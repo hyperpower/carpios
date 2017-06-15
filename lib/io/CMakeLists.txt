@@ -1,0 +1,40 @@
+find_package(VTK REQUIRED)
+include(${VTK_USE_FILE})
+
+# python =======
+set(REQUIRED_PYTHON_VERSION 3)
+message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
+find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
+find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+#find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
+
+
+message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
+message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
+message(STATUS "PYTHON_LIBRARIES:=${PYTHON_LIBRARIES}")
+message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
+#message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
+message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
+#message(STATUS "PYTHON_FRAMEWORKS=${Python_FRAMEWORKS}")
+
+IF(PYTHONLIBS_FOUND)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIRS}")
+ELSE()
+  MESSAGE(FATAL_ERROR "Unable to find PythonLibs.")
+ENDIF()
+
+
+#unset(PYTHON_EXECUTABLE CACHE)
+#unset(PYTHON_LIBRARY CACHE)
+#unset(PYTHON_INCLUDE_DIR CACHE)
+# end python ===
+
+set(io_source_files
+  gnuplot
+  gnuplot_actor
+  plotly_actor
+  plotly
+  mmio
+  csv
+)
+add_library(io ${io_source_files})
