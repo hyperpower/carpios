@@ -306,6 +306,17 @@ public:
 		}
 	}
 
+	void add_CS(const std::string& vname, Vt v) {
+		auto it = this->_css.find(vname);
+		if (it != this->_css.end()) {
+			return;
+		} else {
+			spGrid spg = this->_grid;
+			this->_css[vname] = spScalar(new Scalar(spg));
+			this->set_CS(vname, v);
+		}
+	}
+
 	void set_time(const St& max_step, const Vt& dt) {
 		this->_time = spTime(new Time(max_step, dt));
 		spEvent pse(new Flag("time_term", 1));

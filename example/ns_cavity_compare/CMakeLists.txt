@@ -22,8 +22,6 @@ set(Python_ADDITIONAL_VERSIONS 3.4)
 #add_subdirectory(${PROJECT_SOURCE_DIR}/lib/ts)
 #add_subdirectory(${DIR_CARPIO}/lib/utility)
 #add_subdirectory(${DIR_CARPIO}/lib/io)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/utility ${CMAKE_CURRENT_BINARY_DIR}/lib/utility)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/io ${CMAKE_CURRENT_BINARY_DIR}/lib/io)
 
 # python =======
 set(REQUIRED_PYTHON_VERSION 3)
@@ -59,6 +57,10 @@ find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
 add_executable(main ${SOURCE_FILES})
+
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/utility ${CMAKE_CURRENT_BINARY_DIR}/lib/utility)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/io ${CMAKE_CURRENT_BINARY_DIR}/lib/io)
 
 
 # link the libraries to the executable

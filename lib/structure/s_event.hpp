@@ -463,11 +463,11 @@ protected:
 	void _output(const St& step, const Vt& t, Vt e1, Vt e2, Vt ei) {
 		if (this->_flag_output == 0) {
 			fmt::print(
-					"step: {:>8d} t: {:>8.5f} e1: {:>8.5f} e2: {:>8.5f} ei: {:>8.5f}\n",
+					"step: {:>8d} t: {:>8.5e} e1: {:>8.5e} e2: {:>8.5e} ei: {:>8.5e}\n",
 					step, t, e1, e2, ei);
 		} else {
 			fmt::print(this->_f,
-					"step: {:>8d} t: {:>8.5f} e1: {:>8.5f} e2: {:>8.5f} ei: {:>8.5f}\n",
+					"step: {:>8d} t: {:>8.5e} e1: {:>8.5e} e2: {:>8.5e} ei: {:>8.5e}\n",
 					step, t, e1, e2, ei);
 		}
 	}

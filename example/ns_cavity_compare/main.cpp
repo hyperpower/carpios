@@ -38,7 +38,7 @@ int main(int argc, char** argv){
     ns.set_advection_scheme(scheme);
 
     // set time
-    ns.set_time(100000, 1e-1);
+    ns.set_time(100000, 1e-4);
 
 
     NS::spBC bc0(new NS::BC()), bc1(new NS::BC());
@@ -57,7 +57,7 @@ int main(int argc, char** argv){
     //  return  x*x + y*y - 4;
     //};
     ns.set_uniform_rho(Re);
-    ns.set_diffusion_number(0.25, Re);
+    ns.set_diffusion_number(0.25, 1/Re);
 
     ns.set_output_time(0, -1, 100,
                 NS::Event::START |NS::Event::AFTER);

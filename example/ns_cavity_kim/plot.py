@@ -10,15 +10,19 @@ from scipy import interpolate
 from scipy import ndimage
 import multiprocessing
 
-PATH_EXAMPLE  = os.path.abspath(os.path.join(__file__, "../"))
+PATH_EXAMPLE  = os.path.abspath(os.path.join(__file__, "../.."))
 PATH_THIS     = os.path.abspath(__file__)
 PATH_RESULT   = os.path.abspath("./result")
 PATH_FIG      = os.path.abspath("./fig")
-PATH_PROJECT  = os.path.abspath(os.path.join(PATH_EXAMPLE, "../.."))
+PATH_PROJECT  = os.path.abspath(os.path.join(PATH_THIS, "../../.."))
 PATH_PYSCRIPT = os.path.abspath(os.path.join(PATH_PROJECT, "pyscript"))
+PATH_PY       = os.path.abspath(os.path.join(PATH_EXAMPLE, "py"))
 
 sys.path.append(PATH_PYSCRIPT)
 import read
+print PATH_PROJECT
+sys.path.append(PATH_PY)
+import botella_o as Botella
 
 import run
 
@@ -82,6 +86,39 @@ def get_gerris_result(path, re, level, uorv):
         return get_gfs_result_u(path, re, level)
     elif uorv == "v":
         return get_gfs_result_v(path, re, level)
+
+def get_gfs_result_pv(path, re, mesh):
+    filename  = path + "/xprof_" + str(re) + "_" + str(mesh)
+
+    # If you need to open a file instead:
+    res = []
+    f = open(filename)
+    for line in f:
+        fields = line.strip().split()
+        # Array indices start at 0 unlike AWK
+        if fields[2] != '2:x':
+            res.append([float(fields[2]), float(fields[4])])
+    return res 
+
+def get_gfs_result_ph(path, re, mesh):
+    filename  = path + "/yprof_" + str(re) + "_" + str(mesh)
+
+    # If you need to open a file instead:
+    res = []
+    f = open(filename)
+    for line in f:
+        fields = line.strip().split()
+        # Array indices start at 0 unlike AWK
+        if fields[1] != '1:t':
+            #                 x            P           
+            res.append([float(fields[1]), float(fields[4])])
+    return res 
+
+def get_gerris_result_p(path, re, level, horv):
+    if horv == "h":
+        return get_gfs_result_ph(path, re, level)
+    elif horv == "v":
+        return get_gfs_result_pv(path, re, level)
 
 
 

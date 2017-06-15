@@ -12,13 +12,16 @@ FILE_ORIGINAL = [
     "CMakeLists.txt",
     "plot.py",
     "run.py",
-    "gerris_result",
     "monitor.py",
     "save"
 ]
 
 PARA = [
-    [1000, 64, "QUICK"]
+    [100],
+    [200],
+    [400],
+    [800],
+    [1600],
 ]
 
 def clean():
@@ -50,23 +53,17 @@ def build():
     os.system("make")
     print "run   --------------------------------- "
     for para in PARA:
-        re   = para[0]
-        mesh = para[1]
-        adv  = para[2]
-        os.system("mkdir res_"+str(re)+"_"+str(mesh)+"_"+str(adv))
+        mesh   = para[0]
+        os.system("mkdir res_"+str(mesh))
 
     for para in PARA:
-        re   = para[0]
-        mesh = para[1]
-        adv  = para[2]
-        os.system("./build/main "+str(re)+" "+str(mesh)+" "+str(adv))
+        mesh   = para[0]
+        os.system("./build/main "+str(mesh))
     print "plot   -------------------------------- "
     #os.system("python plot.py")
 
 def main():
     clean() 
-    #os.system("mkdir result")
-    #os.system("mkdir fig")
     build()
 
 if __name__ == '__main__':

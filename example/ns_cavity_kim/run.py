@@ -13,11 +13,12 @@ FILE_ORIGINAL = [
     "plot.py",
     "run.py",
     "gerris_result",
-    "monitor.py"
+    "monitor.py",
+    "save"
 ]
 
 PARA = [
-    [1000, 64, "QUICK"]
+    [1000, 64, "VanLeer"]
 ]
 
 def clean():
@@ -64,8 +65,6 @@ def build():
 
 def main():
     clean() 
-    os.system("mkdir result")
-    os.system("mkdir fig")
     build()
 
 if __name__ == '__main__':
