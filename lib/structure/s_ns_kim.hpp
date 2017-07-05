@@ -263,11 +263,9 @@ protected:
                 Vt src  = __source_term(index);
                 Vt veos = 0.0;
                 if ( this->_time->current_step() == 0){
-                	veos = (advn - (0.5 * dif + src) / rho) * dt
-                							  - s(index);
+                	veos = (advn - (0.5 * dif + src) / rho) * dt - s(index);
                 }else{
-                	veos = (adv - (0.5 * dif + src) / rho) * dt
-						  - s(index);
+                	veos = (adv  - (0.5 * dif + src) / rho) * dt - s(index);
                 }
                 sscr[d](index) = veos;
                 // -------------------------------

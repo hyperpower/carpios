@@ -56,7 +56,7 @@ public:
 	// @param    p2 Point1
 	// @return      the resualt of dot multiply
 	//-----------------------------------------------
-	double Dot(const Point &sp, const Point &ep, const Point &op) {
+	static double Dot(const Point &sp, const Point &ep, const Point &op) {
 		double sum = 0.0;
 		for (St d = 0; d < Dim; d++) {
 			double ds = sp[d] - op[d];
@@ -67,7 +67,7 @@ public:
 	}
 
 	/** Signed area of the triangle (p0, p1, p2) */
-	inline double SignedArea( //
+	static inline double SignedArea( //
 			const Point& p0, const Point& p1, const Point& p2) {
 		ASSERT(Dim == 2);
 		return (p0.x() - p2.x()) * (p1.y() - p2.y())
@@ -75,13 +75,13 @@ public:
 	}
 
 	/** Signed area of the triangle ( (0,0), p1, p2) */
-	inline float SignedArea(const Point& p1, const Point& p2) {
+	static inline float SignedArea(const Point& p1, const Point& p2) {
 		ASSERT(Dim == 2);
 		return -p2.x() * (p1.y() - p2.y()) - -p2.y() * (p1.x() - p2.x());
 	}
 
 	/** Sign of triangle (p1, p2, o) */
-	inline int Sign(const Point& p1, const Point& p2, const Point& o) {
+	static inline int Sign(const Point& p1, const Point& p2, const Point& o) {
 		ASSERT(Dim == 2);
 		double det = (p1.x() - o.x()) * (p2.y() - o.y())
 				- (p2.x() - o.x()) * (p1.y() - o.y());

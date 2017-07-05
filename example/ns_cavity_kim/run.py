@@ -18,7 +18,7 @@ FILE_ORIGINAL = [
 ]
 
 PARA = [
-    [1000, 64, "VanLeer"]
+    [1000, 32, "VanLeer"]
 ]
 
 def clean():
