@@ -1,13 +1,17 @@
-#ifndef _RELATION_HPP_
-#define _RELATION_HPP_
+#ifndef _OPERATION_HPP_
+#define _OPERATION_HPP_
 
 #include "geometry_define.hpp"
 #include <array>
 #include "_point.hpp"
 #include "_segment.hpp"
 #include "_polygon.hpp"
+#include <cmath>
 
 namespace carpio {
+
+template<class TYPE>
+class Contour_;
 
 template<typename TYPE, St DIM>
 class Operation_ {
@@ -30,7 +34,8 @@ public:
 	 */
 	static double Distance(const Point& p1, const Point& p2) {
 		if (Dim == 1) {
-			return double(std::abs(p1.x() - p2.x()));
+			double dis = p1[0] - p2[0];
+			return std::abs(dis);
 		}
 		if (Dim == 2) {
 			return sqrt(
@@ -75,7 +80,7 @@ public:
 	}
 
 	/** Signed area of the triangle ( (0,0), p1, p2) */
-	static inline float SignedArea(const Point& p1, const Point& p2) {
+	static inline double SignedArea(const Point& p1, const Point& p2) {
 		ASSERT(Dim == 2);
 		return -p2.x() * (p1.y() - p2.y()) - -p2.y() * (p1.x() - p2.x());
 	}
@@ -92,6 +97,35 @@ public:
 		ASSERT(Dim == 2);
 		int x = Sign(s.ps(), s.pe(), p);
 		return ((x == Sign(s.pe(), o, p)) && (x == Sign(o, s.ps(), p)));
+	}
+
+	/**
+	 * Get minimun loaction of
+	 *
+	 * for example:
+	 * a   = ( 1, 2, 3)
+	 *            ^
+	 * b   = ( 0, 4, 2)
+	 *         ^     ^
+	 * res = Min(a, b);
+	 * res = ( 0, 2, 2)
+	 */
+	static Point Min(const Point& a, const Point& b) {
+		Point res;
+		for (St i = 0; i < Dim; i++) {
+			res[i] = std::min(a[i], b[i]);
+		}
+		return res;
+	}
+	/**
+	 * Get max location of
+	 */
+	static Point Max(const Point& a, const Point& b) {
+		Point res;
+		for (St i = 0; i < Dim; i++) {
+			res[i] = std::max(a[i], b[i]);
+		}
+		return res;
 	}
 
 	//===============================================
@@ -124,8 +158,8 @@ public:
 		return 0.0;
 	}
 
-	static bool IsInBox(const Vt& xmin, const Vt& xmax, const Vt& ymin, const Vt& ymax,
-			const Vt& x, const Vt& y) {
+	static bool IsInBox(const Vt& xmin, const Vt& xmax, const Vt& ymin,
+			const Vt& ymax, const Vt& x, const Vt& y) {
 		ASSERT(ymin <= ymax);
 		ASSERT(xmin <= xmax);
 		if (ymin == ymax) {
@@ -232,8 +266,8 @@ template<typename TYPE>
 Point_<TYPE, 2> CalIntersect(const Segment_<TYPE, 2> &s1,
 		const Segment_<TYPE, 2> &s2) {
 	ASSERT(IsIntersect(s1, s2));
-	Float x1, x2, y1, y2;
-	Float x3, x4, y3, y4;
+	Float x1,x2,y1,y2;
+	Float x3,x4,y3,y4;
 	Float resxx;
 	Float resyy;
 	x1 = Float(s1.psx());
@@ -333,82 +367,81 @@ double _WindingNumber(const Point_<TYPE, 2>& ref, const Point_<TYPE, 2>& vi,
 	}
 	return wn;
 }
-template<typename TYPE>
-Float WindingNumber(const Polygon_<TYPE>& poly, const Point_<TYPE, 2>& ref) {
-	Float wn = 0;    // the  winding number counter
-	// loop through all edges of the polygon
-	for (int i = 0; i < poly.size_vertexs() - 1; i++) { // edge from V[i] to  V[i+1]
-		wn += _WindingNumber(ref, poly.v(i), poly.v(i + 1));
-	}
-	wn += _WindingNumber(ref, poly.v(poly.size_vertexs() - 1), poly.v(0));
-	return wn;
-}
+//template<typename TYPE>
+//Float WindingNumber(const Polygon_<TYPE>& poly, const Point_<TYPE, 2>& ref) {
+//	Float wn = 0;    // the  winding number counter
+//	// loop through all edges of the polygon
+//	for (int i = 0; i < poly.size_vertexs() - 1; i++) { // edge from V[i] to  V[i+1]
+//		wn += _WindingNumber(ref, poly.v(i), poly.v(i + 1));
+//	}
+//	wn += _WindingNumber(ref, poly.v(poly.size_vertexs() - 1), poly.v(0));
+//	return wn;
+//}
 
-template<typename TYPE>
-bool IsOut(const Polygon_<TYPE>& poly, const Point_<TYPE, 2>& ref) {
-	return (0 == WindingNumber(poly, ref)) ? true : false;
-}
+//template<typename TYPE>
+//bool IsOut(const Polygon_<TYPE>& poly, const Point_<TYPE, 2>& ref) {
+//	return (0 == WindingNumber(poly, ref)) ? true : false;
+//}
 /*
  *  Is the subject inside of the polygon
  */
-template<typename TYPE>
-bool IsIn(const Polygon_<TYPE>& poly, const Polygon_<TYPE>& sub) {
-	for (St i = 0; i < poly.size_vertexs(); ++i) {
-		Float wn = WindingNumber(poly, sub.v(i));
-		if (0 == wn || -1 == wn) {
-			return false;
-		}
-	}
-	return true;
-}
-
+//template<typename TYPE>
+//bool IsIn(const Polygon_<TYPE>& poly, const Polygon_<TYPE>& sub) {
+//	for (St i = 0; i < poly.size_vertexs(); ++i) {
+//		Float wn = WindingNumber(poly, sub.v(i));
+//		if (0 == wn || -1 == wn) {
+//			return false;
+//		}
+//	}
+//	return true;
+//}
 /*
  * Segment -------- Polygon
  */
-template<typename TYPE>
-ArrayListT<Segment_<TYPE, 2> > ToArraySegment(const Polygon_<TYPE>& p) {
-	St n = p.size_vertexs();
-	ArrayListT<Segment_<TYPE, 2> > as(n);
-	for (St i = 0; i < n - 1; i++) {
-		as[i].reconstruct(p.v(i), p.v(i + 1));
-	}
-	as[n - 1].reconstruct(p.v(n - 1), p.v(0));
-	return as;
-}
-template<typename TYPE>
-bool IsSimple(const Polygon_<TYPE>& ap) {
-	int nap = ap.size_vertexs();
-	//ASSERT(nap >= 3);
-	if (nap == 3) {
-		return true;
-	}
-	int i = 0;
-	for (int j = i + 2; j < nap - 1; j++) {
-		if (IsIntersect(ap.v(i), ap.v(i + 1), ap.v(j), ap.v(j + 1))) {
-			return false;
-		}
-	}
-	for (i = 1; i < nap - 2; i++) {
-		for (int j = i + 2; j < nap; j++) {
-			if (IsIntersect(ap.v(i), ap.v(i + 1), ap.v(j),
-					ap.v((j + 1) % nap))) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-template<typename TYPE>
-Float Perimeter(const Polygon_<TYPE>& ap) {
-	ASSERT(!ap.empty());
-	Float res = 0;
-	for (int i = 1; i < ap.size_() - 1; i++) {
-		res += Distance(ap.v(i), ap.v(i + 1));
-	}
-	res += Distance(ap.v(ap.size() - 1), ap.v(0));
-	return res;
-}
+//template<typename TYPE>
+//ArrayListT<Segment_<TYPE, 2> > ToArraySegment(const Polygon_<TYPE>& p) {
+//	St n = p.size_vertexs();
+//	ArrayListT<Segment_<TYPE, 2> > as(n);
+//	for (St i = 0; i < n - 1; i++) {
+//		as[i].reconstruct(p.v(i), p.v(i + 1));
+//	}
+//	as[n - 1].reconstruct(p.v(n - 1), p.v(0));
+//	return as;
+//}
+//template<typename TYPE>
+//bool IsSimple(const Polygon_<TYPE>& ap) {
+//	int nap = ap.size_vertexs();
+//	//ASSERT(nap >= 3);
+//	if (nap == 3) {
+//		return true;
+//	}
+//	int i = 0;
+//	for (int j = i + 2; j < nap - 1; j++) {
+//		if (IsIntersect(ap.v(i), ap.v(i + 1), ap.v(j), ap.v(j + 1))) {
+//			return false;
+//		}
+//	}
+//	for (i = 1; i < nap - 2; i++) {
+//		for (int j = i + 2; j < nap; j++) {
+//			if (IsIntersect(ap.v(i), ap.v(i + 1), ap.v(j),
+//					ap.v((j + 1) % nap))) {
+//				return false;
+//			}
+//		}
+//	}
+//	return true;
+//}
+//
+//template<typename TYPE>
+//Float Perimeter(const Polygon_<TYPE>& ap) {
+//	ASSERT(!ap.empty());
+//	Float res = 0;
+//	for (int i = 1; i < ap.size_() - 1; i++) {
+//		res += Distance(ap.v(i), ap.v(i + 1));
+//	}
+//	res += Distance(ap.v(ap.size() - 1), ap.v(0));
+//	return res;
+//}
 }
 
 #endif

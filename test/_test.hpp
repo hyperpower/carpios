@@ -30,12 +30,13 @@ using namespace std;
 //#include "../test/structure/_test_s_poisson.hpp"
 //#include "../test/structure/_test_s_advection.hpp"
 //#include "../test/structure/_test_s_operation.hpp"
-#include "../test/structure/_test_s_ns.hpp"
+//#include "../test/structure/_test_s_ns.hpp"
 //#include "../test/structure/_test_s_grid.hpp"
 
 
 //#include "../test/geometry/test_triangle.hpp"
-//#include "../test/geometry/test_polygon.hpp"
+#include "../test/geometry/test_polygon.hpp"
+//#include "../test/geometry/test_contour.hpp"
 //#include "../test/io/_test_plotly.hpp"
 
 namespace carpio {

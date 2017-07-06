@@ -8,13 +8,20 @@
 #ifndef _CONTOUR_HPP_
 #define _CONTOUR_HPP_
 
-
 #include "geometry_define.hpp"
 #include "_point.hpp"
-#include "_relation.hpp"
+#include "_operation.hpp"
+#include "algebra/array_list.hpp"
 #include <array>
+#include <vector>
+#include <limits>
+#include <list>
+#include <fstream>
 
 namespace carpio {
+
+template<typename TYPE, St DIM>
+class Operation_;
 
 // the new polygon class ======================================================
 template<class TYPE>
@@ -24,6 +31,9 @@ public:
 	typedef Point_<TYPE, 2> Poi;
 	typedef Point_<TYPE, 2>& ref_Poi;
 	typedef const Point_<TYPE, 2>& const_ref_Poi;
+	typedef Point_<TYPE, 2> Point;
+	typedef Point_<TYPE, 2>& ref_Point;
+	typedef const Point_<TYPE, 2>& const_ref_Point;
 	typedef typename std::vector<Poi>::iterator iterator;
 	typedef typename std::vector<Poi>::const_iterator const_iterator;
 	typedef typename std::vector<Poi>::size_type St;
@@ -32,6 +42,7 @@ public:
 	typedef TYPE Vt;
 
 	typedef ArrayListT<Poi> ArrP;
+
 	typedef Operation_<TYPE, 2> Op;
 
 protected:
@@ -84,10 +95,16 @@ public:
 	}
 
 	/** Get the p-th vertex of the external contour */
-	Poi& vertex(unsigned p) {
+	Point& vertex(unsigned p) {
 		return _vertices[p];
 	}
-	const Poi& vertex(unsigned p) const {
+	const Point& vertex(unsigned p) const {
+		return _vertices[p];
+	}
+	Point& v(unsigned p) {
+		return _vertices[p];
+	}
+	const Point& v(unsigned p) const {
 		return _vertices[p];
 	}
 	Segment segment(unsigned p) const {
@@ -280,11 +297,6 @@ std::ostream& operator<<(std::ostream& o, Contour_<TYPE>& c) {
 	return o;
 }
 
-
-
-
-
 }
-
 
 #endif

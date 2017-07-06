@@ -13,11 +13,7 @@ namespace carpio {
 
 namespace GnuplotActor {
 
-typedef Float Cvt;
-typedef Float Vt;
 
-typedef std::shared_ptr<Gnuplot_actor> spActor;
-typedef std::list<spActor> list_spActor;
 /*
  * generate a spActor
  *

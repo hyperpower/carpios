@@ -485,6 +485,11 @@ public:
 		return *this;
 	}
 
+	Gnuplot& save_cmd(const std::string& filename){
+		this->cmd("save \'" + filename + "\'");
+		return *this;
+	}
+
 
 
 }
@@ -524,6 +529,18 @@ void stringtok(Container &container, std::string const &in,
 }
 int GnuplotShow(const std::list<Gnuplot_actor>& lga);
 int GnuplotShow(Gnuplot&, const std::list<Gnuplot_actor>& lga);
+
+namespace GnuplotActor {
+
+typedef Float Cvt;
+typedef Float Vt;
+
+typedef std::shared_ptr<Gnuplot_actor> spActor;
+typedef std::list<spActor> list_spActor;
+}
+
+
+
 }
 
 #endif

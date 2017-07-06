@@ -24,9 +24,9 @@ public:
 
 	typedef Shape_<VALUE, DIM> Self;
 
-	typedef Polygon_<VALUE> S2D;
-	typedef Polygon_<VALUE>* pS2D;
-	typedef Polygon_<VALUE>& ref_S2D;
+	typedef Contour_<VALUE> S2D;
+	typedef Contour_<VALUE>* pS2D;
+	typedef Contour_<VALUE>& ref_S2D;
 	typedef const Polygon_<VALUE>& const_ref_S2D;
 	typedef typename S2D::Segment Seg2D;
 	typedef typename S2D::Point Poi2D;

@@ -12,6 +12,7 @@ class Point_: public std::array<TYPE, DIM> {
 public:
 	static const St Dim = DIM;
 	//typedef point__tag self_tag;
+	typedef Point_<TYPE, DIM> Point;
 	typedef St size_type;
 	typedef TYPE Vt;
 	typedef TYPE& reference;
@@ -93,10 +94,12 @@ public:
 	}
 
 	const_reference y() const {
+		ASSERT(Dim >= 2);
 		return this->at(1);
 	}
 
 	reference y() {
+		ASSERT(Dim >= 2);
 		return this->at(1);
 	}
 
@@ -144,6 +147,7 @@ public:
 		}
 		std::cout << " )\n";
 	}
+
 	std::string to_string() const {
 		std::stringstream sstr;
 		sstr.precision(4);
@@ -158,7 +162,7 @@ public:
 		return sstr.str();
 	}
 	template<typename T>
-	void transfer(const T&dx, const T&dy, const T&dz) {
+	void transfer(const T&dx, const T& dy = 0, const T& dz = 0) {
 		this->at(0) = this->at(0) + Vt(dx);
 		this->at(1) = this->at(1) + Vt(dy);
 		if (Dim == 3) {
@@ -166,7 +170,7 @@ public:
 		}
 	}
 	template<typename T>
-	void scale(const T&dx, const T&dy, const T&dz) {
+	void scale(const T&dx, const T&dy = 1, const T&dz = 1) {
 		this->at(0) = this->at(0) * Vt(dx);
 		this->at(1) = this->at(1) * Vt(dy);
 		if (Dim == 3) {
@@ -182,6 +186,57 @@ public:
 	inline const_pointer ptr() const {
 		return this->data();
 	}
+
+	// operator
+	Point& operator+=(const Point& p) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) += p[i];
+		}
+		return *this;
+	}
+	Point& operator+=(const Vt& val) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) += val;
+		}
+		return *this;
+	}
+	Point& operator-=(const Point& p) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) -= p[i];
+		}
+		return *this;
+	}
+	Point& operator-=(const Vt& val) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) -= val;
+		}
+		return *this;
+	}
+	Point& operator*=(const Point& p) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) *= p[i];
+		}
+		return *this;
+	}
+	Point& operator*=(const Vt& val) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) *= val;
+		}
+		return *this;
+	}
+	Point& operator/=(const Point& p) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) /= p[i];
+		}
+		return *this;
+	}
+	Point& operator/=(const Vt& val) {
+		for (St i = 0; i < Dim; i++) {
+			this->at(i) /= val;
+		}
+		return *this;
+	}
+
 };
 
 template<typename TYPE, St DIM>

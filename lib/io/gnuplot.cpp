@@ -224,6 +224,7 @@ Gnuplot& Gnuplot::cmd(const std::string &cmdstr) {
 		return *this;
 	}
 
+
 	// int fputs ( const char * str, FILE * stream );
 	// writes the string str to the stream.
 	// The function begins copying from the address specified (str) until it

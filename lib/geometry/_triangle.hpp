@@ -3,7 +3,7 @@
 
 #include "geometry_define.hpp"
 #include "_point.hpp"
-#include "_relation.hpp"
+#include "_operation.hpp"
 #include <array>
 #include "math.h"
 namespace carpio {
@@ -22,6 +22,8 @@ public:
 	typedef Point_<TYPE, DIM>* pPoint;
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
+
+	typedef Operation_<TYPE, DIM> Op;
 public:
 	Triangle_() :
 			std::array<Point_<TYPE, DIM>, 3>() {
@@ -192,7 +194,7 @@ public:
 		St ib[] = { 1, 2, 0 };
 		const Point& a = this->p(ia[idx]);
 		const Point& b = this->p(ib[idx]);
-		return Distance(a, b);
+		return Op::Distance(a, b);
 	}
 	bool is_valid() const {
 		vt a = this->length(0);

@@ -3,10 +3,14 @@
 
 #include "geometry_define.hpp"
 #include "_point.hpp"
-#include "_relation.hpp"
+#include "_operation.hpp"
 #include <array>
 
 namespace carpio {
+
+template<typename TYPE, St DIM>
+class Operation_;
+
 template<typename TYPE, St DIM>
 class Bbox_ {
 public:

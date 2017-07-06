@@ -8,8 +8,12 @@
 #include "_segment.hpp"
 #include "_plane.hpp"
 #include "_polygon.hpp"
+#include "_contour.hpp"
+#include "_bbox.hpp"
+#include "_actor_gnuplot.hpp"
+#include "_sweep.hpp"
 //#include "_polygon_boolean.hpp"
-#include "_relation.hpp"
+#include "_operation.hpp"
 
 namespace carpio {
 
