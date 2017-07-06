@@ -17,6 +17,7 @@
 #include <limits>
 #include <list>
 #include <fstream>
+#include <algorithm>
 
 namespace carpio {
 
@@ -27,28 +28,25 @@ class Operation_;
 template<class TYPE>
 class Contour_ {
 public:
+	static const St Dim = 2;
 	typedef Contour_<TYPE> Self;
-	typedef Point_<TYPE, 2> Poi;
-	typedef Point_<TYPE, 2>& ref_Poi;
-	typedef const Point_<TYPE, 2>& const_ref_Poi;
-	typedef Point_<TYPE, 2> Point;
-	typedef Point_<TYPE, 2>& ref_Point;
-	typedef const Point_<TYPE, 2>& const_ref_Point;
-	typedef typename std::vector<Poi>::iterator iterator;
-	typedef typename std::vector<Poi>::const_iterator const_iterator;
-	typedef typename std::vector<Poi>::size_type St;
-	typedef Segment_<TYPE, 2> Segment;
-	typedef Segment_<TYPE, 2>& ref_Segment;
+	typedef Point_<TYPE, Dim> Point;
+	typedef Point_<TYPE, Dim>& ref_Point;
+	typedef const Point_<TYPE, Dim>& const_ref_Point;
+	typedef typename std::vector<Point>::iterator iterator;
+	typedef typename std::vector<Point>::const_iterator const_iterator;
+	typedef Segment_<TYPE, Dim> Segment;
+	typedef Segment_<TYPE, Dim>& ref_Segment;
 	typedef TYPE Vt;
 
-	typedef ArrayListT<Poi> ArrP;
+	typedef ArrayListT<Point> ArrP;
 
-	typedef Operation_<TYPE, 2> Op;
+	typedef Operation_<TYPE, Dim> Op;
 
 protected:
 
 	// Set of points conforming the external contour
-	std::vector<Poi> _vertices;
+	std::vector<Point> _vertices;
 	// Holes of the contour. They are stored as the indexes of the holes in a polygon class
 	std::vector<St> _holes;
 	// is the contour an external contour? (i.e., is it not a hole?)
@@ -61,6 +59,14 @@ public:
 	Contour_() :
 			_vertices(), _holes(), _external(true), _precomputedCC(false), _CC(
 					false) {
+	}
+
+	Contour_(const std::vector<Point>& ver, const std::vector<St>& holes,
+			bool exter = true, bool precomputedcc = false, bool cc = false) :
+
+			_external(exter), _precomputedCC(precomputedcc), _CC(cc) {
+		std::copy(ver.begin(), ver.end(), std::back_inserter(_vertices));
+		std::copy(holes.begin(), holes.end(), std::back_inserter(_holes));
 	}
 
 	Self& operator=(const Self&a) {
@@ -120,20 +126,20 @@ public:
 		return _vertices.size();
 	}
 	/** Get the bounding box */
-	void boundingbox(Poi& min, Poi& max) {
-		min.x() = -std::numeric_limits<double>::max();
-		min.y() = -std::numeric_limits<double>::max();
-		max.x() = max.y() = std::numeric_limits<double>::max();
+	void boundingbox(Point& min, Point& max) {
+		min.x() = std::numeric_limits<double>::max();
+		min.y() = std::numeric_limits<double>::max();
+		max.x() = max.y() = -std::numeric_limits<double>::max();
 		iterator i = begin();
 		while (i != end()) {
 			if (i->x() < min.x())
 				min.x() = i->x();
 			if (i->x() > max.x())
 				max.x() = i->x();
-			if (i->_y < min.y())
-				min.y() = i->_y;
-			if (i->_y > max.y())
-				max.y() = i->_y;
+			if (i->y() < min.y())
+				min.y() = i->y();
+			if (i->y() > max.y())
+				max.y() = i->y();
 			++i;
 		}
 	}
@@ -173,7 +179,7 @@ public:
 			_vertices[i].y() += y;
 		}
 	}
-	void add(const Poi& s) {
+	void add(const Point& s) {
 		_vertices.push_back(s);
 	}
 	void erase(iterator i) {
@@ -189,10 +195,10 @@ public:
 	iterator end() {
 		return _vertices.end();
 	}
-	Poi& back() {
+	Point& back() {
 		return _vertices.back();
 	}
-	const Poi& back() const {
+	const Point& back() const {
 		return _vertices.back();
 	}
 	void addHole(unsigned ind) {
@@ -232,7 +238,7 @@ public:
 		return min;
 	}
 
-	St find_closest_vertex(const Poi& p) const {
+	St find_closest_vertex(const Point& p) const {
 		ASSERT(_vertices.size() > 0);
 		St idx = 0;
 		Vt mindis = Op::Distance(_vertices[0], p);
@@ -247,7 +253,7 @@ public:
 	}
 
 	St find_closest_vertex(const Vt& x, const Vt& y) const {
-		Poi p(x, y);
+		Point p(x, y);
 		return this->find_closest_vertex(p);
 	}
 

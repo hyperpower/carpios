@@ -187,6 +187,104 @@ public:
 						|| ((s.pey() <= pt.y()) && (pt.y() <= s.psy())));
 	}
 
+	// Find intersetion on 1d
+	//                ----------------
+	//         -------|---------     |
+	// --------|------|--------|-----|---------
+	//        u0     v0        u1   v1
+	//               w[0]      w[1]
+	static int FindIntersection (Vt u0, Vt u1, Vt v0, Vt v1, Vt w[2])
+	{
+		if ((u1 < v0) || (u0 > v1))
+			return 0;
+		if (u1 > v0) {
+			if (u0 < v1) {
+				w[0] = (u0 < v0) ? v0 : u0;
+				w[1] = (u1 > v1) ? v1 : u1;
+				return 2;
+			} else {
+				// u0 == v1
+				w[0] = u0;
+				return 1;
+			}
+		} else {
+			// u1 == v0
+			w[0] = u1;
+			return 1;
+		}
+	}
+
+
+	// Find intersection on 2d
+	static int FindIntersection (const Segment& seg0, const Segment& seg1, Point& pi0, Point& pi1)
+	{
+		ASSERT(Dim == 2);
+		const Point& p0 = seg0.ps();
+		Point d0 (seg0.pex() - p0.x(), seg0.pey() - p0.y());
+		const Point& p1 = seg1.ps ();
+		Point d1 (seg1.pex() - p1.x(), seg1.pey() - p1.y());
+		Vt sqrEpsilon = 1e-8; // it was 0.001 before
+		Point E (p1.x() - p0.x(), p1.y() - p0.y());
+		Vt kross = d0.x() * d1.y() - d0.y() * d1.x();
+		Vt sqrKross = kross * kross;
+		Vt sqrLen0 = d0.x() * d0.x() + d0.y() * d0.y();
+		Vt sqrLen1 = d1.x() * d1.x() + d1.y() * d1.y();
+
+		if (sqrKross > sqrEpsilon * sqrLen0 * sqrLen1) {
+			// lines of the segments are not parallel
+			Vt s = (E.x() * d1.y() - E.y() * d1.x()) / kross;
+			if ((s < 0) || (s > 1)) {
+				return 0;
+			}
+			Vt t = (E.x() * d0.y() - E.y() * d0.x()) / kross;
+			if ((t < 0) || (t > 1)) {
+				return 0;
+			}
+			// intersection of lines is a point an each segment
+			pi0.x() = p0.x() + s * d0.x();
+			pi0.y() = p0.y() + s * d0.y();
+			if (pi0.dist(seg0.ps()) < 1e-9) pi0 = seg0.ps();
+			if (pi0.dist(seg0.pe()) < 1e-9) pi0 = seg0.pe();
+			if (pi0.dist(seg1.ps()) < 1e-9) pi0 = seg1.ps();
+			if (pi0.dist(seg1.pe()) < 1e-9) pi0 = seg1.pe();
+			return 1;
+		}
+
+		// lines of the segments are parallel
+		Vt sqrLenE = E.x() * E.x() + E.y() * E.y();
+		kross = E.x() * d0.y() - E.y() * d0.x();
+		sqrKross = kross * kross;
+		if (sqrKross > sqrEpsilon * sqrLen0 * sqrLenE) {
+			// lines of the segment are different
+			return 0;
+		}
+
+		// Lines of the segments are the same. Need to test for overlap of segments.
+		// s0 = Dot (D0, E) * sqrLen0
+		Vt s0 = (d0.x() * E.x() + d0.y() * E.y()) / sqrLen0;
+		// s1 = s0 + Dot (D0, D1) * sqrLen0
+		Vt s1 = s0 + (d0.x() * d1.x() + d0.y() * d1.y()) / sqrLen0;
+		Vt smin = std::min (s0, s1);
+		Vt smax = std::max (s0, s1);
+		Vt w[2];
+		int imax = FindIntersection (0.0, 1.0, smin, smax, w);
+
+		if (imax > 0) {
+			pi0.x() = p0.x() + w[0] * d0.x();
+			pi0.y() = p0.y() + w[0] * d0.y();
+			if (pi0.dist (seg0.ps()) < 1e-9) pi0 = seg0.ps();
+			if (pi0.dist (seg0.pe()) < 1e-9) pi0 = seg0.pe();
+			if (pi0.dist (seg1.ps()) < 1e-9) pi0 = seg1.ps();
+			if (pi0.dist (seg1.pe()) < 1e-9) pi0 = seg1.pe();
+			if (imax > 1) {
+				pi1.x() = p0.x() + w[1] * d0.x();
+				pi1.y() = p0.y() + w[1] * d0.y();
+			}
+		}
+
+		return imax;
+	}
+
 };
 
 template<typename TYPE, St DIM>

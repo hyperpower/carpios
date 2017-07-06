@@ -76,6 +76,15 @@ public:
 		return this->at(0); //make compile happy;
 	}
 
+	const_reference operator()(St idx) const {
+		ASSERT(idx < Dim);
+		return this->at(idx);
+	}
+	reference operator()(St idx) {
+		ASSERT(idx < Dim);
+		return this->at(idx);
+	}
+
 	Vt value(St idx) const {
 		Vt res;
 		if (idx < Dim) {
@@ -177,6 +186,14 @@ public:
 			this->at(2) = this->at(2) * Vt(dz);
 		}
 	}
+	/** Distance to other point */
+	Vt dist(const Point& p) const
+	{
+		double dx = x() - p.x();
+		double dy = y() - p.y();
+		return sqrt (dx * dx + dy * dy);
+	}
+
 	inline size_type size() const {
 		return size_type(Dim);
 	}

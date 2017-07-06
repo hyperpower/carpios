@@ -38,21 +38,32 @@ public:
 	typedef std::list<spActor> list_spActor;
 
 public:
-	static spActor Lines(const Contour& contour, int base_idx = 0) {
+	static spActor Lines(const Contour& contour, int base_idx = 0,
+			int color_idx = -1) {
 		spActor actor = spActor(new Gnuplot_actor());
 		actor->command() = "using 1:2:3 title \"\" ";
-		actor->style()   = "with lines lc variable";
+		actor->style() = "with lines lc variable";
 		if (contour.empty()) {
 			actor->data().push_back("");
 			return actor;
 		}
 		for (St i = 0; i < contour.size_vertexs(); ++i) {
 			const Point& p = contour.v(i);
-			actor->data().push_back(ToString(p.x(), p.y(), i + base_idx, " "));
+			if (color_idx >= 0) {
+				actor->data().push_back(ToString(p.x(), p.y(), color_idx, " "));
+			} else {
+				actor->data().push_back(
+						ToString(p.x(), p.y(), i + base_idx, " "));
+			}
 		}
 		const Point& pstart = contour.v(0);
-		actor->data().push_back(
-				ToString(pstart.x(), pstart.y(), base_idx, " "));
+		if (color_idx >= 0) {
+			actor->data().push_back(
+					ToString(pstart.x(), pstart.y(), color_idx, " "));
+		} else {
+			actor->data().push_back(
+					ToString(pstart.x(), pstart.y(), base_idx, " "));
+		}
 		actor->data().push_back("");
 		return actor;
 	}

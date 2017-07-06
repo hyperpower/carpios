@@ -63,9 +63,11 @@ public:
 	}
 	/** Get the p-th contour */
 	Contour& contour(unsigned p) {
+		ASSERT(p < contours.size());
 		return contours[p];
 	}
 	Contour& operator[](unsigned int p) {
+		ASSERT(p < contours.size());
 		return contours[p];
 	}
 	/** Number of contours */
@@ -159,7 +161,7 @@ std::ostream& operator<<(std::ostream& o, Polygon_<TYPE>& p) {
 template<class TYPE>
 std::istream& operator>>(std::istream& is, Polygon_<TYPE>& p) {
 	typedef Contour_<TYPE> Contour;
-	typedef typename Contour_<TYPE>::Poi Poi;
+	typedef typename Contour_<TYPE>::Point Point;
 	// read the contours
 	int ncontours;
 	double px,py;
@@ -176,7 +178,7 @@ std::istream& operator>>(std::istream& is, Polygon_<TYPE>& p) {
 			if (j == npoints - 1 && px == contour.vertex(0).x()
 					&& py == contour.vertex(0).y())
 				continue;
-			contour.add(Poi(px, py));
+			contour.add(Point(px, py));
 		}
 		if (contour.nvertices() < 3) {
 			p.pop_back();

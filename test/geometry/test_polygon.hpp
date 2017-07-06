@@ -83,17 +83,59 @@ TEST(Polygon, sweepevent) {
 	//3 PolygonType  apl,
 	//4 SweepEvent*  o,
 	//5 EdgeType     t= NORMAL
-	SweepEvent* e1 = new SweepEvent(s1.ps(), true, SUBJECT, 0);
+	SweepEvent* e1 = new SweepEvent(s1.ps(), true, SUBJECT, nullptr);
 	SweepEvent* e2 = new SweepEvent(s1.pe(), true, SUBJECT, e1);
+	e1->other = e2;
+
+	if (e1->p.x() < e2->p.x()) {
+		e2->left = false;
+	} else if (e1->p.x() > e2->p.x()) {
+		e1->left = false;
+	} else if (e1->p.y() < e2->p.y()) { // the line segment is vertical. The bottom endpoint is the left endpoint
+		e2->left = false;
+	} else {
+		e1->left = false;
+	}
+
+	std::cout << "Queue :" << eq.size() << "\n";
+
 	e1->show();
 	e2->show();
-
-	e1->other = e2;
 
 	eq.push(e1);
 	eq.push(e2);
 
+	std::cout << "Popping out elements...\n";
+	while (!eq.empty()) {
+		SweepEvent* et = eq.top();
+		et->show();
+		//std::cout << '\n';
+		eq.pop();
+	}
+	std::cout << '\n';
+}
 
+TEST(Polygon, trivial1) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Point_<double, 2> Point;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	// poly2 is empty
+	//Cr::Cube(poly2, 0.5, 0.5, 1.5, 1.5);
+
+	Clip clip(poly, poly2);
+	Polygon res;
+	clip.compute(DIFFERENCE, res);
+
+	Gnuplot gp;
+	gp.add(GpActor::Lines(res.contour(0)));
+	//gp.plot();
 }
 
 TEST(Polygon, read) {
@@ -130,6 +172,83 @@ TEST(Polygon, read) {
 	gp.add(GpActor::Lines(p.contour(1)));
 	//gp.plot();
 }
+
+TEST(Polygon, normal) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Point_<double, 2> Point;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	Cr::Cube(poly2, 0.5, 0.5, 1.5, 1.5);
+
+	Clip clip(poly, poly2);
+	Polygon res;
+	clip.compute(INTERSECTION, res);
+
+	Gnuplot gp;
+	gp.add(GpActor::Lines(poly.contour(0), 0, 0));
+	gp.add(GpActor::Lines(poly2.contour(0), 0, 1));
+	gp.add(GpActor::Lines(res.contour(0), 0, 2));
+	//gp.plot();
+}
+
+TEST(Polygon, line_touch) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Point_<double, 2> Point;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	Cr::Cube(poly2, 1.0, 0.5, 1.5, 1.5);
+
+	Clip clip(poly, poly2);
+	Polygon res;
+	clip.compute(INTERSECTION, res);
+
+	Gnuplot gp;
+	gp.add(GpActor::Lines(poly.contour(0), 0, 0));
+	gp.add(GpActor::Lines(poly2.contour(0), 0, 1));
+	if (res.ncontours() > 0) {
+		gp.add(GpActor::Lines(res.contour(0), 0, 2));
+	}
+	gp.plot();
+}
+
+TEST(Polygon, point_line_touch) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Point_<double, 2> Point;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	Cr::Triangle(poly2, Point(0.8, 0.5), Point(1.5,0.5), Point(1.3, 1.0));
+
+	Clip clip(poly, poly2);
+	Polygon res;
+	clip.compute(INTERSECTION, res);
+
+	Gnuplot gp;
+	gp.add(GpActor::Lines(poly.contour(0), 0, 0));
+	gp.add(GpActor::Lines(poly2.contour(0), 0, 1));
+	if (res.ncontours() > 0) {
+		gp.add(GpActor::Lines(res.contour(0), 0, 2));
+	}
+	gp.plot();
+}
+
 }
 
 #endif /* TEST_GEOMETRY_TEST_POLYGON_HPP_ */

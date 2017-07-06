@@ -202,19 +202,19 @@ public:
 	}
 	void show() const {
 		std::cout.precision(4);
-		std::cout << "( " << psx() << ", " << psy();
+		std::cout << "(" << psx() << ", " << psy();
 		if (Dim == 3) {
 			std::cout << ", " << psz();
 		} else {
 			std::cout << "";
 		}
-		std::cout << " )--->(" << this->pex() << ", " << pey();
+		std::cout << ")-->(" << this->pex() << ", " << pey();
 		if (Dim == 3) {
 			std::cout << ", " << pez();
 		} else {
 			std::cout << "";
 		}
-		std::cout << " )\n";
+		std::cout << ")\n";
 	}
 
 	/*
@@ -291,7 +291,7 @@ protected:
 
 template<typename TYPE, St DIM>
 inline std::ostream& operator<<(std::ostream& o, const Segment_<TYPE, DIM>& p) {
-	return o << p.ps() << "-" << p.pe();
+	return o << p.ps() << "-->" << p.pe();
 }
 
 }

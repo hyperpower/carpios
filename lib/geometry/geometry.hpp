@@ -14,6 +14,7 @@
 #include "_sweep.hpp"
 //#include "_polygon_boolean.hpp"
 #include "_operation.hpp"
+#include "_creation.hpp"
 
 namespace carpio {
 

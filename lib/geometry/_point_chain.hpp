@@ -13,6 +13,7 @@
 #include "_contour.hpp"
 #include "../algebra/array_list.hpp"
 #include "_segment.hpp"
+#include "_polygon.hpp"
 #include <array>
 #include <vector>
 #include <limits>
@@ -44,36 +45,36 @@ public:
 			l(), _closed(false) {
 	}
 	void init(const Segment& s) {
-		l.push_back(s.begin());
-		l.push_back(s.end());
+		l.push_back(s.ps());
+		l.push_back(s.pe());
 	}
 	bool LinkSegment(const Segment& s) {
-		if (s.begin() == l.front()) {
-			if (s.end() == l.back())
+		if (s.ps() == l.front()) {
+			if (s.pe() == l.back())
 				_closed = true;
 			else
-				l.push_front(s.end());
+				l.push_front(s.pe());
 			return true;
 		}
-		if (s.end() == l.back()) {
-			if (s.begin() == l.front())
+		if (s.pe() == l.back()) {
+			if (s.ps() == l.front())
 				_closed = true;
 			else
-				l.push_back(s.begin());
+				l.push_back(s.ps());
 			return true;
 		}
-		if (s.end() == l.front()) {
-			if (s.begin() == l.back())
+		if (s.pe() == l.front()) {
+			if (s.ps() == l.back())
 				_closed = true;
 			else
-				l.push_front(s.begin());
+				l.push_front(s.ps());
 			return true;
 		}
-		if (s.begin() == l.back()) {
-			if (s.end() == l.front())
+		if (s.ps() == l.back()) {
+			if (s.pe() == l.front())
 				_closed = true;
 			else
-				l.push_back(s.end());
+				l.push_back(s.pe());
 			return true;
 		}
 		return false;
@@ -121,7 +122,7 @@ public:
 };
 
 template<class TYPE, St DIM>
-class Connector {
+class Connector_ {
 public:
 	static const St Dim = DIM;
 	typedef Point_<TYPE, DIM> Point;
@@ -130,17 +131,19 @@ public:
 	typedef Segment_<TYPE, DIM> Segment;
 	typedef Segment_<TYPE, DIM>& ref_Segment;
 	typedef TYPE vt;
+	typedef Polygon_<TYPE> Polygon;
 	//typedef ArrayListT<Point> ArrP;
 	typedef PointChain_<TYPE, DIM> PointChain;
+	typedef Contour_<TYPE> Contour;
 	typedef typename std::list<PointChain>::iterator iterator;
 protected:
 	std::list<PointChain> openPolygons;
 	std::list<PointChain> closedPolygons;
 public:
-	Connector() :
+	Connector_() :
 			openPolygons(), closedPolygons() {
 	}
-	~Connector() {
+	~Connector_() {
 	}
 	void add(const Segment& s) {
 		iterator j = openPolygons.begin();
@@ -181,24 +184,17 @@ public:
 		return closedPolygons.size();
 	}
 
-//	void toPolygon(Polygon& p) {
-//		typedef Contour_<TYPE> Contour;
-//		for (iterator it = begin(); it != end(); it++) {
-//			p.push_back(Contour());
-//			Contour& contour = p.back();
-//			for (PointChain::iterator it2 = it->begin(); it2 != it->end();
-//					it2++)
-//				contour.add(*it2);
-//		}
-//	}
+	void toPolygon(Polygon& p) {
+
+		for (iterator it = begin(); it != end(); it++) {
+			p.push_back(Contour());
+		Contour& contour = p.back();
+			for (typename PointChain::iterator it2 = it->begin(); it2 != it->end();
+					it2++)
+				contour.add(*it2);
+		}
+	}
 };
-
-
-
-
-
-
-
 
 }
 
