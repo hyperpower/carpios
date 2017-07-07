@@ -186,7 +186,6 @@ public:
 		}
 	}
 
-protected:
 
 public:
 	static Vt InterpolateCoordinate(spScalar spcdata, Vt x, Vt y = 0.0, Vt z =

@@ -311,9 +311,11 @@ protected:
 		nint += nintersections;
 
 		if (nintersections == 1) {
-			if (e1->p != ip1 && e1->other->p != ip1) // if ip1 is not an endpoint of the line segment associated to e1 then divide "e1"
+			// if ip1 is not an endpoint of the line segment associated to e1 then divide "e1"
+			if (e1->p != ip1 && e1->other->p != ip1)
 				_divide_segment(e1, ip1);
-			if (e2->p != ip1 && e2->other->p != ip1) // if ip1 is not an endpoint of the line segment associated to e2 then divide "e2"
+			// if ip1 is not an endpoint of the line segment associated to e2 then divide "e2"
+			if (e2->p != ip1 && e2->other->p != ip1)
 				_divide_segment(e2, ip1);
 			return;
 		}
@@ -382,9 +384,11 @@ protected:
 	}
 	/** @brief Divide the segment associated to left event e, updating pq and (implicitly) the status line */
 	void _divide_segment(SweepEvent *e, const Point& p) {
-		// "Right event" of the "left line segment" resulting from dividing e (the line segment associated to e)
+		// "Right event" of the "left line segment" resulting from dividing e
+		// (the line segment associated to e)
 		SweepEvent *r = _store(SweepEvent(p, false, e->pl, e, e->type));
-		// "Left event" of the "right line segment" resulting from dividing e (the line segment associated to e)
+		// "Left event" of the "right line segment" resulting from dividing e
+		// (the line segment associated to e)
 		SweepEvent *l = _store(
 				SweepEvent(p, true, e->pl, e->other, e->other->type));
 		if (sec(l, e->other)) { // avoid a rounding error. The left event would be processed after the right event

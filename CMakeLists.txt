@@ -7,6 +7,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build/)
 
 set(SOURCE_FILES src/main.cpp)
 
+find_package(MPI)
+if (MPI_LIBRARY)
+	set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH} CACHE STRING "MPI Include Path")
+	set(MPI_LIBRARIES ${MPI_LIBRARY};${MPI_EXTRA_LIBRARY} CACHE STRING "MPI Libraries")
+endif (MPI_LIBRARY)
+
+
+
 #set(Python_ADDITIONAL_VERSIONS 3.5)
 # Check the architecture and set CMAKE_LIBRARY_ARCHITECTURE accordingly
 if(UNIX)
@@ -38,10 +46,6 @@ ELSE()
   MESSAGE(FATAL_ERROR "Unable to find PythonLibs.")
 ENDIF()
 
-
-#unset(PYTHON_EXECUTABLE CACHE)
-#unset(PYTHON_LIBRARY CACHE)
-#unset(PYTHON_INCLUDE_DIR CACHE)
 # end python ===
 # location of header files
 INCLUDE_DIRECTORIES(

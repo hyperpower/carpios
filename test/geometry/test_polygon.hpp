@@ -234,7 +234,7 @@ TEST(Polygon, point_line_touch) {
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
 	Polygon poly2;
-	Cr::Triangle(poly2, Point(0.8, 0.5), Point(1.5,0.5), Point(1.3, 1.0));
+	Cr::Triangle(poly2, Point(1.0, 0.5), Point(1.5,0.5), Point(1.3, 1.0));
 
 	Clip clip(poly, poly2);
 	Polygon res;
@@ -248,6 +248,8 @@ TEST(Polygon, point_line_touch) {
 	}
 	gp.plot();
 }
+
+
 
 }
 

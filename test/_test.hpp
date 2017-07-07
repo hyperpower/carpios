@@ -35,9 +35,11 @@ using namespace std;
 
 
 //#include "../test/geometry/test_triangle.hpp"
-#include "../test/geometry/test_polygon.hpp"
+//#include "../test/geometry/test_polygon.hpp"
 //#include "../test/geometry/test_contour.hpp"
 //#include "../test/io/_test_plotly.hpp"
+
+#include "../test/parallel/test_mpi.hpp"
 
 namespace carpio {
 

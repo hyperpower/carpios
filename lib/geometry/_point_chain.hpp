@@ -21,7 +21,6 @@
 #include <fstream>
 #include <algorithm>
 
-
 namespace carpio {
 
 template<class TYPE, St DIM>
@@ -38,68 +37,68 @@ public:
 	typedef typename std::list<Point>::iterator iterator;
 protected:
 	/** Linked point chain */
-	std::list<Point> l;
+	std::list<Point> _lpoints;
 	bool _closed; // is the chain closed, that is, is the first point is linked with the last one?
 public:
 	PointChain_() :
-			l(), _closed(false) {
+			_lpoints(), _closed(false) {
 	}
 	void init(const Segment& s) {
-		l.push_back(s.ps());
-		l.push_back(s.pe());
+		_lpoints.push_back(s.ps());
+		_lpoints.push_back(s.pe());
 	}
 	bool LinkSegment(const Segment& s) {
-		if (s.ps() == l.front()) {
-			if (s.pe() == l.back())
+		if (s.ps() == _lpoints.front()) {
+			if (s.pe() == _lpoints.back())
 				_closed = true;
 			else
-				l.push_front(s.pe());
+				_lpoints.push_front(s.pe());
 			return true;
 		}
-		if (s.pe() == l.back()) {
-			if (s.ps() == l.front())
+		if (s.pe() == _lpoints.back()) {
+			if (s.ps() == _lpoints.front())
 				_closed = true;
 			else
-				l.push_back(s.ps());
+				_lpoints.push_back(s.ps());
 			return true;
 		}
-		if (s.pe() == l.front()) {
-			if (s.ps() == l.back())
+		if (s.pe() == _lpoints.front()) {
+			if (s.ps() == _lpoints.back())
 				_closed = true;
 			else
-				l.push_front(s.ps());
+				_lpoints.push_front(s.ps());
 			return true;
 		}
-		if (s.ps() == l.back()) {
-			if (s.pe() == l.front())
+		if (s.ps() == _lpoints.back()) {
+			if (s.pe() == _lpoints.front())
 				_closed = true;
 			else
-				l.push_back(s.pe());
+				_lpoints.push_back(s.pe());
 			return true;
 		}
 		return false;
 	}
 	bool LinkPointChain(PointChain& chain) {
-		if (chain.l.front() == l.back()) {
-			chain.l.pop_front();
-			l.splice(l.end(), chain.l);
+		if (chain._lpoints.front() == _lpoints.back()) {
+			chain._lpoints.pop_front();
+			_lpoints.splice(_lpoints.end(), chain._lpoints);
 			return true;
 		}
-		if (chain.l.back() == l.front()) {
-			l.pop_front();
-			l.splice(l.begin(), chain.l);
+		if (chain._lpoints.back() == _lpoints.front()) {
+			_lpoints.pop_front();
+			_lpoints.splice(_lpoints.begin(), chain._lpoints);
 			return true;
 		}
-		if (chain.l.front() == l.front()) {
-			l.pop_front();
-			std::reverse(chain.l.begin(), chain.l.end());
-			l.splice(l.begin(), chain.l);
+		if (chain._lpoints.front() == _lpoints.front()) {
+			_lpoints.pop_front();
+			std::reverse(chain._lpoints.begin(), chain._lpoints.end());
+			_lpoints.splice(_lpoints.begin(), chain._lpoints);
 			return true;
 		}
-		if (chain.l.back() == l.back()) {
-			l.pop_back();
-			reverse(chain.l.begin(), chain.l.end());
-			l.splice(l.end(), chain.l);
+		if (chain._lpoints.back() == _lpoints.back()) {
+			_lpoints.pop_back();
+			std::reverse(chain._lpoints.begin(), chain._lpoints.end());
+			_lpoints.splice(_lpoints.end(), chain._lpoints);
 			return true;
 		}
 		return false;
@@ -108,16 +107,16 @@ public:
 		return _closed;
 	}
 	iterator begin() {
-		return l.begin();
+		return _lpoints.begin();
 	}
 	iterator end() {
-		return l.end();
+		return _lpoints.end();
 	}
 	void clear() {
-		l.clear();
+		_lpoints.clear();
 	}
 	unsigned int size() const {
-		return l.size();
+		return _lpoints.size();
 	}
 };
 
@@ -137,26 +136,25 @@ public:
 	typedef Contour_<TYPE> Contour;
 	typedef typename std::list<PointChain>::iterator iterator;
 protected:
-	std::list<PointChain> openPolygons;
-	std::list<PointChain> closedPolygons;
+	std::list<PointChain> _lopen;
+	std::list<PointChain> _lclosed;
 public:
 	Connector_() :
-			openPolygons(), closedPolygons() {
+			_lopen(), _lclosed() {
 	}
 	~Connector_() {
 	}
 	void add(const Segment& s) {
-		iterator j = openPolygons.begin();
-		while (j != openPolygons.end()) {
+		iterator j = _lopen.begin();
+		while (j != _lopen.end()) {
 			if (j->LinkSegment(s)) {
 				if (j->closed())
-					closedPolygons.splice(closedPolygons.end(), openPolygons,
-							j);
+					_lclosed.splice(_lclosed.end(), _lopen, j);
 				else {
 					iterator k = j;
-					for (++k; k != openPolygons.end(); k++) {
+					for (++k; k != _lopen.end(); k++) {
 						if (j->LinkPointChain(*k)) {
-							openPolygons.erase(k);
+							_lopen.erase(k);
 							break;
 						}
 					}
@@ -166,38 +164,35 @@ public:
 			j++;
 		}
 		// The segment cannot be connected with any open polygon
-		openPolygons.push_back(PointChain());
-		openPolygons.back().init(s);
+		_lopen.push_back(PointChain());
+		_lopen.back().init(s);
 	}
 
 	iterator begin() {
-		return closedPolygons.begin();
+		return _lclosed.begin();
 	}
 	iterator end() {
-		return closedPolygons.end();
+		return _lclosed.end();
 	}
 	void clear() {
-		closedPolygons.clear();
-		openPolygons.clear();
+		_lclosed.clear();
+		_lopen.clear();
 	}
 	unsigned int size() const {
-		return closedPolygons.size();
+		return _lclosed.size();
 	}
 
 	void toPolygon(Polygon& p) {
-
 		for (iterator it = begin(); it != end(); it++) {
 			p.push_back(Contour());
-		Contour& contour = p.back();
-			for (typename PointChain::iterator it2 = it->begin(); it2 != it->end();
-					it2++)
+			Contour& contour = p.back();
+			for (typename PointChain::iterator it2 = it->begin();
+					it2 != it->end(); it2++)
 				contour.add(*it2);
 		}
 	}
 };
 
 }
-
-
 
 #endif
