@@ -10,6 +10,7 @@
 #include "s_time.hpp"
 #include "s_solver.hpp"
 #include "s_operation.hpp"
+#include "s_ghost.hpp"
 
 namespace structure {
 
@@ -72,7 +73,6 @@ public:
 
 protected:
 	spGrid _grid;
-
 	spGhost _ghost;
 	spBI _bi;
 	// time relates variables
@@ -99,8 +99,8 @@ public:
 	 * utp
 	 * utp map          0
 	 */
-	Equation_(spGrid pf) :
-			_grid(pf) {
+	Equation_(spGrid pf, spGhost pg = nullptr) :
+			_grid(pf), _ghost(pg) {
 		_bi = spBI(new BI());
 		this->_time = nullptr;
 		//_timestep = spTimeStep(nullptr);

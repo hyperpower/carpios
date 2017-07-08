@@ -73,7 +73,7 @@ TEST(sgrid, ns) {
 	plt.add(WireFrame2(*(ns.get_grid())));
 	//	auto actor1 = ScalarCenter(*(ns.get_CS("phi")));
 	plt.size(800, 800);
-	plt.plot();
+	//plt.plot();
 }
 
 TEST(ns, sin) {
@@ -143,7 +143,7 @@ TEST(ns, sin) {
 	plt.add(WireFrame2(*(ns.get_grid())));
 	//	auto actor1 = ScalarCenter(*(ns.get_CS("phi")));
 	plt.size(800, 800);
-	plt.plot();
+	//plt.plot();
 
 	std::cout << "--------- end ---------- \n";
 

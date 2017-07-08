@@ -7,6 +7,7 @@
 #include <utility>
 #include <stdio.h>
 #include "utility/any.hpp"
+#include "s_ghost.hpp"
 
 namespace structure {
 

@@ -312,8 +312,8 @@ public:
 	typedef Operation_<DIM> Operation;
 
 public:
-	Poisson_(spGrid spg) :
-			Base(spg) {
+	Poisson_(spGrid spg, spGhost sph = nullptr) :
+			Base(spg, sph) {
 		_default_setup();
 	}
 
@@ -346,8 +346,9 @@ public:
 			this->_stencils["poisson"] = _new_poisson_stencil();
 		}
 
-		this->_ghost = spGhost(new GhostRegular_<Dim>(this->_grid, this->_bi));
-
+		if ( this->_ghost == nullptr){
+			this->_ghost = spGhost(new GhostRegular_<Dim>(this->_grid, this->_bi));
+		}
 		_init_solver();
 
 		return -1;

@@ -82,8 +82,8 @@ protected:
 	std::array<std::string, 3> _nvf;
 
 public:
-	NS_(spGrid spg) :
-			Base(spg) {
+	NS_(spGrid spg, spGhost pgh = nullptr) :
+			Base(spg, pgh) {
 		_default_setup();
 	}
 
@@ -160,7 +160,7 @@ public:
 			//	this->_time->set_dt(rdt2);
 			//}
 		}
-		if ( this->_time->dt() > std::min(rdt, rdt2)){
+		if (this->_time->dt() > std::min(rdt, rdt2)) {
 			this->_time->set_dt(std::min(rdt, rdt2));
 		}
 
@@ -282,8 +282,9 @@ protected:
 		this->_veoc = _new_veoc(_nv[0], _nv[1], _nv[2]);
 		this->_veof = _new_veof(_nvf[0], _nvf[1], _nvf[2]);
 
-		this->_ghost = spGhost(new GhostRegular_<Dim>(this->_grid, this->_bi));
-
+		if(this->_ghost == nullptr) {
+			this->_ghost = spGhost(new GhostRegular_<Dim>(this->_grid, this->_bi));
+		}
 		return -1;
 	}
 };

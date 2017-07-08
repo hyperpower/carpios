@@ -20,7 +20,6 @@ typedef double Vt;
 
 #define FOR_EACH_DIM for(St d=0;d<DIM;++d)
 
-
 enum Axes {
 	_X_ = 0, //
 	_Y_ = 1, //
@@ -163,7 +162,7 @@ public:
 			return this->p(dim);
 		}
 	}
-	Self shift(St dim, St ori) const{
+	Self shift(St dim, St ori) const {
 		// dim 0 1 2
 		//     x y z
 		// ori 0 1 2
@@ -171,7 +170,7 @@ public:
 		ASSERT(ori == 0 || ori == 1 || ori == 2);
 		if (ori == 0) {
 			return this->m(dim);
-		} else if( ori == 1){
+		} else if (ori == 1) {
 			return this->p(dim);
 		} else {
 			return (*this);
@@ -230,6 +229,32 @@ struct Index_compare_ {
 			} else {
 				return false;
 			}
+		}
+		return false;
+	}
+};
+
+template<St DIM>
+struct Index_hash_ {
+	typedef Index_<DIM> Index;
+	std::size_t operator()(const Index& a) const {
+		std::size_t res[DIM];
+		for (St d = 0; d < DIM; d++) {
+			res[d] = std::hash<St> { }(a[d]);
+		}
+		switch (DIM) {
+		case 1: {
+			return res[0];
+			break;
+		}
+		case 2: {
+			return res[0] ^ (res[1] << 1);
+			break;
+		}
+		case 3: {
+			return res[0] ^ ((res[1] << 1) >> 1) ^ (res[2] << 1);
+			break;
+		}
 		}
 		return false;
 	}
