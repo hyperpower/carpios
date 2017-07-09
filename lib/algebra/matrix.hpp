@@ -12,6 +12,7 @@
 #include <iterator>
 
 #include "array_list.hpp"
+#include <omp.h>
 
 namespace carpio {
 
@@ -658,21 +659,26 @@ MatrixV<T>::MatrixV(St iLen, St jLen, T **value) :
 
 template<typename T>
 MatrixV<T> MatrixV<T>::operator+(const MatrixV<T> &a) {
-	ASSERT(a.iLen() == this->iLen());
-	ASSERT(a.jLen() == this->jLen());
-	MatrixT<T> sum(this->m_iLen, this->m_jLen);
+	ASSERT(a.size_i() == this->size_i());
+	ASSERT(a.size_j() == this->size_j());
+	MatrixV<T> sum(this->m_iLen, this->m_jLen);
+#pragma omp parallel
+	{
+#pragma omp for schedule(dynamic,50)
 	for (size_type i = 0; i < this->m_iLen; i++) {
 		for (size_type j = 0; j < this->m_jLen; j++) {
 			sum[i][j] = this->m_mp[i][j] + a[i][j];
 		}
+//		printf("Thread %d\n", omp_get_thread_num());
+	}
 	}
 	return sum;
 }
 template<typename T>
 MatrixV<T> MatrixV<T>::operator-(const MatrixV<T> &a) {
-	ASSERT(a.iLen() == this->iLen());
-	ASSERT(a.jLen() == this->jLen());
-	MatrixT<T> sum(this->m_iLen, this->m_jLen);
+	ASSERT(a.size_i() == this->size_i());
+	ASSERT(a.size_j() == this->size_j());
+	MatrixV<T> sum(this->m_iLen, this->m_jLen);
 	for (size_type i = 0; i < this->m_iLen; i++) {
 		for (size_type j = 0; j < this->m_jLen; j++) {
 			sum[i][j] = this->m_mp[i][j] - a[i][j];
@@ -682,10 +688,10 @@ MatrixV<T> MatrixV<T>::operator-(const MatrixV<T> &a) {
 }
 template<typename T>
 MatrixV<T> MatrixV<T>::operator*(const MatrixV<T> &a) {
-	ASSERT(a.iLen() == this->jLen());
+	ASSERT(a.size_i() == this->size_j());
 	size_type nrow = this->m_iLen;
-	size_type ncol = a.jLen();
-	MatrixT<T> res(nrow, ncol);
+	size_type ncol = a.size_j();
+	MatrixV<T> res(nrow, ncol);
 	for (size_type i = 0; i < nrow; i++) {
 		for (size_type j = 0; j < ncol; j++) {
 			res[i][j] = 0;
@@ -715,17 +721,17 @@ void MatrixV<T>::show() const {
 //===============================================
 template<typename T>
 ArrayListV<T> operator*(const MatrixV<T> &m, const ArrayListV<T> &a) {
-	ASSERT(m.jLen() == a.size());
+	ASSERT(m.size_j() == a.size());
 	arrayList res(a.size());
-	for (int i = 0; i < m.iLen(); i++) {
-		for (int j = 0; j < m.jLen(); j++) {
+	for (int i = 0; i < m.size_i(); i++) {
+		for (int j = 0; j < m.size_j(); j++) {
 			res[i] += m[i][j] * a[j];
 		}
 	}
 	return res;
 }
 
-typedef MatrixV<Float> Matrix;
+//typedef MatrixV<Float> Matrix;
 
 
 

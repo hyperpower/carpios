@@ -69,7 +69,7 @@ public:
 			if (it == _spapp->end()) {
 				return _defalt_app;
 			} else {
-				return (*it);
+				return it->second;
 			}
 		}
 	}
@@ -85,7 +85,7 @@ public:
 			if (it == _spapp->end()) {
 				return _defalt_app;
 			} else {
-				return (*it);
+				return it->second;
 			}
 		}
 	}

@@ -21,6 +21,7 @@ template<class VALUE>
 class MatrixSCO_ {
 public:
 	typedef VALUE vt;
+	typedef MatrixV<VALUE> Matrix;
 private:
 	ArrayListV<vt> val_;    // data values (nz_ elements)
 	ArrayListV<St> rowind_;    // row_ind (nz_ elements)

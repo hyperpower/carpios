@@ -11,6 +11,7 @@
 #include "algebra_define.hpp"
 #include "arithmetic.hpp"
 #include "array_list.hpp"
+#include <cmath>
 
 namespace carpio {
 //Function ROTG =================================

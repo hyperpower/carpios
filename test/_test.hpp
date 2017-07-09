@@ -7,7 +7,7 @@ using namespace std;
 #include <glog/logging.h>
 
 //#include "../test/utility/_test_any.hpp"
-//#include "../test/algebra/_test_matrix.hpp"
+#include "../test/algebra/_test_matrix.hpp"
 //#include "../test/algebra/_test_matrix_small.hpp"
 //#include "../test/algebra/_test_polynomial.hpp"
 //#include "../test/algebra/_test_solver.hpp"
@@ -30,7 +30,7 @@ using namespace std;
 //#include "../test/structure/_test_s_poisson.hpp"
 //#include "../test/structure/_test_s_advection.hpp"
 //#include "../test/structure/_test_s_operation.hpp"
-#include "../test/structure/_test_s_ns.hpp"
+//#include "../test/structure/_test_s_ns.hpp"
 //#include "../test/structure/_test_s_grid.hpp"
 
 

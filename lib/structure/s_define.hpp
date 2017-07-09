@@ -425,12 +425,6 @@ protected:
 
 //#define __DEBUG__
 
-#ifdef __DEBUG__
-Index_<2> index2(0, 9);
-Index_<3> index3(0, 0, 0);
-
-#endif
-
 }
 
 #endif

@@ -51,7 +51,9 @@ template<class VALUE>
 class ICPre
 {
 public:
-	typedef VALUE vt;
+	typedef VALUE Vt;
+	typedef MatrixV<VALUE> Matrix;
+	typedef MatrixSCR_<VALUE> MatrixSCR;
 private:
 	ArrayListV<VALUE> val_;
 	ArrayListV<St> pntr_;
@@ -90,7 +92,7 @@ public:
 		ICFactor(pntr_, indx_, val_);
 	}
 
-	ICPre(const MatrixSCR_<VALUE> &A) :
+	ICPre(const MatrixSCR &A) :
 			val_(0), pntr_(A.iLen() + 1), indx_(0), nz_(0)
 	{
 
@@ -181,9 +183,9 @@ template<class VALUE>
 class DiaPre
 {
 public:
-
+	typedef ArrayListV<VALUE> Arr;
 private:
-	ArrayListV<VALUE> diag_;
+	Arr diag_;
 	int inv_;   //if inv_==1  diag_= 1. / M.val(i,j);
 				//else        diag_= M.val(i,j);
 
@@ -229,18 +231,18 @@ public:
 	}
 	;
 
-	ArrayListV<VALUE> solve(const ArrayListV<VALUE> &x) const
+	Arr solve(const Arr &x) const
 	{
-		ArrayListV<VALUE> y(x.size());
+		Arr y(x.size());
 
 		for (St i = 0; i < x.size(); i++)
 			y[i] = x[i] * diag_[i];
 
 		return y;
 	}
-	ArrayListV<VALUE> trans_solve(const ArrayListV<VALUE> &x) const
+	Arr trans_solve(const Arr &x) const
 	{
-		ArrayListV<VALUE> y(x.Len());
+		Arr y(x.Len());
 
 		for (int i = 0; i < x.Len(); i++)
 			y[i] = x[i] * diag_[i];
