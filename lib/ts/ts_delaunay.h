@@ -57,7 +57,7 @@ public:
 		this->_psur = psur;
 	}
 	/**
-	 * gts_triangle_enclosing:
+	 * triangle_enclosing:
 	 * @klass: the class of the new triangle.
 	 * @points: a list of #GtsPoint.
 	 * @scale: a scaling factor (must be larger than one).
@@ -115,11 +115,11 @@ public:
 	}
 
 	/**
-	 * gts_delaunay_add_vertex:
+	 * delaunay_add_vertex:
 	 * @surface: a #GtsSurface.
-	 * @v: a #GtsVertex.
-	 * @guess: %NULL or a #GtsFace belonging to @surface to be used as an initial
-	 * guess for point location.
+	 * @v:       a #GtsVertex.
+	 * @guess:   %NULL or a #GtsFace belonging to @surface to be used as an initial
+	 *           guess for point location.
 	 *
 	 * Adds vertex @v to the Delaunay triangulation defined by
 	 * @surface. If @v is not contained in the convex hull bounding

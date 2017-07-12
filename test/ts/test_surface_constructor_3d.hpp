@@ -9,16 +9,17 @@
 #include "io/plotly.h"
 #include "io/plotly_actor.h"
 
-namespace carpio {
+using namespace carpio;
 
 const std::string FILES = "./test/input_files/";
 
 TEST(ts_3d, construction) {
 	typedef double vt;
-	std::cout << "test construct =====" << std::endl;
+	std::cout << "test construct circle =====" << std::endl;
 	Float r = 1.0;
 	uInt n = 10;
-	std::shared_ptr<TS::Surface<Float, 3> > sur = TS::ConstructCircle3(n, r);
+typedef TS::Creation<Float, 3> Cr;
+	std::shared_ptr<TS::Surface<Float, 3> > sur = Cr::Circle(n, r);
 
 	sur->show_vertex();
 	ASSERT_EQ(sur->size_face(), 10);
@@ -36,7 +37,8 @@ TEST(ts_3d, cone) {
 	uInt n = 100;
 	vt zbottom = 0;
 	vt zpex = 1;
-	auto psur = TS::ConstructCone(n, r, zbottom, zpex);
+	typedef TS::Creation<Float, 3> Cr;
+	auto psur = Cr::Cone(n, r, zbottom, zpex);
 
 	psur->show_vertex();
 	ASSERT_EQ(psur->size_face(), n);
@@ -53,6 +55,7 @@ TEST(ts_3d, read_head) {
 	typedef double vt;
 	typedef TS::Surface<vt, 3> Sur;
 	typedef std::shared_ptr<TS::Surface<vt, 3> > pSur;
+	typedef TS::Creation<Float, 3> Cr;
 	std::cout << "test construct =====" << std::endl;
 	pSur psur(new Sur());
 	psur->load_gts_file(FILES + "icosa.gts");
@@ -74,7 +77,7 @@ TEST(ts_3d, walk) {
 	typedef TS::Surface<vt, 3> Sur;
 	typedef TS::Face<vt, 3> Fac;
 	typedef std::shared_ptr<TS::Surface<vt, 3> > pSur;
-	std::cout << "test construct =====" << std::endl;
+	std::cout << "test construct walk =====" << std::endl;
 	pSur psur(new Sur());
 	psur->load_gts_file(FILES + "icosa.gts");
 	//Sur.output_vtk("out.vtk");
@@ -104,12 +107,14 @@ TEST(ts_3d, compatiable) {
 	typedef TS::Surface<vt, 3> Sur;
 	typedef TS::Face<vt, 3> Fac;
 	typedef std::shared_ptr<TS::Surface<vt, 3> > pSur;
+
 	std::cout << "test construct =====" << std::endl;
 	vt r = 1;
 	uInt n = 10;
 	vt zbottom = 0;
 	vt zpex = 0.1;
-	auto psur = TS::ConstructCone(n, r, zbottom, zpex);
+	typedef TS::Creation<Float, 3> Cr;
+	auto psur = Cr::Cone(n, r, zbottom, zpex);
 	//Sur.output_vtk("out.vtk");
 	std::cout << "num faces " << psur->size_face() << "\n";
 	std::cout << "++++++++++--------------------------------\n";
@@ -158,6 +163,6 @@ TEST(ts_3d, compatiable_read) {
 	//p.plot();
 }
 
-}
+
 
 #endif

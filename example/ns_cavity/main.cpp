@@ -15,7 +15,7 @@ typedef Grid_<DIM> Grid;
 typedef std::shared_ptr<Grid_<DIM> > spGrid;
 typedef Index_<DIM> Index;
 
-typedef NS_kim_<DIM> NS;
+typedef NS_explicit_<DIM> NS;
 
 int main(){
     std::cout<< "--------- ns cavity ---------- \n";

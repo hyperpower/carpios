@@ -7,7 +7,7 @@ using namespace std;
 #include <glog/logging.h>
 
 //#include "../test/utility/_test_any.hpp"
-#include "../test/algebra/_test_matrix.hpp"
+//#include "../test/algebra/_test_matrix.hpp"
 //#include "../test/algebra/_test_matrix_small.hpp"
 //#include "../test/algebra/_test_polynomial.hpp"
 //#include "../test/algebra/_test_solver.hpp"
@@ -22,7 +22,7 @@ using namespace std;
 //#include "../test/calculation/_test_ns_explicit.hpp"
 //#include "../test/calculation/_test_interpolate.hpp"
 
-//#include "../test/ts/test_surface_constructor_3d.hpp"
+#include "../test/ts/test_surface_constructor_3d.hpp"
 //#include "../test/ts/test_AABBox.h"
 //#include "../test/ts/test_overlap.h"
 //#include "../test/ts/test_delaunay.h"

@@ -11,6 +11,24 @@ set(PROJECT_SOURCE_DIR ./)
 
 set(DIR_CARPIO ../..)
 
+find_package(MPI)
+if (MPI_LIBRARY)
+	set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH} CACHE STRING "MPI Include Path")
+	set(MPI_LIBRARIES ${MPI_LIBRARY};${MPI_EXTRA_LIBRARY} CACHE STRING "MPI Libraries")
+endif (MPI_LIBRARY)
+
+OPTION(ENABLE_OPENMP "Enable openmp" ON) # Enabled by default
+IF(ENABLE_OPENMP)
+	message(STATUS "======== LOOKING FOR OPENMP ========================")
+    ADD_DEFINITIONS(-DOPENMP)
+    find_package(OpenMP)
+	if (OPENMP_FOUND)
+    	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+	endif()
+ENDIF(ENABLE_OPENMP)
+
+
 
 # location of header files
 include_directories(

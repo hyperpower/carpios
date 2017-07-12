@@ -177,7 +177,7 @@ spPA_mesh3d Surface(const Surd3& sur) {
 	return res;
 }
 
-spPA_scatter3d ScatterPoints(const list_spcPoid2& list_p) {
+spPA_scatter ScatterPoints(const list_spcPoid2& list_p) {
 	Listd lx;
 	Listd ly;
 	Listd lz;
@@ -186,12 +186,12 @@ spPA_scatter3d ScatterPoints(const list_spcPoid2& list_p) {
 		for (Surd3::size_type i = 0; i < 3; i++) {
 			lx.push_back(pf->x());
 			ly.push_back(pf->y());
-			lz.push_back(0.0);
+//			lz.push_back(0.0);
 		}
 	}
-	spPA_scatter3d res = spPA_scatter3d(
-			new Plotly_actor_scatter3d(lx, ly, lz, 1));
-	res->set_mode("points");
+	spPA_scatter res = spPA_scatter(
+			new Plotly_actor_scatter(lx, ly, 1));
+	res->set_mode("markers");
 	return res;
 }
 

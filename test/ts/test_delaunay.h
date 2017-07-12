@@ -8,7 +8,7 @@
 #include "ts/ts_triangle.h"
 #include "ts/ts_delaunay.h"
 #include "ts/ts_surface.h"
-#include "ts/ts_surface_constructor.h"
+#include "ts/ts_creation.h"
 #include "io/plotly.h"
 #include "io/plotly_actor.h"
 
@@ -52,7 +52,7 @@ TEST(ts_delaunay, read) {
 	p.add(carpio::PlotlyActor::ScatterPoints(listv));
 	p.add(carpio::PlotlyActor::SurfaceWireFrame(sur));
 	//p.add(carpio::PlotlyActor::BBTree(bbtree, 3));
-	p.plot();
+	//p.plot();
 }
 
 }

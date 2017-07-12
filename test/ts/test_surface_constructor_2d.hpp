@@ -19,10 +19,11 @@ TEST(ts_2d, construction) {
 	typedef double vt;
 	typedef std::shared_ptr<Surface<vt, 2> > pSur;
 	typedef Surface<vt, 2> Sur;
+	typedef Creation<vt, 2> Cr;
 	std::cout << "test construct =====" << std::endl;
 	Float r = 1;
 	uInt n = 10;
-	pSur sur = ConstructCircle2(n, r);
+	pSur sur = Cr::Circle(n, r);
 	st count_edge = sur->count_edge();
 
 	//std::cout << " num face = " << count_face << std::endl;
@@ -41,7 +42,7 @@ TEST(ts_2d, construction) {
 	//actors.push_back(vtk_new_actor(Sur));
 	//actors.push_back(vtk_new_actor_normal(Sur));
 	//actors.push_back(vtk_new_actor_axes(0, 0, 0));
-	// vtk_show_actor(actors);
+	//vtk_show_actor(actors);
 }
 
 TEST(ts_2d, show) {

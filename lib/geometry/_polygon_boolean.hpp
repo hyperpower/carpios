@@ -192,11 +192,11 @@ public:
 
 				// Process a possible intersection between "e" and its next neighbor in S
 				if ((++next) != S.end())
-					_possiblei_intersection(e, *next);
+					_possible_intersection(e, *next);
 
 				// Process a possible intersection between "e" and its previous neighbor in S
 				if (prev != S.end())
-					_possiblei_intersection(*prev, e);
+					_possible_intersection(*prev, e);
 			} else { // the line segment must be removed from S
 				next = prev = sli = *(e->other->poss); // S.find (e->other);
 
@@ -238,7 +238,7 @@ public:
 				// delete line segment associated to e from S and check for intersection between the neighbors of "e" in S
 				S.erase(sli);
 				if (next != S.end() && prev != S.end())
-					_possiblei_intersection(*prev, *next);
+					_possible_intersection(*prev, *next);
 			}
 
 		} // end while
@@ -288,7 +288,7 @@ protected:
 		eq.push(e2);
 	}
 	/** @brief Process a posible intersection between the segment associated to the left events e1 and e2 */
-	void _possiblei_intersection(SweepEvent *e1, SweepEvent *e2) {
+	void _possible_intersection(SweepEvent *e1, SweepEvent *e2) {
 		// you can uncomment these two lines if self-intersecting polygons are not allowed
 		//	if ((e1->pl == e2->pl) )
 		//		return false;

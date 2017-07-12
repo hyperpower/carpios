@@ -71,7 +71,7 @@ def plot_phi_one(strstep, strtime):
     #plt.grid(True)
     plt.axes().set_aspect('equal')
     plt.tight_layout()
-    name = PATH_FIG + "/phi_" + "%06d" % int(strstep) +".png"
+    name = PATH_FIG + "/phi_" + "%05d" % int(strstep) +".png"
     print name
     plt.savefig(name)
     plt.close()

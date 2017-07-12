@@ -83,9 +83,9 @@ public:
 	}
 
 	void _copy_to_cs(const Arr& x) {
-		for (Index ijk = _order->begin(); ijk != _order->end();
-				ijk = _order->next(ijk)) {
-			_spcs->val(ijk) = x[_order->get_order(ijk)];
+		for (Index idx = _order->begin(); idx != _order->end();
+				idx = _order->next(idx)) {
+			_spcs->val(idx) = x[_order->get_order(idx)];
 		}
 	}
 

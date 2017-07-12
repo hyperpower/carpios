@@ -383,7 +383,7 @@ public:
 	typedef Data_<spExpression, DIM> CenterExp;
 	typedef std::shared_ptr<CenterExp> spCenterExp;
 protected:
-	spGrid _grid;
+	spGrid  _grid;
 	spGhost _ghost;
 public:
 	Order_(spGrid grid, spGhost ghost) :

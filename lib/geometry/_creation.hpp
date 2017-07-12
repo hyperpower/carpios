@@ -25,9 +25,9 @@ public:
 	typedef Polygon_<TYPE> Polygon;
 	typedef Contour_<TYPE> Contour;
 public:
-	static void FromFile(Polygon& res, const std::string& filename) {
-		return Polygon(filename);
-	}
+	//static void FromFile(Polygon& res, const std::string& filename) {
+	//	Polygon(filename);
+	//}
 
 	static void Cube(Polygon& res, const Vt minx, const Vt miny, const Vt maxx,
 			const Vt maxy) {

@@ -188,6 +188,7 @@ protected:
         }
         Vt dt = this->_time->dt();
         Grid& grid = *(this->_grid);
+//#pragma omp parallel for schedule(dynamic,1)
         FOR_EACH_DIM {
             spScalar sps = this->_css[veo_name[d]];
             spScalar spss = this->_css[veos_name[d]];

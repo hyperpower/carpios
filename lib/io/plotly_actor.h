@@ -51,7 +51,7 @@ spPA_scatter SurfaceWireFrame(const Surd2&);
 spPA_mesh3d Face(const Faced3&);
 spPA_scatter3d SurfaceWireFrame(const Surd3&);
 spPA_scatter3d SurfaceWireFrame(const Trid2&);
-spPA_scatter3d ScatterPoints(const list_spcPoid2&);
+spPA_scatter ScatterPoints(const list_spcPoid2&);
 // working with AABBox
 typedef TS::AABBox<double, 3> AABBoxd3;
 typedef TS::BBTree<AABBoxd3> BBTreed3;

@@ -27,19 +27,19 @@ public:
 	typedef Triangle<TYPE, DIM> self_class;
 	typedef TYPE vt;
 	typedef st size_type;
-	typedef Point<TYPE, DIM> Poi;
+	typedef Point<vt, DIM> Poi;
 	typedef std::shared_ptr<Poi> spPoi;
-	typedef Vertex<TYPE, DIM> Ver;
+	typedef Vertex<vt, DIM> Ver;
 	typedef std::shared_ptr<Ver> spVer;
-	typedef Segment<TYPE, DIM> Seg;
+	typedef Segment<vt, DIM> Seg;
 	typedef std::shared_ptr<Seg> spSeg;
-	typedef Edge<TYPE, DIM> Edg;
+	typedef Edge<vt, DIM> Edg;
 	typedef std::shared_ptr<Edg> spEdg;
-	typedef Triangle<TYPE, DIM> Tri;
+	typedef Triangle<vt, DIM> Tri;
 	typedef std::shared_ptr<Tri> spTri;
-	typedef Face<TYPE, DIM> Fac;
+	typedef Face<vt, DIM> Fac;
 	typedef std::shared_ptr<Fac> spFac;
-	typedef Surface<TYPE, DIM> Sur;
+	typedef Surface<vt, DIM> Sur;
 	typedef std::shared_ptr<Sur> spSur;
 	typedef List<spEdg> list_pEdg;
 	typedef List<spVer> list_pVer;
@@ -91,11 +91,44 @@ public:
 	spVer get_vertex2() const {
 		if (e1->v1 == e2->v1) {
 			return e2->v2;
+			// case 1 ----------
+	        //     v2 *#
+	        //       /
+	        //   e2 /
+	        //     /
+	        // v1 /
+	        //    ----------*
+	        //   v1   e1   v2
+
 		} else if (e1->v2 == e2->v2) {
+			// case 2 ----------
+			//         \ v1
+			//          \
+			//           \ e2
+			//            \
+			//             \  v2
+			//    ----------*#
+			//   v1   e1   v2
 			return e1->v2;
 		} else if (e1->v1 == e2->v2) {
+			// case 3 ----------
+			//     v1 #
+	        //       /
+	        //   e2 /
+	        //     /
+			// v2 /
+	        //   *----------*
+	        //   v1   e1   v2
 			return e2->v1;
 		} else if (e1->v2 == e2->v1) {
+			// case 2 ----------
+			//         * v1
+			//          \
+			//           \ e2
+			//            \
+			//             \  v2
+			//    ----------*#
+			//   v1   e1   v2
 			return e1->v2;
 		}
 		SHOULD_NOT_REACH;
@@ -159,17 +192,17 @@ public:
 		spVer v2 = get_vertex2();
 		spVer v3 = get_vertex3();
 
-		TYPE x1 = v2->x() - v1->x();
-		TYPE y1 = v2->y() - v1->y();
-		TYPE z1 = v2->z() - v1->z();
+		vt x1 = v2->x() - v1->x();
+		vt y1 = v2->y() - v1->y();
+		vt z1 = v2->z() - v1->z();
 
-		TYPE x2 = v3->x() - v1->x();
-		TYPE y2 = v3->y() - v1->y();
-		TYPE z2 = v3->z() - v1->z();
+		vt x2 = v3->x() - v1->x();
+		vt y2 = v3->y() - v1->y();
+		vt z2 = v3->z() - v1->z();
 
-		TYPE x = y1 * z2 - z1 * y2;
-		TYPE y = z1 * x2 - x1 * z2;
-		TYPE z = x1 * y2 - y1 * x2;
+		vt x = y1 * z2 - z1 * y2;
+		vt y = z1 * x2 - x1 * z2;
+		vt z = x1 * y2 - y1 * x2;
 
 		return Poi(x, y, z);
 	}
@@ -188,26 +221,64 @@ public:
 	}
 
 	/**
-	 * gts_triangle_area:
-	 * @t: a #GtsTriangle.
+	 * triangle_area:
 	 *
-	 * Returns: the area of the triangle @t.
+	 * Returns: the area of this triangle.
 	 */
-	TYPE area() const {
+	double area() const {
 		Poi n = this->normal();
 		return sqrt(
 				n.x() * n.x() + n.y() * n.y()
 						+ ((DIM == 3) ? n.z() * n.z() : 0.0)) / 2.;
 	}
+	/**
+	 * centroid  (barycenter)
+	 *
+	 * returns center point as a point
+	 */
 
 	Poi centroid() const {
 		spVer v1 = get_vertex1();
 		spVer v2 = get_vertex2();
 		spVer v3 = get_vertex3();
-		TYPE x = (v1->x() + v2->x() + v3->x()) / 3.0;
-		TYPE y = (v1->y() + v2->y() + v3->y()) / 3.0;
-		TYPE z = (DIM == 3) ? (v1->z() + v2->z() + v3->z()) / 3.0 : 0.0;
+		vt x = (v1->x() + v2->x() + v3->x()) / 3.0;
+		vt y = (v1->y() + v2->y() + v3->y()) / 3.0;
+		vt z = (DIM == 3) ? (v1->z() + v2->z() + v3->z()) / 3.0 : 0.0;
 		return Poi(x, y, z);
+	}
+
+	// Find the circumcenter of three 2-D points by Cramer's Rule to find
+	// the intersection of two perpendicular bisectors of the triangle's
+	// edges.
+	// http://www.ics.uci.edu/~eppstein/junkyard/circumcenter.html
+	//
+	// Return true if successful; return false if points are collinear
+	Poi circumcenter(double x0, double y0,
+	                 double x1, double y1,
+	                 double x2, double y2,
+	                 double& centerx, double& centery)
+	{
+	    double D;
+	    double x0m2, y1m2, x1m2, y0m2;
+	    double x0p2, y1p2, x1p2, y0p2;
+	    x0m2 = x0 - x2;
+	    y1m2 = y1 - y2;
+	    x1m2 = x1 - x2;
+	    y0m2 = y0 - y2;
+	    x0p2 = x0 + x2;
+	    y1p2 = y1 + y2;
+	    x1p2 = x1 + x2;
+	    y0p2 = y0 + y2;
+
+	    D = x0m2*y1m2 - x1m2*y0m2;
+	    if ((D < SMALL) && (D > -SMALL)) return false;
+
+	    centerx = (((x0m2*x0p2 + y0m2*y0p2)/2*y1m2)
+	              - (x1m2*x1p2 + y1m2*y1p2)/2*y0m2) / D;
+	    centery = (((x1m2*x1p2 + y1m2*y1p2)/2*x0m2)
+	              - (x0m2*x0p2 + y0m2*y0p2)/2*x1m2) / D;
+
+	    return true;
 	}
 
 	/**
@@ -375,6 +446,8 @@ void Triangle<TYPE, DIM>::output_vtk(const String& fn) const {
 /*
  *  function out of class
  */
+
+
 /**
  * gts_triangles_are_compatible:
  * @t1: a #GtsTriangle.
@@ -420,30 +493,6 @@ bool AreCompatible( //
 			|| e1->v2 == e2->v2)
 		return false;
 	return true;
-}
-
-/**
- * triangles_common_edge:
- * @t1: a #GtsTriangle.
- * @t2: a #GtsTriangle.
- *
- * Returns: a #GtsEdge common to both @t1 and @t2 or %NULL if @t1 and @t2
- * do not share any edge.
- */
-template<class TYPE, st DIM>
-Edge<TYPE, DIM>* GetCommonpEdge( //
-		const Triangle<TYPE, DIM> * t1,  //
-		const Triangle<TYPE, DIM> * t2) {
-	_return_val_if_fail(t1 != nullptr, nullptr);
-	_return_val_if_fail(t2 != nullptr, nullptr);
-
-	if (t1->e1 == t2->e1 || t1->e1 == t2->e2 || t1->e1 == t2->e3)
-		return t1->e1;
-	if (t1->e2 == t2->e1 || t1->e2 == t2->e2 || t1->e2 == t2->e3)
-		return t1->e2;
-	if (t1->e3 == t2->e1 || t1->e3 == t2->e2 || t1->e3 == t2->e3)
-		return t1->e3;
-	return nullptr;
 }
 
 }
