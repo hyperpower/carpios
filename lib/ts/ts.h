@@ -10,7 +10,7 @@
 #include "ts_creation.h"
 #include "ts_AABBox.h"
 #include "ts_BBTree.h"
-#include "ts_overlap.h"
+#include "ts_intersection.h"
 //#include "ts_io.h"
 
 namespace TS{

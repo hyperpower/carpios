@@ -14,11 +14,11 @@
 namespace TS {
 
 template<class TYPE, st DIM>
-class Overlap {
+class Intersection {
 public:
 	typedef TYPE vt;
 	typedef st size_type;
-	typedef Overlap<TYPE, DIM> Self;
+	typedef Intersection<TYPE, DIM> Self;
 	typedef AABBox<TYPE, DIM> Box;
 	typedef const AABBox<TYPE, DIM> const_Box;
 	typedef Point<TYPE, DIM> Poi;
@@ -40,6 +40,8 @@ public:
 	typedef const Node* const_pNode;
 	typedef BBTree<Box> Tree;
 	typedef const BBTree<Box> const_Tree;
+
+	typedef std::vector<AABBox<vt, 3> > VecBox;
 
 	static const st Dim = DIM;
 public:
@@ -136,26 +138,16 @@ public:
 		return res;
 	}
 
-	static bool DetectIsect(const Box& a, const Box& b, Poi& pa, Poi& pb) {
-		if (!a.are_overlapping(b)) {
-			return false;
-		}
-		const utPointer uta = a.utp_obj();
-		OBJ_TYPE ta = a.type;
-		const utPointer utb = b.utp_obj();
-		OBJ_TYPE tb = b.type;
-		//Poi pa, pb;
-		return _Detect(uta, utb, ta, tb, pa, pb);
-	}
-
-	static bool DetectObj(const Tree& ta, const Tree& tb, std::vector<Box>& av, //
+	static bool DetectObj(
+			const Tree& ta, const Tree& tb, //
+			std::vector<Box>& av, //
 			std::vector<Box>& bv //
 			) {
 		// if one leaf box a overlap with b, return true
 		av.clear();
 		bv.clear();
-		for (typename Tree::const_iterator iter = tb.begin();
-				iter != tb.end(); ++iter) {
+		for (typename Tree::const_iterator iter = tb.begin(); iter != tb.end();
+				++iter) {
 			if (iter->is_leaf()) {
 				const Box& b = (iter->box());
 				typename Tree::Func_flag fun =
@@ -194,18 +186,32 @@ public:
 		return false; //make complier happy
 	}
 
-	static bool _Detect(utPointer a, utPointer b, OBJ_TYPE ta, OBJ_TYPE tb,
+	static bool CalInersectBox(const Box& a, const Box& b, Poi& pa, Poi& pb) {
+		if (!a.are_overlapping(b)) {
+			return false;
+		}
+		const utPointer uta = a.utp_obj();
+		OBJ_TYPE ta = a.type;
+		const utPointer utb = b.utp_obj();
+		OBJ_TYPE tb = b.type;
+		//Poi pa, pb;
+		return CalIntersectUtPointer(uta, utb, ta, tb, pa, pb);
+	}
+
+	static bool CalIntersectUtPointer( //
+			utPointer a, utPointer b, //
+			OBJ_TYPE ta, OBJ_TYPE tb, //
 			Poi& pa, Poi& pb) {
 		if ((ta == TRIANGLE && tb == TRIANGLE) || (ta == FACE && tb == FACE)) {
 			pTri ra = CAST(pTri, a);
 			pTri rb = CAST(pTri, b);
-			return Detect(ra, rb, pa, pb);
+			return CalIntersectTriangle(ra, rb, pa, pb);
 		}
 		ASSERT(false);
 		return false; //make complier happy
 	}
 
-	static bool Detect(pTri a, pTri b, Poi& ps, Poi& pe) {
+	static bool CalIntersectTriangle(pTri a, pTri b, Poi& ps, Poi& pe) {
 		bool co = false;
 		int res = TriTriIsect(*a, *b, co, ps, pe);
 		bool onep = ((ps) == (pe));

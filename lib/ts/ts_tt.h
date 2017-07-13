@@ -42,17 +42,27 @@
 namespace TriTriRaw {
 /* function prototype */
 template<class Scalar>
-int tri_tri_overlap_test_3d(const Scalar p1[3], const Scalar q1[3],
-		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
-		const Scalar r2[3]);
+int tri_tri_overlap_test_3d(
+		//
+		const Scalar p1[3], const Scalar q1[3], const Scalar r1[3],
+		const Scalar p2[3], const Scalar q2[3], const Scalar r2[3]);
 template<class Scalar>
-int coplanar_tri_tri3d(const Scalar p1[3], const Scalar q1[3],
-		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
-		const Scalar r2[3], const Scalar N1[3], const Scalar N2[3]);
+int coplanar_tri_tri3d(
+		//
+		const Scalar p1[3], const Scalar q1[3], const Scalar r1[3],
+		const Scalar p2[3], const Scalar q2[3], const Scalar r2[3],
+		const Scalar N1[3], const Scalar N2[3]);
 template<class Scalar>
-int tri_tri_overlap_test_2d(const Scalar p1[2], const Scalar q1[2],
-		const Scalar r1[2], const Scalar p2[2], const Scalar q2[2],
-		const Scalar r2[2]);
+int tri_tri_overlap_test_2d(
+		//
+		const Scalar p1[2], const Scalar q1[2], const Scalar r1[2],
+		const Scalar p2[2], const Scalar q2[2], const Scalar r2[2]);
+
+template<class Scalar>
+int tri_tri_sign_distance(const Scalar p1[3], const Scalar q1[3],
+		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
+		const Scalar r2[3], Scalar d);
+
 // template<class Scalar>
 // int tri_tri_intersection_test_3d(const Scalar p1[3], const Scalar q1[3],
 //		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
@@ -65,7 +75,6 @@ int tri_tri_overlap_test_2d(const Scalar p1[2], const Scalar q1[2],
  */
 
 /* some 3D macros */
-
 #define CROSS(dest,v1,v2)                \
 	    dest[0]=v1[1]*v2[2]-v1[2]*v2[1]; \
 	    dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
@@ -122,20 +131,42 @@ int tri_tri_overlap_test_2d(const Scalar p1[2], const Scalar q1[2],
 		else return coplanar_tri_tri3d(p1,q1,r1,p2,q2,r2,N1,N2);\
 		      }}}
 
+template<class Scalar>
+int tri_tri_sign_distance(
+		//
+		const Scalar p1[3], const Scalar q1[3],
+		const Scalar r1[3], //
+		const Scalar p2[3], const Scalar q2[3], const Scalar r2[3], //
+		Scalar& dp1, Scalar& dq1, Scalar& dr1) {  //
+
+	Scalar v1[3],v2[3];
+	Scalar N2[3];
+	SUB(v1, p2, r2)
+	SUB(v2, q2, r2)
+	CROSS(N2, v1, v2)
+
+	SUB(v1, p1, r2)
+	dp1 = DOT(v1, N2);
+	SUB(v1, q1, r2)
+	dq1 = DOT(v1, N2);
+	SUB(v1, r1, r2)
+	dr1 = DOT(v1, N2);
+}
+
 /*
  *
  *  Three-dimensional Triangle-Triangle Overlap Test
  *
  */
 template<class Scalar>
-int tri_tri_overlap_test_3d(const Scalar p1[3], const Scalar q1[3],
-		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
-		const Scalar r2[3]) {
-	Scalar dp1, dq1, dr1, dp2, dq2, dr2;
-	Scalar v1[3], v2[3];
-	Scalar N1[3], N2[3];
+int tri_tri_overlap_test_3d( //
+		const Scalar p1[3], const Scalar q1[3], const Scalar r1[3], //
+		const Scalar p2[3], const Scalar q2[3], const Scalar r2[3]) {  //
+	Scalar dp1,dq1,dr1,dp2,dq2,dr2;
+	Scalar v1[3],v2[3];
+	Scalar N1[3],N2[3];
 
-	/* Compute distance signs  of p1, q1 and r1 to the plane of
+	/* Compute distance signs of p1, q1 and r1 to the plane of
 	 triangle(p2,q2,r2) */
 
 	SUB(v1, p2, r2)
@@ -152,7 +183,7 @@ int tri_tri_overlap_test_3d(const Scalar p1[3], const Scalar q1[3],
 	if (((dp1 * dq1) > 0.0f) && ((dp1 * dr1) > 0.0f))
 		return 0;
 
-	/* Compute distance signs  of p2, q2 and r2 to the plane of
+	/* Compute distance signs of p2, q2 and r2 to the plane of
 	 triangle(p1,q1,r1) */
 
 	SUB(v1, q1, p1)
@@ -212,10 +243,10 @@ int coplanar_tri_tri3d(const Scalar p1[3], const Scalar q1[3],
 		const Scalar r1[3], const Scalar p2[3], const Scalar q2[3],
 		const Scalar r2[3], const Scalar normal_1[3],
 		const Scalar normal_2[3]) {
-	Scalar P1[2], Q1[2], R1[2];
-	Scalar P2[2], Q2[2], R2[2];
+	Scalar P1[2],Q1[2],R1[2];
+	Scalar P2[2],Q2[2],R2[2];
 
-	Scalar n_x, n_y, n_z;
+	Scalar n_x,n_y,n_z;
 
 	n_x = ((normal_1[0] < 0) ? -normal_1[0] : normal_1[0]);
 	n_y = ((normal_1[1] < 0) ? -normal_1[1] : normal_1[1]);
@@ -403,9 +434,9 @@ int tri_tri_intersection_test_3d(const Scalar p1[3], const Scalar q1[3],
 		Scalar target[3]) {
 	coplanar = false;
 
-	Scalar dp1, dq1, dr1, dp2, dq2, dr2;
-	Scalar v1[3], v2[3], v[3];
-	Scalar N1[3], N2[3], N[3];
+	Scalar dp1,dq1,dr1,dp2,dq2,dr2;
+	Scalar v1[3],v2[3],v[3];
+	Scalar N1[3],N2[3],N[3];
 	Scalar alpha;
 
 	// Compute distance signs  of p1, q1 and r1
@@ -591,10 +622,11 @@ int tri_tri_overlap_test_2d(const Scalar p1[2], const Scalar q1[2],
 namespace TS {
 
 template<class VALUE>
-int TriTriIsect(const Triangle<VALUE, 3>& tri1,
-		const Triangle<VALUE, 3>& tri2) {
-	VALUE V0[3], V1[3], V2[3];
-	VALUE U0[3], U1[3], U2[3];
+int TriTriIsect(                           //
+		const Triangle<VALUE, 3>& tri1,    //
+		const Triangle<VALUE, 3>& tri2) {  //
+	VALUE V0[3],V1[3],V2[3];
+	VALUE U0[3],U1[3],U2[3];
 	if (&tri1 == &tri2) {
 		return 0;  // equal is not intersect
 	}
@@ -611,14 +643,14 @@ int TriTriIsect(const Triangle<VALUE, 3>& tri1,
 }
 
 template<class VALUE>
-int TriTriIsect(  //
+int TriTriIsect(                         //
 		const Triangle<VALUE, 3>& tri1,  //
 		const Triangle<VALUE, 3>& tri2,  //
 		bool& coplane,                   //
 		Point<VALUE, 3>& ps,             //
 		Point<VALUE, 3>& pe) {           //
-	VALUE V0[3], V1[3], V2[3];
-	VALUE U0[3], U1[3], U2[3];
+	VALUE V0[3],V1[3],V2[3];
+	VALUE U0[3],U1[3],U2[3];
 	if (&tri1 == &tri2) {
 		return 0;  // equal is not intersect
 	}
@@ -631,11 +663,11 @@ int TriTriIsect(  //
 		U1[i] = tri2.get_vertex(1, ToAix(i));
 		U2[i] = tri2.get_vertex(2, ToAix(i));
 	}
-	VALUE PS[3], PE[3];
+	VALUE PS[3],PE[3];
 
-	int res = TriTriRaw::tri_tri_intersection_test_3d(V0, V1, V2, U0, U1, U2, coplane, PS,
-			PE);
-	for (typename Triangle<VALUE, 3>::size_type i = 0; i < 3; i++){
+	int res = TriTriRaw::tri_tri_intersection_test_3d(V0, V1, V2, U0, U1, U2,
+			coplane, PS, PE);
+	for (typename Triangle<VALUE, 3>::size_type i = 0; i < 3; i++) {
 		ps.val(ToAix(i)) = PS[i];
 		pe.val(ToAix(i)) = PE[i];
 	}

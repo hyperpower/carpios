@@ -22,9 +22,9 @@ using namespace std;
 //#include "../test/calculation/_test_ns_explicit.hpp"
 //#include "../test/calculation/_test_interpolate.hpp"
 
-#include "../test/ts/test_surface_constructor_3d.hpp"
+//#include "../test/ts/test_surface_constructor_3d.hpp"
 //#include "../test/ts/test_AABBox.h"
-//#include "../test/ts/test_overlap.h"
+#include "../test/ts/test_overlap.h"
 //#include "../test/ts/test_delaunay.h"
 
 //#include "../test/structure/_test_s_poisson.hpp"

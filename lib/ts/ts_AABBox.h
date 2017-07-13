@@ -18,8 +18,6 @@
 
 namespace TS {
 
-
-
 //VTK_VOXEL (=11)  -- 3D
 //VTK_PIXEL (=8)   -- 2D
 const Location _ORDER_VTK[8][3] = { { _M, _M, _M }, //
@@ -410,10 +408,6 @@ bool AABBox<TYPE, DIM>::are_overlapping(pTri t) const {
 		tv[1][i] = (*p2)[i];
 		tv[2][i] = (*p3)[i];
 	}
-	//std::cout<< tv[0][0]<< tv[0][1]<< tv[0][2]<<std::endl;
-	//std::cout<< tv[1][0]<< tv[1][1]<< tv[1][2]<<std::endl;
-	//std::cout<< tv[2][0]<< tv[2][1]<< tv[2][2]<<std::endl;
-	//std::cout<<"inter in : "<<triBoxOverlap(bc, bh, tv)<<std::endl;
 	return carpio::TriBoxIsect_Raw(bc, bh, tv);
 	//return triBoxOverlap(bc, bh, tv);
 }
