@@ -187,31 +187,8 @@ public:
 
 };
 
-//function out of class
-template<class POINT>
-typename POINT::value_type point_distance(const POINT& p1, const POINT& p2) {
-	if (POINT::Dim == 2) {
-		return sqrt(
-				(p1[0] - p2[0]) * (p1[0] - p2[0])
-						+ (p1[1] - p2[1]) * (p1[1] - p2[1]));
-	} else {
-		return sqrt(
-				(p1[0] - p2[0]) * (p1[0] - p2[0])
-						+ (p1[1] - p2[1]) * (p1[1] - p2[1])
-						+ (p1[2] - p2[2]) * (p1[2] - p2[2]));
-	}
-}
-template<class POINT>
-typename POINT::value_type point_distance2(const POINT& p1, const POINT& p2) {
-	if (POINT::Dim == 2) {
-		return (p1[0] - p2[0]) * (p1[0] - p2[0])
-				+ (p1[1] - p2[1]) * (p1[1] - p2[1]);
-	} else {
-		return (p1[0] - p2[0]) * (p1[0] - p2[0])
-				+ (p1[1] - p2[1]) * (p1[1] - p2[1])
-				+ (p1[2] - p2[2]) * (p1[2] - p2[2]);
-	}
-}
+
+
 template<class POINT>
 bool point_is_in_on_rectangle(const POINT& p, const POINT& p1,
 		const POINT& p2) {
@@ -357,51 +334,9 @@ Intersect point_is_in_triangle(const Point<TYPE, DIM>& p,
 //	return insphere((double *) &p1.data(), (double *) &p2.data(),
 //			(double *) &p3.data(), (double *) &p4.data(), (double *) &p.data());
 //}
-/**
- * gts_point_segment_distance2:
- * @p: a #GtsPoint.
- * @s: a #GtsSegment.
- *
- * Returns: the square of the minimun Euclidean distance between @p and @s.
- */
-template<class TYPE, st DIM>
-TYPE point_segment_distance2( //
-		const Point<TYPE, DIM>& p, //
-		const Segment<TYPE, DIM>& s) {
-	TYPE t, ns2, x, y, z;
-	const Point<TYPE, DIM>* p1, p2;
 
-	p1 = s->v1;
-	p2 = s->v2;
-	ns2 = point_distance2(*p1, *p2);
-	if (ns2 == 0.0)
-		return point_distance2(*p, *p1);
-	t = ((p2->x() - p1->x()) * (p->x() - p1->x())
-			+ (p2->y() - p1->y()) * (p->y() - p1->y())
-			+ (p2->z() - p1->z()) * (p->z() - p1->z())) / ns2;
-	if (t > 1.0)
-		return point_distance2(*p, *p2);
-	if (t < 0.0)
-		return point_distance2(*p, *p1);
-	x = (1. - t) * p1->x() + t * p2->x() - p->x();
-	y = (1. - t) * p1->y() + t * p2->y() - p->y();
-	z = (1. - t) * p1->z() + t * p2->z() - p->z();
-	return x * x + y * y + z * z;
-}
 
-/**
- * gts_point_segment_distance:
- * @p: a #GtsPoint.
- * @s: a #GtsSegment.
- *
- * Returns: the minimun Euclidean distance between @p and @s.
- */
-template<class TYPE, st DIM>
-Float point_segment_distance( //
-		const Point<TYPE, DIM>& p, //
-		const Segment<TYPE, DIM>& s) {
-	return sqrt(point_segment_distance2(p, s));
-}
+
 
 /**
  * gts_point_segment_closest:
