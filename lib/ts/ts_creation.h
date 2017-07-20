@@ -160,7 +160,7 @@ public:
 	}
 
 	static spSur FromGtsFile(const std::string& filename) {
-		ASSERT(Dim ==3);
+		ASSERT(Dim == 3);
 		spSur psur(new Sur());
 		psur->load_gts_file(filename);
 		return psur;
@@ -168,7 +168,7 @@ public:
 
 	static spSur Cone(uInt n,                           //the number of triangle
 			const vt& r, const vt& zbottom, const vt& zpex) {
-		ASSERT(Dim ==3);
+		ASSERT(Dim == 3);
 		Vector<spVer> v_vertex;
 		Vector<spEdg> v_edge;
 		Vector<spFac> v_face;
@@ -177,7 +177,7 @@ public:
 		v_vertex.push_back(pverc);
 		for (uInt i = 0; i < n; i++) {
 			vt x = r * std::cos(i * da);
-			vt y = r * sin(i * da);
+			vt y = r * std::sin(i * da);
 			vt z = zbottom;
 			spVer pv(new Ver(x, y, z));
 			v_vertex.push_back(pv);

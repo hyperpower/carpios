@@ -67,6 +67,10 @@ public:
 		return _lv.size();
 	}
 
+	void push_back(spVer ver){
+		_lv.push_back(ver);
+	}
+
 };
 
 #endif /* LIB_TS_TS_POLYGON_H_ */

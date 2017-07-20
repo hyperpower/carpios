@@ -242,7 +242,7 @@ TEST(AABox, box_vector_vector) {
 	p.add(carpio::PlotlyActor::Triangle(vec2));
 	p.add(carpio::PlotlyActor::TriangleNormal(vec1));
 	p.add(carpio::PlotlyActor::TriangleNormal(vec2));
-	//p.plot();
+	p.plot();
 	std::cout << "end test ===============\n";
 }
 

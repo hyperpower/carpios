@@ -41,21 +41,21 @@ public:
 	typedef List<spSur> list_spSur;
 	static const st Dim = DIM;
 public:
-	list_spEdg segments;
+	list_spEdg _ledges;
 public:
 	Vertex(const base_class& poi) :
-			base_class(poi), segments() {
+			base_class(poi), _ledges() {
 	}
 	Vertex(const TYPE&x, const TYPE& y, const TYPE& z) :
-			base_class(x, y, z), segments() {
+			base_class(x, y, z), _ledges() {
 	}
 
 	inline void attach(spEdg edg) {
-		this->segments.push_back(edg);
+		this->_ledges.push_back(edg);
 	}
 
 	inline bool vertex_is_unattached() {
-		if (segments.empty())
+		if (_ledges.empty())
 			return true;
 		return false;
 	}
@@ -72,16 +72,16 @@ public:
 	void vertex_replace(const Vertex<TYPE, DIM>& with) {
 		return_if_fail(this != &with);
 
-		for (auto iter = segments.begin(); iter != segments.end(); ++iter) {
+		for (auto iter = _ledges.begin(); iter != _ledges.end(); ++iter) {
 			spSeg& s = (*iter);
 			if (s->v1 != with && s->v2 != with)
-				with->segments.push_front(s);
+				with->_ledges.push_front(s);
 			if (s->v1 == this)
 				s->v1 = with;
 			if (s->v2 == this)
 				s->v2 = with;
 		}
-		this->segments.clear();
+		this->_ledges.clear();
 	}
 	/**
 	 * vertices_are_connected:
@@ -91,7 +91,7 @@ public:
 	 * this segment else %NULL.
 	 */
 	spSeg vertices_are_connected(spVer v2) {
-		for (auto iter = this->segments->begin(); iter != this->segments->end();
+		for (auto iter = this->_ledges->begin(); iter != this->_ledges->end();
 				++iter) {
 			spSeg& s = (*iter);
 			if (s->v1 == v2 || s->v2 == v2)
@@ -109,7 +109,7 @@ public:
 	void vertices_from_segments(list_spVer& lpver) const {
 		lpver.clear();
 		std::set<spVer> spver;
-		for (auto iter = segments.begin(); iter != segments.end(); ++iter) {
+		for (auto iter = _ledges.begin(); iter != _ledges.end(); ++iter) {
 			spSeg& s = (*iter);
 			std::pair<typename std::set<spVer>::iterator, bool> ret;
 			ret = spver.insert((*iter)->v1);
@@ -132,7 +132,7 @@ public:
 		} else {
 			std::cout << " )";
 		}
-		std::cout << " -> seg = " << segments.size() << "\n";
+		std::cout << " -> seg = " << _ledges.size() << "\n";
 		std::cout.setf(f);
 	}
 }

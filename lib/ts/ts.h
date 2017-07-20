@@ -11,6 +11,8 @@
 #include "ts_AABBox.h"
 #include "ts_BBTree.h"
 #include "ts_intersection.h"
+#include "ts_operation.h"
+#include "ts_io_ply.h"
 //#include "ts_io.h"
 
 namespace TS{

@@ -187,6 +187,18 @@ public:
 
 };
 
+template<typename TYPE, st DIM>
+std::ostream& operator<<(std::ostream& stream, const Point<TYPE, DIM>& point) {
+	stream << "(";
+	for (st d = 0; d < DIM; ++d) {
+		stream << point[d];
+		if (d != DIM - 1) {
+			stream << ", ";
+		}
+	}
+	stream << ")";
+	return stream;
+}
 
 
 template<class POINT>

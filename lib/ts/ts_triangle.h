@@ -448,52 +448,7 @@ void Triangle<TYPE, DIM>::output_vtk(const String& fn) const {
  */
 
 
-/**
- * gts_triangles_are_compatible:
- * @t1: a #GtsTriangle.
- * @t2: a #GtsTriangle.
- * @e: a #GtsEdge used by both @t1 and @t2.
- *
- * Checks if @t1 and @t2 have compatible orientations i.e. if @t1 and
- * @t2 can be part of the same surface without conflict in the surface
- * normal orientation.
- *
- * Returns: %TRUE if @t1 and @t2 are compatible, %FALSE otherwise.
- */
-template<class TYPE, st DIM>
-bool AreCompatible( //
-		Triangle<TYPE, DIM>* t1,  //
-		Triangle<TYPE, DIM>* t2,  //
-		Edge<TYPE, DIM>* e) {
-	typedef Edge<TYPE, DIM> Edg;
-	typedef std::shared_ptr<Edg> spEdg;
-	spEdg e1(nullptr), e2(nullptr);
 
-	_return_val_if_fail(t1 != nullptr, false);
-	_return_val_if_fail(t2 != nullptr, false);
-	_return_val_if_fail(e != nullptr, false);
-
-	if (t1->e1.get() == e)
-		e1 = t1->e2;
-	else if (t1->e2.get() == e)
-		e1 = t1->e3;
-	else if (t1->e3.get() == e)
-		e1 = t1->e1;
-	else
-		assert(false);
-	if (t2->e1.get() == e)
-		e2 = t2->e2;
-	else if (t2->e2.get() == e)
-		e2 = t2->e3;
-	else if (t2->e3.get() == e)
-		e2 = t2->e1;
-	else
-		assert(false);
-	if (e1->v1 == e2->v1 || e1->v1 == e2->v2 || e1->v2 == e2->v1
-			|| e1->v2 == e2->v2)
-		return false;
-	return true;
-}
 
 }
 #endif /* _TS_TRIANGLE_H_ */
