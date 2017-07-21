@@ -142,9 +142,9 @@ public:
 		typedef std::shared_ptr<Edg> spEdg;
 		spEdg e1(nullptr), e2(nullptr);
 
-		_return_val_if_fail(t1 != nullptr, false);
-		_return_val_if_fail(t2 != nullptr, false);
-		_return_val_if_fail(e != nullptr, false);
+		//_return_val_if_fail(t1 != nullptr, false);
+		//_return_val_if_fail(t2 != nullptr, false);
+		//_return_val_if_fail(e  != nullptr, false);
 
 		if (t1->e1.get() == &e)
 			e1 = t1->e2;

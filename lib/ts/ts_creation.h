@@ -14,6 +14,7 @@
 #include "ts_segment.h"
 #include "ts_edge.h"
 #include "ts_face.h"
+#include "ts_io_ply.h"
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -159,13 +160,6 @@ public:
 		return sur;
 	}
 
-	static spSur FromGtsFile(const std::string& filename) {
-		ASSERT(Dim == 3);
-		spSur psur(new Sur());
-		psur->load_gts_file(filename);
-		return psur;
-	}
-
 	static spSur Cone(uInt n,                           //the number of triangle
 			const vt& r, const vt& zbottom, const vt& zpex) {
 		ASSERT(Dim == 3);
@@ -212,6 +206,67 @@ public:
 		sur->faces.insert(pfac);
 		return sur;
 	}
+
+	static spSur FromGtsFile(const std::string& filename) {
+		ASSERT(Dim == 3);
+		spSur psur(new Sur());
+		psur->load_gts_file(filename);
+		return psur;
+	}
+
+	static spSur FromPlyFile(const std::string& filename) {
+		ASSERT(Dim == 3);
+		std::ifstream ss(filename);
+		// Parse the ASCII header fields
+		PlyFile file(ss);
+
+		std::vector<float> verts;
+		std::vector<uint32_t> faces;
+
+		st vertexCount = file.request_properties_from_element("vertex", { "x",
+				"y", "z" }, verts);
+		st faceCount = file.request_properties_from_element("face", {
+				"vertex_indices" }, faces);
+
+		file.read(ss);
+
+		Vector<spVer> v_vertex;
+		Vector<spEdg> v_edge;
+		Vector<spFac> v_face;
+		st vertsComponent = verts.size() / vertexCount;
+		ASSERT(vertsComponent == 3);
+		for (uInt i = 0; i < verts.size(); i += vertsComponent) {
+			vt x = verts[i];
+			vt y = verts[i + 1];
+			vt z = verts[i + 2];
+			spVer pv(new Ver(x, y, z));
+			v_vertex.push_back(pv);
+		}
+		st faceComponent = faces.size() / faceCount;
+		ASSERT(faceComponent == 3);
+		spSur sur(new Sur);
+		for (uInt i = 0; i < faces.size(); i += faceComponent) {
+			spVer v1 = v_vertex[faces[i]];
+			spVer v2 = v_vertex[faces[i + 1]];
+			spVer v3 = v_vertex[faces[i + 2]];
+			spEdg pe1(new Edg(v1, v2));
+			pe1->attach();
+			v_edge.push_back(pe1);
+			spEdg pe2(new Edg(v2, v3));
+			pe2->attach();
+			v_edge.push_back(pe2);
+			spEdg pe3(new Edg(v3, v1));
+			pe3->attach();
+			v_edge.push_back(pe3);
+			spFac pfac(
+					new Fac(pe1, pe2, pe3,
+							sur.get()));
+			pfac->attach();
+			sur->faces.insert(pfac);
+		}
+		return sur;
+	}
+
 };
 
 }

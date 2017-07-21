@@ -187,9 +187,9 @@ TEST(ply, read) {
 			<< faceCount << " properties)." << std::endl;
 	std::cout << "\tRead " << uvCoords.size() << " total texcoords ("
 			<< faceTexcoordCount << " properties)." << std::endl;
-	for (auto& f : faces){
-		std::cout << f << std::endl;
-	}
+	//for (auto& f : faces){
+	//	std::cout << f << std::endl;
+	//}
 
 	/*
 	 // Fixme - tinyply isn't particularly sensitive to mismatched properties and prefers to crash instead of throw. Use
@@ -212,6 +212,22 @@ TEST(ply, read) {
 	 */
 
 }
+
+TEST(PLY, fromfile) {
+	// read ply file and check the normal directions
+	typedef Float vt;
+	typedef Creation<vt, 3> Cr;
+	auto psur = Cr::FromPlyFile(FILES + "icosahedron_ascii.ply");
+
+	carpio::Plotly p;
+	p.add(carpio::PlotlyActor::Surface(*psur));
+	//p.add(carpio::PlotlyActor::TriangleNormal(*psur));
+	p.plot();
+	std::cout << "end test ===============\n";
+}
+
+
+
 
 }
 

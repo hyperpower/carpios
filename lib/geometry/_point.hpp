@@ -11,7 +11,6 @@ template<typename TYPE, St DIM>
 class Point_: public std::array<TYPE, DIM> {
 public:
 	static const St Dim = DIM;
-	//typedef point__tag self_tag;
 	typedef Point_<TYPE, DIM> Point;
 	typedef St size_type;
 	typedef TYPE Vt;

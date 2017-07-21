@@ -21,17 +21,21 @@
 
 namespace TS {
 
-template<typename T> T endian_swap(const T & v) {
+template<typename T>
+T endian_swap(const T & v) {
 	return v;
 }
-template<> inline uint16_t endian_swap(const uint16_t & v) {
+template<>
+inline uint16_t endian_swap(const uint16_t & v) {
 	return (v << 8) | (v >> 8);
 }
-template<> inline uint32_t endian_swap(const uint32_t & v) {
+template<>
+inline uint32_t endian_swap(const uint32_t & v) {
 	return (v << 24) | ((v << 8) & 0x00ff0000) | ((v >> 8) & 0x0000ff00)
 			| (v >> 24);
 }
-template<> inline uint64_t endian_swap(const uint64_t & v) {
+template<>
+inline uint64_t endian_swap(const uint64_t & v) {
 	return (((v & 0x00000000000000ffLL) << 56)
 			| ((v & 0x000000000000ff00LL) << 40)
 			| ((v & 0x0000000000ff0000LL) << 24)
@@ -41,15 +45,18 @@ template<> inline uint64_t endian_swap(const uint64_t & v) {
 			| ((v & 0x00ff000000000000LL) >> 40)
 			| ((v & 0xff00000000000000LL) >> 56));
 }
-template<> inline int16_t endian_swap(const int16_t & v) {
+template<>
+inline int16_t endian_swap(const int16_t & v) {
 	uint16_t r = endian_swap(*(uint16_t*) &v);
 	return *(int16_t*) &r;
 }
-template<> inline int32_t endian_swap(const int32_t & v) {
+template<>
+inline int32_t endian_swap(const int32_t & v) {
 	uint32_t r = endian_swap(*(uint32_t*) &v);
 	return *(int32_t*) &r;
 }
-template<> inline int64_t endian_swap(const int64_t & v) {
+template<>
+inline int64_t endian_swap(const int64_t & v) {
 	uint64_t r = endian_swap(*(uint64_t*) &v);
 	return *(int64_t*) &r;
 }
@@ -65,7 +72,7 @@ inline double endian_swap_double(const uint64_t & v) {
 struct DataCursor {
 	void * vector;
 	uint8_t * data;
-	size_t  offset;
+	size_t offset;
 	bool realloc = false;
 };
 
@@ -79,14 +86,15 @@ public:
 
 	Type listType, propertyType;
 	bool isList;
-	int  listCount = 0;
+	int listCount = 0;
 	std::string name;
 
-	PlyProperty(std::istream & is): isList(false) {
+	PlyProperty(std::istream & is) :
+			isList(false) {
 		parse_internal(is);
 	}
 	PlyProperty(Type type, const std::string & name) :
-		propertyType(type), isList(false), name(name) {
+			propertyType(type), isList(false), name(name) {
 	}
 	PlyProperty(Type list_type, Type prop_type, const std::string & name,
 			int listCount) :
@@ -393,13 +401,12 @@ public:
 				continue;
 		}
 
-		size_t totalInstanceSize =
-				[&](){
-				size_t t = 0;
-				for (auto c : instanceCounts){
-					t += c;
-				}
-				return t;}() * listCount;
+		size_t totalInstanceSize = [&]() {
+			size_t t = 0;
+			for (auto c : instanceCounts) {
+				t += c;
+			}
+			return t;}() * listCount;
 		source.resize(totalInstanceSize); // this satisfies regular properties; `cursor->realloc` is for list types since tinyply uses single-pass parsing
 		cursor->offset = 0;
 		cursor->vector = &source;
@@ -430,9 +437,9 @@ public:
 					{
 						PlyProperty::Type t = property_type_for_type(source);
 						PlyProperty newProp =
-								(listType == PlyProperty::Type::INVALID) ?
-								PlyProperty(t, key) :
-								PlyProperty(listType, t, key, listCount);
+						(listType == PlyProperty::Type::INVALID) ?
+						PlyProperty(t, key) :
+						PlyProperty(listType, t, key, listCount);
 						userDataTable.insert(
 								std::pair<std::string, std::shared_ptr<DataCursor> >(make_key(e.name, key), cursor));
 						e.properties.push_back(newProp);
@@ -478,10 +485,12 @@ private:
 		if (property.isList) {
 			int listSize;
 			is >> listSize;
-			for (int i = 0; i < listSize; ++i)
+			for (int i = 0; i < listSize; ++i) {
 				is >> skip;
-		} else
+			}
+		} else {
 			is >> skip;
+		}
 	}
 
 	void read_property_binary(PlyProperty::Type t, void * dest,
@@ -697,8 +706,9 @@ private:
 				for (size_t count = 0; count < element.size; ++count) {
 					for (auto & property : element.properties) {
 						//std::cout <<"property : "<< property.name << "\n";
-						if (auto & cursor = userDataTable[make_key(element.name,
-								property.name)]) {
+						auto & cursor = userDataTable[make_key(element.name,
+								property.name)];
+						if (cursor != nullptr) {
 							if (property.isList) {
 								size_t listSize = 0;
 								size_t dummyCount = 0;
@@ -715,8 +725,8 @@ private:
 								}
 								for (size_t i = 0; i < listSize; ++i) {
 									read(property.propertyType,
-											(cursor->data + cursor->offset),
-											cursor->offset, is);
+										(cursor->data + cursor->offset),
+										cursor->offset, is);
 								}
 							} else {
 								read(property.propertyType,
@@ -757,6 +767,7 @@ private:
 			}
 		}
 	}
+
 	void write_binary_internal(std::ostream & os) {
 		isBinary = true;
 		write_header(os);
@@ -788,6 +799,6 @@ private:
 
 };
 
-} // namesapce tinyply
+} // namesapce ts
 
-#endif // tinyply_h
+#endif // ts_io_ply_h

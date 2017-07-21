@@ -109,8 +109,11 @@ public:
 		spVer v2(new Ver(xo, yo + 2. * r, 0.0));
 		spVer v3(new Ver(xo - r * SQRT3, yo - r, 0.0));
 		spEdg e1(new Edg(v1, v2));
+		e1->attach();
 		spEdg e2(new Edg(v2, v3));
+		e2->attach();
 		spEdg e3(new Edg(v3, v1));
+		e3->attach();
 		return spTri(new Tri(e1, e2, e3));
 	}
 
