@@ -1,7 +1,7 @@
 #ifndef _LINE_HPP_
 #define _LINE_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
 #include <array>
 

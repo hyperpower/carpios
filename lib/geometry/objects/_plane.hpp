@@ -1,7 +1,7 @@
 #ifndef _PLANE_HPP_
 #define _PLANE_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
 #include <array>
 

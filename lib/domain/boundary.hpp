@@ -6,7 +6,7 @@
 #include "cell.hpp"
 #include "path.hpp"
 #include "shape.hpp"
-#include "geometry/_line.hpp"
+#include "geometry/geometry.hpp"
 #include <functional>
 #include <map>
 

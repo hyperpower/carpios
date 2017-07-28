@@ -50,6 +50,10 @@ inline Axes ToAxes(const St& i) {
 	return _X_;
 }
 
+//enum Location {
+//	_M_ = 0, _C_ = 1, _P_ = 2,
+//};
+
 }
 
 

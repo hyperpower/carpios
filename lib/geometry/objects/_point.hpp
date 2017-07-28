@@ -1,7 +1,7 @@
 #ifndef _POINT_HPP_
 #define _POINT_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include <array>
 #include <sstream>
 

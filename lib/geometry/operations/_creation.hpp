@@ -1,11 +1,9 @@
 #ifndef _CREATION_HPP_
 #define _CREATION_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include <array>
-#include "_point.hpp"
-#include "_segment.hpp"
-#include "_polygon.hpp"
+#include "../objects/_objects.hpp"
 #include <cmath>
 
 namespace carpio {

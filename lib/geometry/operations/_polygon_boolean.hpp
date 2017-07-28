@@ -8,13 +8,10 @@
 #ifndef _POLYGON_BOOLEAN_HPP_
 #define _POLYGON_BOOLEAN_HPP_
 
-#include "geometry_define.hpp"
-#include "_point.hpp"
-#include "_point_chain.hpp"
-#include "../algebra/array_list.hpp"
-#include "_segment.hpp"
+#include "../geometry_define.hpp"
+#include "../objects/_objects.hpp"
+#include "../../algebra/array_list.hpp"
 #include "_operation.hpp"
-#include "_polygon.hpp"
 #include "_sweep.hpp"
 
 #include <array>

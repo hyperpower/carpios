@@ -1,9 +1,9 @@
 #ifndef _TRIANGLE_HPP_
 #define _TRIANGLE_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
-#include "_operation.hpp"
+#include "../operations/_operation.hpp"
 #include <array>
 #include "math.h"
 namespace carpio {

@@ -1,11 +1,11 @@
 #ifndef _TRI_TRI_INTERSECT_H_
 #define _TRI_TRI_INTERSECT_H_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 
 #include "_tri_tri_intersect_97.hpp"
 #include "_tri_tri_intersect_02.hpp"
-#include "_triangle.hpp"
+#include "../objects/_triangle.hpp"
 
 namespace carpio {
 

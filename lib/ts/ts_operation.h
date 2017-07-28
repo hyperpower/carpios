@@ -111,15 +111,15 @@ public:
 			return false;
 	}
 
-	bool IsCW(const Poi& p1, const Poi& p2, const Poi& p3) {
-		vt tmp;
-		tmp = (p3.y() - p1.y()) * (p2.x() - p1.x())
-				- (p3.x() - p1.x()) * (p2.y() - p1.y());
-		if (tmp > 0)
-			return true;
-		else
-			return false;
-	}
+//	bool IsCW(const Poi& p1, const Poi& p2, const Poi& p3) {
+//		vt tmp;
+//		tmp = (p3.y() - p1.y()) * (p2.x() - p1.x())
+//				- (p3.x() - p1.x()) * (p2.y() - p1.y());
+//		if (tmp > 0)
+//			return true;
+//		else
+//			return false;
+//	}
 
 
 	/**

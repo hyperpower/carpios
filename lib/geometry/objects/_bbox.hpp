@@ -1,9 +1,9 @@
 #ifndef _BBOX_HPP_
 #define _BBOX_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
-#include "_operation.hpp"
+#include "../operations/_operation.hpp"
 #include <array>
 
 namespace carpio {

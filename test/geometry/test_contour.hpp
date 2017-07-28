@@ -8,7 +8,7 @@
 #ifndef _TEST_contour_HPP_
 #define _TEST_contour_HPP_
 #include "gtest/gtest.h"
-#include "geometry/_contour.hpp"
+#include "geometry/geometry.hpp"
 #include "utility/random.h"
 #include "utility/clock.h"
 #include "utility/format.h"
@@ -31,12 +31,12 @@ typedef Polygon_<double> Polygons;
 using namespace std;
 
 
-std::string getexepath()
-{
-  char result[ PATH_MAX ];
-  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
-  return std::string( result, (count > 0) ? count : 0 );
-}
+//inline std::string getexepath()
+//{
+//  char result[ PATH_MAX ];
+//  ssize_t count = readlink( "/proc/self/exe", result, PATH_MAX );
+//  return std::string( result, (count > 0) ? count : 0 );
+//}
 
 TEST(contour, read) {
 	fmt::print("{}", "-------test contour-----------");

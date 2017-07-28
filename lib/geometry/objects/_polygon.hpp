@@ -1,12 +1,12 @@
 #ifndef _POLYGON_HPP_
 #define _POLYGON_HPP_
 
-#include "geometry_define.hpp"
-#include "_operation.hpp"
+#include "../geometry_define.hpp"
+#include "../operations/_operation.hpp"
 #include "_point.hpp"
 #include "_contour.hpp"
 #include "_bbox.hpp"
-#include "../algebra/array_list.hpp"
+//#include "../algebra/array_list.hpp"
 #include "_segment.hpp"
 #include <array>
 #include <vector>

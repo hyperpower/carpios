@@ -3,8 +3,7 @@
 
 #include <io/plotly.h>
 #include "algebra/array_list.hpp"
-#include "geometry/_triangle.hpp"
-#include "geometry/_point.hpp"
+#include "geometry/geometry.hpp"
 
 #include "ts/ts.h"
 

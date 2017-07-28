@@ -13,7 +13,7 @@
 #include "ts_vertex.h"
 #include "ts_segment.h"
 #include "ts_face.h"
-#include "geometry/_tri_tri_intersect.hpp"
+#include "geometry/geometry.hpp"
 //#include "ts_tri_moller.h"
 
 namespace TS {

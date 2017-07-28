@@ -25,7 +25,7 @@ using namespace std;
 //#include "../test/ts/test_surface_constructor_3d.hpp"
 //#include "../test/ts/test_AABBox.h"
 //#include "../test/ts/test_overlap.h"
-#include "../test/ts/test_ply.h"
+//#include "../test/ts/test_ply.h"
 //#include "../test/ts/test_delaunay.h"
 
 //#include "../test/structure/_test_s_poisson.hpp"
@@ -38,6 +38,7 @@ using namespace std;
 //#include "../test/geometry/test_triangle.hpp"
 //#include "../test/geometry/test_polygon.hpp"
 //#include "../test/geometry/test_contour.hpp"
+#include "../test/geometry/test_polygon_partition.hpp"
 //#include "../test/io/_test_plotly.hpp"
 
 //#include "../test/parallel/test_mpi.hpp"

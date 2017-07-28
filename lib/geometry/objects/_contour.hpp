@@ -8,10 +8,10 @@
 #ifndef _CONTOUR_HPP_
 #define _CONTOUR_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
+#include "../operations/_operation.hpp"
 #include "_point.hpp"
-#include "_operation.hpp"
-#include "algebra/array_list.hpp"
+//#include "algebra/array_list.hpp"
 #include <array>
 #include <vector>
 #include <limits>
@@ -20,6 +20,9 @@
 #include <algorithm>
 
 namespace carpio {
+
+template<typename TYPE>
+class Clip_;
 
 template<typename TYPE, St DIM>
 class Operation_;
@@ -39,7 +42,7 @@ public:
 	typedef Segment_<TYPE, Dim>& ref_Segment;
 	typedef TYPE Vt;
 
-	typedef ArrayListT<Point> ArrP;
+	//typedef ArrayListT<Point> ArrP;
 
 	typedef Operation_<TYPE, Dim> Op;
 
@@ -61,7 +64,7 @@ public:
 					false) {
 	}
 
-	Contour_(const std::vector<Point>& ver, const std::vector<St>& holes,
+	Contour_(const std::vector<Point>& ver, const std::vector<St>& holes = std::vector<St>(),
 			bool exter = true, bool precomputedcc = false, bool cc = false) :
 
 			_external(exter), _precomputedCC(precomputedcc), _CC(cc) {

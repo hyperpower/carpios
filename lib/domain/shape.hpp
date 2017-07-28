@@ -95,14 +95,14 @@ public:
 	/*
 	 * set
 	 */
-	void set(typename S2D::ArrP& arrp) {
-		ASSERT(Dim == 2);
-		if (_ps2d != nullptr) {
-			delete _ps2d;
-			_ps2d = nullptr;
-		}
-		_ps2d = new S2D(arrp);
-	}
+	//void set(typename S2D::ArrP& arrp) {
+	//	ASSERT(Dim == 2);
+	//	if (_ps2d != nullptr) {
+	//		delete _ps2d;
+	//		_ps2d = nullptr;
+	//	}
+	//	_ps2d = new S2D(arrp);
+	//}
 	void set(const S2D& poly) {
 		ASSERT(Dim == 2);
 		if (_ps2d != nullptr) {

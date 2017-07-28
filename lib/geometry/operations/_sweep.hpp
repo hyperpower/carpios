@@ -8,7 +8,7 @@
 #ifndef _SWEEP_HPP_
 #define _SWEEP_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_operation.hpp"
 #include "_polygon_boolean.hpp"
 #include <array>

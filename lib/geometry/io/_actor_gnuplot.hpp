@@ -8,12 +8,10 @@
 #ifndef _ACTOR_GNUPLOT_HPP_
 #define _ACTOR_GNUPLOT_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include <array>
-#include "_point.hpp"
-#include "_segment.hpp"
-#include "_polygon.hpp"
-#include "../io/gnuplot.h"
+#include "../objects/_objects.hpp"
+#include "../../io/gnuplot.h"
 #include <memory>
 #include <cmath>
 
@@ -71,4 +69,4 @@ public:
 };
 }
 
-#endif /* LIB_GEOMETRY__ACTOR_GNUPLOT_HPP_ */
+#endif /* _ACTOR_GNUPLOT_HPP_ */

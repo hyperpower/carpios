@@ -1,12 +1,10 @@
 #ifndef _OPERATION_HPP_
 #define _OPERATION_HPP_
 
-#include "geometry_define.hpp"
 #include <array>
-#include "_point.hpp"
-#include "_segment.hpp"
-#include "_polygon.hpp"
 #include <cmath>
+#include "../geometry_define.hpp"
+#include "../objects/_objects.hpp"
 
 namespace carpio {
 
@@ -32,26 +30,28 @@ public:
 	 // @param   p2 Point1
 	 // @return     Distance
 	 */
-	static double Distance(const Point& p1, const Point& p2) {
+	static double Distance2(const Point& p1, const Point& p2) {
 		if (Dim == 1) {
 			double dis = p1[0] - p2[0];
 			return std::abs(dis);
 		}
 		if (Dim == 2) {
-			return sqrt(
-					double(
-							(p1.x() - p2.x()) * (p1.x() - p2.x())
-									+ (p1.y() - p2.y()) * (p1.y() - p2.y())));
+			return double(
+					(p1.x() - p2.x()) * (p1.x() - p2.x())
+							+ (p1.y() - p2.y()) * (p1.y() - p2.y()));
 		}
 		if (Dim == 3) {
-			return sqrt(
-					double(
-							(p1.x() - p2.x()) * (p1.x() - p2.x())
-									+ (p1.y() - p2.y()) * (p1.y() - p2.y())
-									+ (p1.z() - p2.z()) * (p1.z() - p2.z())));
+			return double(
+					(p1.x() - p2.x()) * (p1.x() - p2.x())
+							+ (p1.y() - p2.y()) * (p1.y() - p2.y())
+							+ (p1.z() - p2.z()) * (p1.z() - p2.z()));
 		}
 		SHOULD_NOT_REACH;
 		return 0.0;
+	}
+
+	static double Distance(const Point& p1, const Point& p2) {
+		return sqrt(Distance2(p1, p2));
 	}
 
 	//===============================================
@@ -78,6 +78,23 @@ public:
 		return (p0.x() - p2.x()) * (p1.y() - p2.y())
 				- (p1.x() - p2.x()) * (p0.y() - p2.y());
 	}
+
+	static bool IsCCW(const Point& p0, const Point& p1, const Point& p2) {
+		double tmp = SignedArea(p0, p1, p2);
+		if (tmp > 0)
+			return true;
+		else
+			return false;
+	}
+
+	static bool IsCW(const Point& p0, const Point& p1, const Point& p2) {
+		double tmp = SignedArea(p0, p1, p2);
+		if (tmp < 0)
+			return true;
+		else
+			return false;
+	}
+
 
 	/** Signed area of the triangle ( (0,0), p1, p2) */
 	static inline double SignedArea(const Point& p1, const Point& p2) {
@@ -193,8 +210,7 @@ public:
 	// --------|------|--------|-----|---------
 	//        u0     v0        u1   v1
 	//               w[0]      w[1]
-	static int FindIntersection (Vt u0, Vt u1, Vt v0, Vt v1, Vt w[2])
-	{
+	static int FindIntersection(Vt u0, Vt u1, Vt v0, Vt v1, Vt w[2]) {
 		if ((u1 < v0) || (u0 > v1))
 			return 0;
 		if (u1 > v0) {
@@ -214,17 +230,16 @@ public:
 		}
 	}
 
-
 	// Find intersection on 2d
-	static int FindIntersection (const Segment& seg0, const Segment& seg1, Point& pi0, Point& pi1)
-	{
+	static int FindIntersection(const Segment& seg0, const Segment& seg1,
+			Point& pi0, Point& pi1) {
 		ASSERT(Dim == 2);
 		const Point& p0 = seg0.ps();
-		Point d0 (seg0.pex() - p0.x(), seg0.pey() - p0.y());
-		const Point& p1 = seg1.ps ();
-		Point d1 (seg1.pex() - p1.x(), seg1.pey() - p1.y());
+		Point d0(seg0.pex() - p0.x(), seg0.pey() - p0.y());
+		const Point& p1 = seg1.ps();
+		Point d1(seg1.pex() - p1.x(), seg1.pey() - p1.y());
 		Vt sqrEpsilon = 1e-8; // it was 0.001 before
-		Point E (p1.x() - p0.x(), p1.y() - p0.y());
+		Point E(p1.x() - p0.x(), p1.y() - p0.y());
 		Vt kross = d0.x() * d1.y() - d0.y() * d1.x();
 		Vt sqrKross = kross * kross;
 		Vt sqrLen0 = d0.x() * d0.x() + d0.y() * d0.y();
@@ -243,10 +258,14 @@ public:
 			// intersection of lines is a point an each segment
 			pi0.x() = p0.x() + s * d0.x();
 			pi0.y() = p0.y() + s * d0.y();
-			if (pi0.dist(seg0.ps()) < 1e-9) pi0 = seg0.ps();
-			if (pi0.dist(seg0.pe()) < 1e-9) pi0 = seg0.pe();
-			if (pi0.dist(seg1.ps()) < 1e-9) pi0 = seg1.ps();
-			if (pi0.dist(seg1.pe()) < 1e-9) pi0 = seg1.pe();
+			if (pi0.dist(seg0.ps()) < 1e-9)
+				pi0 = seg0.ps();
+			if (pi0.dist(seg0.pe()) < 1e-9)
+				pi0 = seg0.pe();
+			if (pi0.dist(seg1.ps()) < 1e-9)
+				pi0 = seg1.ps();
+			if (pi0.dist(seg1.pe()) < 1e-9)
+				pi0 = seg1.pe();
 			return 1;
 		}
 
@@ -264,18 +283,22 @@ public:
 		Vt s0 = (d0.x() * E.x() + d0.y() * E.y()) / sqrLen0;
 		// s1 = s0 + Dot (D0, D1) * sqrLen0
 		Vt s1 = s0 + (d0.x() * d1.x() + d0.y() * d1.y()) / sqrLen0;
-		Vt smin = std::min (s0, s1);
-		Vt smax = std::max (s0, s1);
+		Vt smin = std::min(s0, s1);
+		Vt smax = std::max(s0, s1);
 		Vt w[2];
-		int imax = FindIntersection (0.0, 1.0, smin, smax, w);
+		int imax = FindIntersection(0.0, 1.0, smin, smax, w);
 
 		if (imax > 0) {
 			pi0.x() = p0.x() + w[0] * d0.x();
 			pi0.y() = p0.y() + w[0] * d0.y();
-			if (pi0.dist (seg0.ps()) < 1e-9) pi0 = seg0.ps();
-			if (pi0.dist (seg0.pe()) < 1e-9) pi0 = seg0.pe();
-			if (pi0.dist (seg1.ps()) < 1e-9) pi0 = seg1.ps();
-			if (pi0.dist (seg1.pe()) < 1e-9) pi0 = seg1.pe();
+			if (pi0.dist(seg0.ps()) < 1e-9)
+				pi0 = seg0.ps();
+			if (pi0.dist(seg0.pe()) < 1e-9)
+				pi0 = seg0.pe();
+			if (pi0.dist(seg1.ps()) < 1e-9)
+				pi0 = seg1.ps();
+			if (pi0.dist(seg1.pe()) < 1e-9)
+				pi0 = seg1.pe();
 			if (imax > 1) {
 				pi1.x() = p0.x() + w[1] * d0.x();
 				pi1.y() = p0.y() + w[1] * d0.y();
@@ -364,8 +387,8 @@ template<typename TYPE>
 Point_<TYPE, 2> CalIntersect(const Segment_<TYPE, 2> &s1,
 		const Segment_<TYPE, 2> &s2) {
 	ASSERT(IsIntersect(s1, s2));
-	Float x1,x2,y1,y2;
-	Float x3,x4,y3,y4;
+	Float x1, x2, y1, y2;
+	Float x3, x4, y3, y4;
 	Float resxx;
 	Float resyy;
 	x1 = Float(s1.psx());

@@ -8,10 +8,10 @@
 #ifndef _POINT_CHAIN_HPP_
 #define _POINT_CHAIN_HPP_
 
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
 #include "_contour.hpp"
-#include "../algebra/array_list.hpp"
+#include "../../algebra/array_list.hpp"
 #include "_segment.hpp"
 #include "_polygon.hpp"
 #include <array>

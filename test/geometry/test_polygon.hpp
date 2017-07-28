@@ -141,7 +141,7 @@ TEST(Polygon, trivial1) {
 TEST(Polygon, read) {
 	//std::cout<< " path : " << argc << std::endl;
 	string workdir =
-			"/home/zhou/git/gitCarpios/test/input_files/polygons/samples";
+			"/home/zhou/git-workspace/carpios/test/input_files/polygons/samples";
 	//string workdir = "./";
 	std::string fn = "/polygonwithholes";
 	Polygon p(workdir + fn);
@@ -220,7 +220,7 @@ TEST(Polygon, line_touch) {
 	if (res.ncontours() > 0) {
 		gp.add(GpActor::Lines(res.contour(0), 0, 2));
 	}
-	gp.plot();
+	//gp.plot();
 }
 
 TEST(Polygon, point_line_touch) {
@@ -246,7 +246,7 @@ TEST(Polygon, point_line_touch) {
 	if (res.ncontours() > 0) {
 		gp.add(GpActor::Lines(res.contour(0), 0, 2));
 	}
-	gp.plot();
+	//gp.plot();
 }
 
 

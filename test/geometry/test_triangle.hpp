@@ -2,8 +2,7 @@
 #define __TEST_TRIANGLE_HPP_
 
 #include "gtest/gtest.h"
-#include "geometry/_triangle.hpp"
-#include "geometry/_tri_tri_intersect.hpp"
+#include "geometry/geometry.hpp"
 #include "utility/random.h"
 #include "utility/clock.h"
 

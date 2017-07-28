@@ -1,8 +1,7 @@
 #ifndef _SEGMENT_HPP_
 #define _SEGMENT_HPP_
 
-#include "../type_define.hpp"
-#include "geometry_define.hpp"
+#include "../geometry_define.hpp"
 #include "_point.hpp"
 #include <array>
 #include "math.h"
