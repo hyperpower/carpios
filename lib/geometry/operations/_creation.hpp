@@ -4,6 +4,7 @@
 #include "../geometry_define.hpp"
 #include <array>
 #include "../objects/_objects.hpp"
+#include "../../utility/random.h"
 #include <cmath>
 
 namespace carpio {
@@ -19,10 +20,11 @@ public:
 	typedef Segment_<TYPE, DIM> Segment;
 	typedef Segment_<TYPE, DIM>& ref_Segment;
 	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
+	typedef PointChain_<TYPE, DIM> PointChain;
 
 	typedef Polygon_<TYPE> Polygon;
 	typedef Contour_<TYPE> Contour;
-public:
+	public:
 	//static void FromFile(Polygon& res, const std::string& filename) {
 	//	Polygon(filename);
 	//}
@@ -55,6 +57,27 @@ public:
 		vers.push_back(p3);
 		Contour con(vers, holes, true, false, false);
 		res.push_back(con);
+	}
+
+	static void RandomSimplePointChain(PointChain& pc, int num,
+			const Point& min = Point(-10, -10, -10),
+			const Point& max = Point(10, 10, 10)) {
+		pc.clear();
+		for (int i = 0; i < num; i++) {
+			Point p(Random::nextDouble(min[_X_], max[_X_]),
+					Random::nextDouble(min[_Y_], max[_Y_]),
+					Random::nextDouble(min[_Z_], max[_Z_]));
+			pc.push_back(p);
+			if(pc.size()>3){
+				// check simple
+				if(!(pc.is_simple())){
+					pc.pop_back();
+					--i;
+				}
+			}
+			//std::cout<< "i = " << i << "p = "<< p <<std::endl;
+		}
+
 	}
 
 };

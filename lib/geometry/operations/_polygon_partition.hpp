@@ -39,9 +39,11 @@ template<class TYPE, St DIM>
 class PolygonPartition_ {
 public:
 	static const St Dim = DIM;
+	typedef TYPE Vt;
 	typedef Polygon_<TYPE> Polygon;
 	typedef Contour_<TYPE> Contour;
 	typedef Point_<TYPE, Dim> Point;
+	typedef PointChain_<TYPE, Dim> PointChain;
 	typedef Segment_<TYPE, Dim> Segment;
 	typedef Operation_<TYPE, Dim> Op;
 	typedef Connector_<TYPE, Dim> Connector;
@@ -57,7 +59,9 @@ public:
 		PartitionVertex *previous;
 		PartitionVertex *next;
 
-		PartitionVertex();
+		PartitionVertex() :
+				previous(nullptr), next(nullptr) {
+		}
 	};
 
 	struct MonotoneVertex {
@@ -68,7 +72,7 @@ public:
 
 	class VertexSorter {
 		MonotoneVertex *vertices;
-	public:
+		public:
 		VertexSorter(MonotoneVertex *v) :
 				vertices(v) {
 		}
@@ -108,19 +112,19 @@ public:
 
 	//standard helper functions
 	// ------------------|
-	static bool IsConvex(Point& p1, Point& p2, Point& p3) {
+	static bool IsConvex(const Point& p1, const Point& p2, const Point& p3) { // this function should be change to CCW
 		// p0 = p3
 		// p1 = p2
-		// Op::IsCCW(p2, p3, p1);
-		tppl_float tmp;
-		tmp = (p3.y() - p1.y()) * (p2.x() - p1.x())
-				- (p3.x() - p1.x()) * (p2.y() - p1.y());
-		if (tmp > 0) {
-			return true;
-		} else {
-			return false;
-
-		}
+		return Op::IsCCW(p1, p2, p3);
+//		tppl_float tmp;
+//		tmp = (p3.y() - p1.y()) * (p2.x() - p1.x())
+//				- (p3.x() - p1.x()) * (p2.y() - p1.y());
+//		if (tmp > 0) {
+//			return true;
+//		} else {
+//			return false;
+//
+//		}
 	}
 	bool IsReflex(Point& p1, Point& p2, Point& p3) {
 		tppl_float tmp;
@@ -131,15 +135,15 @@ public:
 		else
 			return 0;
 	}
-	bool IsInside(Point& p1, Point& p2, Point& p3, Point &p) {
-		if (IsConvex(p1, p, p2))
-			return false;
-		if (IsConvex(p2, p, p3))
-			return false;
-		if (IsConvex(p3, p, p1))
-			return false;
-		return true;
-	}
+//	static bool IsInOn(Point& p1, Point& p2, Point& p3, Point &p) {
+//		if (IsConvex(p1, p, p2))
+//			return false;
+//		if (IsConvex(p2, p, p3))
+//			return false;
+//		if (IsConvex(p3, p, p1))
+//			return false;
+//		return true;
+//	}
 
 	bool InCone(Point &p1, Point &p2, Point &p3, Point &p) {
 		bool convex;
@@ -170,60 +174,53 @@ public:
 		return InCone(p1, p2, p3, p);
 	}
 
-	int Intersects(Point &p11, Point &p12, Point &p21, Point &p22) {
-		if ((p11.x() == p21.x()) && (p11.y() == p21.y()))
-			return 0;
-		if ((p11.x() == p22.x()) && (p11.y() == p22.y()))
-			return 0;
-		if ((p12.x() == p21.x()) && (p12.y() == p21.y()))
-			return 0;
-		if ((p12.x() == p22.x()) && (p12.y() == p22.y()))
-			return 0;
+	static bool IsIntersect(Point &p11, Point &p12, Point &p21, Point &p22) {
+		// same    0
+		// touch   1
+		// overlap 1
+		return Op::IsSegmentIntersect(p11, p12, p21, p22,
+				INTERSECT_NORMAL
+						| INTERSECT_POINT_POINT
+						| INTERSECT_POINT_SEGMENT
+						| INTERSECT_POINT_SEGMENT_2);
 
-		Point v1ort, v2ort, v;
-		tppl_float dot11, dot12, dot21, dot22;
-
-		v1ort.x() = p12.y() - p11.y();
-		v1ort.y() = p11.x() - p12.x();
-
-		v2ort.x() = p22.y() - p21.y();
-		v2ort.y() = p21.x() - p22.x();
-
-		v = p21 - p11;
-		dot21 = v.x() * v1ort.x() + v.y() * v1ort.y();
-		v = p22 - p11;
-		dot22 = v.x() * v1ort.x() + v.y() * v1ort.y();
-
-		v = p11 - p21;
-		dot11 = v.x() * v2ort.x() + v.y() * v2ort.y();
-		v = p12 - p21;
-		dot12 = v.x() * v2ort.x() + v.y() * v2ort.y();
-
-		if (dot11 * dot12 > 0)
-			return 0;
-		if (dot21 * dot22 > 0)
-			return 0;
-
-		return 1;
+//		if ((p11.x() == p21.x()) && (p11.y() == p21.y()))
+//			return 0;
+//		if ((p11.x() == p22.x()) && (p11.y() == p22.y()))
+//			return 0;
+//		if ((p12.x() == p21.x()) && (p12.y() == p21.y()))
+//			return 0;
+//		if ((p12.x() == p22.x()) && (p12.y() == p22.y()))
+//			return 0;
+//
+//		Point v1ort, v2ort, v;
+//		tppl_float dot11, dot12, dot21, dot22;
+//
+//		v1ort.x() = p12.y() - p11.y();
+//		v1ort.y() = p11.x() - p12.x();
+//
+//		v2ort.x() = p22.y() - p21.y();
+//		v2ort.y() = p21.x() - p22.x();
+//
+//		v = p21 - p11;
+//		dot21 = v.x() * v1ort.x() + v.y() * v1ort.y();
+//		v = p22 - p11;
+//		dot22 = v.x() * v1ort.x() + v.y() * v1ort.y();
+//
+//		v = p11 - p21;
+//		dot11 = v.x() * v2ort.x() + v.y() * v2ort.y();
+//		v = p12 - p21;
+//		dot12 = v.x() * v2ort.x() + v.y() * v2ort.y();
+//
+//		if (dot11 * dot12 > 0)
+//			return 0;
+//		if (dot21 * dot22 > 0)
+//			return 0;
+//
+//		return 1;
 	}
 
-	Point Normalize(const Point &p) {
-		Point r;
-		tppl_float n = sqrt(p.x() * p.x() + p.y() * p.y());
-		if (n != 0) {
-			r = p / n;
-		} else {
-			r.x() = 0;
-			r.y() = 0;
-		}
-		return r;
-	}
-	tppl_float Distance(const Point &p1, const Point &p2) {
-		tppl_float dx, dy;
-		dx = p2.x() - p1.x();
-		dy = p2.y() - p1.y();
-		return (sqrt(dx * dx + dy * dy));
-	}
+
 
 	//helper functions for Triangulate_EC
 	void UpdateVertexReflexity(PartitionVertex *v) {
@@ -232,10 +229,12 @@ public:
 		v3 = v->next;
 		v->isConvex = !IsReflex(v1->p, v->p, v3->p);
 	}
-	void UpdateVertex(PartitionVertex *v, PartitionVertex *vertices,
+
+	static void UpdateVertex(
+			PartitionVertex *v,
+			PartitionVertex *vertices,
 			long numvertices) {
 
-		long i;
 		PartitionVertex *v1 = nullptr, *v3 = nullptr;
 		Point vec1, vec3;
 
@@ -244,23 +243,21 @@ public:
 
 		v->isConvex = IsConvex(v1->p, v->p, v3->p);
 
-		vec1 = Normalize(v1->p - v->p);
-		vec3 = Normalize(v3->p - v->p);
+		vec1 = Op::Normalize(v1->p - v->p);
+		vec3 = Op::Normalize(v3->p - v->p);
 		v->angle = vec1.x() * vec3.x() + vec1.y() * vec3.y();
 
 		if (v->isConvex) {
 			v->isEar = true;
-			for (i = 0; i < numvertices; i++) {
-				if ((vertices[i].p.x() == v->p.x())
-						&& (vertices[i].p.y() == v->p.y()))
+			for (int i = 0; i < numvertices; i++) {
+				if (vertices[i].p == v->p)
 					continue;
-				if ((vertices[i].p.x() == v1->p.x())
-						&& (vertices[i].p.y() == v1->p.y()))
+				if (vertices[i].p == v1->p)
 					continue;
-				if ((vertices[i].p.x() == v3->p.x())
-						&& (vertices[i].p.y() == v3->p.y()))
+				if (vertices[i].p == v3->p)
 					continue;
-				if (IsInside(v1->p, v->p, v3->p, vertices[i].p)) {
+
+				if (Op::IsInOn(v1->p, v->p, v3->p, vertices[i].p)) {
 					v->isEar = false;
 					break;
 				}
@@ -269,6 +266,7 @@ public:
 			v->isEar = false;
 		}
 	}
+
 
 	//helper functions for ConvexPartition_OPT
 	void UpdateState(long a, long b, long w, long i, long j,
@@ -280,13 +278,42 @@ public:
 
 	//helper functions for MonotonePartition
 	bool Below(Point &p1, Point &p2);
-//	void AddDiagonal(MonotoneVertex *vertices, long *numvertices, long index1,
+	//	void AddDiagonal(MonotoneVertex *vertices, long *numvertices, long index1,
 //			long index2, char *vertextypes,
 //			std::set<ScanLineEdge>::iterator *edgeTreeIterators,
 //			std::set<ScanLineEdge> *edgeTree, long *helpers);
 
 	//triangulates a monotone polygon, used in Triangulate_MONO
 	int TriangulateMonotone(Contour *inPoly, std::list<Contour> *triangles);
+
+	// helper function
+	// copy vertices into PartitionVertex
+	static PartitionVertex* NewPartitionVertex(const PointChain& pc) {
+		ASSERT(pc.size() >= 3);
+
+		long numvertices = pc.size();
+//		std::cout << "d size = " << numvertices <<std::endl;
+		PartitionVertex* vertices = new PartitionVertex[numvertices];
+		long i = 0;
+		for (auto& point : pc) {
+
+			vertices[i].isActive = true;
+			vertices[i].p = point;
+			if (i == (numvertices - 1)) { // last one
+				vertices[i].next = &(vertices[0]);
+			} else {
+				vertices[i].next = &(vertices[i + 1]);
+			}
+			if (i == 0) {                 //first one
+				vertices[i].previous = &(vertices[numvertices - 1]);
+			} else {
+				vertices[i].previous = &(vertices[i - 1]);
+			}
+//			std::cout << "i = " << i << "  " << vertices[i].p << std::endl;
+			i++;
+		}
+		return vertices;
+	}
 
 public:
 
@@ -310,43 +337,36 @@ public:
 	//          vertices have to be in counter-clockwise order
 	//   triangles : a list of triangles (result)
 	//returns 1 on success, 0 on failure
-	int Triangulate_EC(Contour *poly, std::list<Contour> *triangles) {
+	static int EerClipping(const PointChain& poly,
+			std::list<PointChain>& triangles) {
 		long numvertices;
-		PartitionVertex *vertices = NULL;
-		PartitionVertex *ear = NULL;
+		PartitionVertex *vertices = nullptr;
+		PartitionVertex *ear = nullptr;
 		Contour triangle;
 		long i, j;
 		bool earfound;
 
-		if (poly->GetNumPoints() < 3)
+		/// if the vertices is less than 3
+		/// return
+		if (poly.size() < 3)
 			return 0;
-		if (poly->GetNumPoints() == 3) {
-			triangles->push_back(*poly);
+		if (poly.size() == 3) {
+			triangles.push_back(poly);
 			return 1;
 		}
 
-		numvertices = poly->GetNumPoints();
-
-		vertices = new PartitionVertex[numvertices];
+		/// copy vertices into PartitionVertex
+		numvertices = poly.size();
+		vertices = NewPartitionVertex(poly);
+		// update vertices
 		for (i = 0; i < numvertices; i++) {
-			vertices[i].isActive = true;
-			vertices[i].p = poly->GetPoint(i);
-			if (i == (numvertices - 1))
-				vertices[i].next = &(vertices[0]);
-			else
-				vertices[i].next = &(vertices[i + 1]);
-			if (i == 0)
-				vertices[i].previous = &(vertices[numvertices - 1]);
-			else
-				vertices[i].previous = &(vertices[i - 1]);
+			UpdateVertex(&(vertices[i]), vertices, numvertices);
 		}
-		for (i = 0; i < numvertices; i++) {
-			UpdateVertex(&vertices[i], vertices, numvertices);
-		}
+//		std::cout << " --------- \n";
 
 		for (i = 0; i < numvertices - 3; i++) {
 			earfound = false;
-			//find the most extruded ear
+			/// find the most extruded ear
 			for (j = 0; j < numvertices; j++) {
 				if (!vertices[j].isActive)
 					continue;
@@ -361,13 +381,20 @@ public:
 					}
 				}
 			}
+//			std::cout << "ear : " << ear->p << std::endl;
 			if (!earfound) {
 				delete[] vertices;
 				return 0;
 			}
 
-			triangle.Triangle(ear->previous->p, ear->p, ear->next->p);
-			triangles->push_back(triangle);
+			triangles.push_back(PointChain(
+					ear->previous->p,
+					ear->p,
+					ear->next->p)
+					);
+//			std::cout << "T : "<< ear->previous->p << std::endl;
+//			std::cout << "  : "<< ear->p << std::endl;
+//			std::cout << "  : "<< ear->next->p << std::endl;
 
 			ear->isActive = false;
 			ear->previous->next = ear->next;
@@ -381,9 +408,11 @@ public:
 		}
 		for (i = 0; i < numvertices; i++) {
 			if (vertices[i].isActive) {
-				triangle.Triangle(vertices[i].previous->p, vertices[i].p,
-						vertices[i].next->p);
-				triangles->push_back(triangle);
+				triangles.push_back(PointChain(
+						vertices[i].previous->p,
+						vertices[i].p,
+						vertices[i].next->p)
+						);
 				break;
 			}
 		}
@@ -403,8 +432,19 @@ public:
 	//             vertices of all hole polys have to be in clockwise order
 	//   triangles : a list of triangles (result)
 	//returns 1 on success, 0 on failure
-	int Triangulate_EC(std::list<Contour> *inpolys,
-			std::list<Contour> *triangles);
+	int Triangulate_EC(std::list<PointChain> *inpolys,
+			std::list<PointChain> *triangles) {
+		std::list<PointChain> outpolys;
+		typename std::list<PointChain>::iterator iter;
+
+		if (!RemoveHoles(inpolys, &outpolys))
+			return 0;
+		for (iter = outpolys.begin(); iter != outpolys.end(); iter++) {
+			if (!Triangulate_EC(&(*iter), triangles))
+				return 0;
+		}
+		return 1;
+	}
 
 	//creates an optimal polygon triangulation in terms of minimal edge length
 	//time complexity: O(n^3), n is the number of vertices

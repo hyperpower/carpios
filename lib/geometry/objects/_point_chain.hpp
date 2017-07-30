@@ -11,6 +11,7 @@
 #include "../geometry_define.hpp"
 #include "_point.hpp"
 #include "_contour.hpp"
+#include "../operations/_operation.hpp"
 #include "../../algebra/array_list.hpp"
 #include "_segment.hpp"
 #include "_polygon.hpp"
@@ -35,7 +36,9 @@ public:
 	typedef PointChain_<TYPE, DIM>& PointChain;
 	typedef TYPE vt;
 	typedef typename std::list<Point>::iterator iterator;
-protected:
+	typedef typename std::list<Point>::const_iterator const_iterator;
+	typedef Operation_<TYPE, DIM> Op;
+	protected:
 	/** Linked point chain */
 	std::list<Point> _lpoints;
 	bool _closed; // is the chain closed, that is, is the first point is linked with the last one?
@@ -43,6 +46,31 @@ public:
 	PointChain_() :
 			_lpoints(), _closed(false) {
 	}
+	PointChain_(const Point& p1) :
+			_closed(false) {
+		_lpoints.push_back(p1);
+	}
+	PointChain_(const Point& p1, const Point& p2) :
+			_closed(false) {
+		_lpoints.push_back(p1);
+		_lpoints.push_back(p2);
+	}
+	PointChain_(const Point& p1, const Point& p2, const Point& p3, bool close =
+			true) :
+			_closed(close) {
+		_lpoints.push_back(p1);
+		_lpoints.push_back(p2);
+		_lpoints.push_back(p3);
+	}
+	PointChain_(const Point& p1, const Point& p2, const Point& p3,
+			const Point& p4, bool close = true) :
+			_closed(close) {
+		_lpoints.push_back(p1);
+		_lpoints.push_back(p2);
+		_lpoints.push_back(p3);
+		_lpoints.push_back(p4);
+	}
+
 	void init(const Segment& s) {
 		_lpoints.push_back(s.ps());
 		_lpoints.push_back(s.pe());
@@ -103,8 +131,14 @@ public:
 		}
 		return false;
 	}
+	void set_close() {
+		_closed = true;
+	}
 	bool closed() const {
 		return _closed;
+	}
+	bool empty() const {
+		return _lpoints.empty();
 	}
 	iterator begin() {
 		return _lpoints.begin();
@@ -112,13 +146,58 @@ public:
 	iterator end() {
 		return _lpoints.end();
 	}
+
+	const_iterator begin() const {
+		return _lpoints.begin();
+	}
+	const_iterator end() const {
+		return _lpoints.end();
+	}
+
+	void push_back(const Point& p) {
+		_lpoints.push_back(p);
+	}
+	void pop_back() {
+		_lpoints.pop_back();
+	}
 	void clear() {
 		_lpoints.clear();
 	}
 	unsigned int size() const {
 		return _lpoints.size();
 	}
-};
+
+	bool is_simple() const {
+		return Op::IsSimple(_lpoints.begin(), _lpoints.end(), closed());
+	}
+
+	double perimeter() const {
+		if (empty()) {
+			return 0;
+		}
+		double res = 0;
+		const_iterator iter_end = std::prev(_lpoints.end(), 1);
+		for (const_iterator iter = _lpoints.begin();
+				iter != iter_end; ++iter) {
+			const_iterator iter1 = std::next(iter);
+			res += Op::Distance(*iter, *iter1);
+		}
+		if (closed()) {
+			res += Op::Distance(*iter_end, *(_lpoints.begin()));
+		}
+		return res;
+	}
+
+	void show() const {
+		int count = 0;
+		for (auto& p : _lpoints) {
+			std::cout << "i = " << count << " " << p << std::endl;
+			count++;
+		}
+	}
+
+}
+;
 
 template<class TYPE, St DIM>
 class Connector_ {
@@ -135,10 +214,10 @@ public:
 	typedef PointChain_<TYPE, DIM> PointChain;
 	typedef Contour_<TYPE> Contour;
 	typedef typename std::list<PointChain>::iterator iterator;
-protected:
+	protected:
 	std::list<PointChain> _lopen;
 	std::list<PointChain> _lclosed;
-public:
+	public:
 	Connector_() :
 			_lopen(), _lclosed() {
 	}

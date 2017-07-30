@@ -82,7 +82,7 @@ public:
 	 */
 	inline St size_vertexs() const {
 		ASSERT(Dim == 2);
-		return _ps2d->size_vertexs();
+		return _ps2d->size_vertices();
 	}
 	typename S2D::const_ref_Point v(St i) const {
 		ASSERT(Dim == 2);

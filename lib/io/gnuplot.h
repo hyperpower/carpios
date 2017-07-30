@@ -8,6 +8,7 @@
 #include <sstream>              // for std::ostringstream
 #include <stdexcept>
 #include <cstdio>
+#include <stdio.h>
 #include <cstdlib>              // for getenv()
 #include <list>                 // for std::list
 #include <stdlib.h>
@@ -104,6 +105,9 @@ public:
 	}
 
 };
+
+
+
 
 class Gnuplot {
 public:
@@ -537,6 +541,9 @@ typedef Float Vt;
 
 typedef std::shared_ptr<Gnuplot_actor> spActor;
 typedef std::list<spActor> list_spActor;
+
+
+
 }
 
 

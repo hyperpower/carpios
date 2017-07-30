@@ -8,8 +8,6 @@ import operator
 from scipy import ndimage
 import multiprocessing
 
-
-
 def _col(matrix, i):
     return [row[i] for row in matrix]
 

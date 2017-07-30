@@ -4,13 +4,19 @@
 #include "../geometry_define.hpp"
 #include <array>
 #include <sstream>
+#include <iostream>
 
 namespace carpio {
+
+struct TagPoint {
+};
+
 //Point T ====================================
 template<typename TYPE, St DIM>
 class Point_: public std::array<TYPE, DIM> {
 public:
 	static const St Dim = DIM;
+	typedef TagPoint Tag;
 	typedef Point_<TYPE, DIM> Point;
 	typedef St size_type;
 	typedef TYPE Vt;
@@ -186,13 +192,26 @@ public:
 		}
 	}
 	/** Distance to other point */
-	Vt dist(const Point& p) const
-	{
+	Vt dist(const Point& p) const {
 		double dx = x() - p.x();
 		double dy = y() - p.y();
-		return sqrt (dx * dx + dy * dy);
+		return sqrt(dx * dx + dy * dy);
 	}
 
+	void normalize() {
+		double n = 0;
+		for (St i = 0; i < Dim; i++) {
+			n += double(this->at(i) * this->at(i));
+		}
+		n = sqrt(n);
+		for (St i = 0; i < Dim; i++) {
+			if (n != 0) {
+				this->at(i) /= n;
+			} else {
+				this->at(i) = 0;
+			}
+		}
+	}
 	inline size_type size() const {
 		return size_type(Dim);
 	}
@@ -204,6 +223,7 @@ public:
 	}
 
 	// operator
+
 	Point& operator+=(const Point& p) {
 		for (St i = 0; i < Dim; i++) {
 			this->at(i) += p[i];
@@ -254,6 +274,21 @@ public:
 	}
 
 };
+template<typename TYPE, St DIM>
+inline Point_<TYPE, DIM> operator+(
+		Point_<TYPE, DIM> lhs,
+		const Point_<TYPE, DIM>& rhs) {
+	lhs += rhs;
+	return lhs;
+}
+
+template<typename TYPE, St DIM>
+inline Point_<TYPE, DIM> operator-(
+		Point_<TYPE, DIM> lhs,
+		const Point_<TYPE, DIM>& rhs) {
+	lhs -= rhs;
+	return lhs;
+}
 
 template<typename TYPE, St DIM>
 std::ostream& operator<<(std::ostream& stream, const Point_<TYPE, DIM>& point) {

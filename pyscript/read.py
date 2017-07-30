@@ -70,6 +70,12 @@ class TextFile:
             if len(arr) > 0:
                 self._mat.append(arr)
 
+    def get_config(self):
+        return self._dict
+
+    def get_data(self):
+        return self._mat
+
     def _parse_line_data(self, line):
         # sperated by ,
         # trim space

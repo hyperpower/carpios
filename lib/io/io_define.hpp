@@ -7,9 +7,11 @@
 #include <unistd.h>
 
 #include <string>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <list>
+#include <map>
 
 namespace carpio {
 /*
@@ -75,7 +77,7 @@ inline bool file_access_check( //
 	if (_access(filename.c_str(), mode) == 0)
 #elif defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
 	if (access(filename.c_str(), mode) == 0)
-#endif
+			#endif
 			{
 		return true;
 	} else {
@@ -84,16 +86,17 @@ inline bool file_access_check( //
 }
 
 class TextFile {
-
 public:
 	typedef std::string str;
 	typedef std::list<str> lines;
 	typedef std::fstream fst;
-protected:
+	typedef std::map<std::string, std::string> dict;
+	protected:
 	str _filename;
 	lines _content;
 
-public:
+	dict _config;
+	public:
 	TextFile() :
 			_filename(""), _content() {
 	}
@@ -105,7 +108,7 @@ public:
 		_content = content;
 	}
 
-	void add_line(const str& line){
+	void add_line(const str& line) {
 		return _content.push_back(line);
 	}
 
@@ -138,6 +141,41 @@ public:
 		}
 	}
 
+	lines& content(){
+		return this->_content;
+	}
+
+	void parse_config() {
+		for (auto& line : _content) {
+			std::vector<std::string> tokens;
+			Tokenize(line, tokens);
+			int count = 0;
+			for (auto& str : tokens) {
+				if (count == 0 && str == "##") {
+					// this line is a dict line
+					this->_config[tokens[1]] = tokens[3];
+					break;
+				}
+			}
+		}
+	}
+
+	void show_config() {
+		for (auto& str : _config) {
+			std::cout << str.first << " : " << str.second << "\n";
+		}
+	}
+
+	std::string get_config(const std::string& key) const {
+		typename dict::const_iterator iter = this->_config.find(key);
+		if (iter == this->_config.end()) {
+			ASSERT_MSG(false, "Not found key");
+			return "";
+		} else {
+			return iter->second;
+		}
+	}
+
 	void write() {
 		fst outs;
 		this->_open_write(outs);
@@ -145,6 +183,32 @@ public:
 		for (lines::iterator iter = _content.begin(); iter != _content.end();
 				++iter) {
 			outs << (*iter) << "\n";
+		}
+	}
+
+
+
+	template<class ContainerT>
+	static void Tokenize(const std::string& str, ContainerT& tokens,
+			const std::string& delimiters = " ", bool trimEmpty = true)
+			{
+		std::string::size_type pos, lastPos = 0, length = str.length();
+
+		using value_type = typename ContainerT::value_type;
+		using size_type = typename ContainerT::size_type;
+
+		while (lastPos < length + 1)
+		{
+			pos = str.find_first_of(delimiters, lastPos);
+			if (pos == std::string::npos) {
+				pos = length;
+			}
+
+			if (pos != lastPos || !trimEmpty)
+				tokens.push_back(value_type(str.data() + lastPos,
+						(size_type) pos - lastPos));
+
+			lastPos = pos + 1;
 		}
 	}
 

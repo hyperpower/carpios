@@ -27,12 +27,16 @@ class Clip_;
 template<typename TYPE, St DIM>
 class Operation_;
 
+struct TagContour{
+};
+
 // the new polygon class ======================================================
 template<class TYPE>
 class Contour_ {
 public:
 	static const St Dim = 2;
 	typedef Contour_<TYPE> Self;
+	typedef TagContour Tag;
 	typedef Point_<TYPE, Dim> Point;
 	typedef Point_<TYPE, Dim>& ref_Point;
 	typedef const Point_<TYPE, Dim>& const_ref_Point;
@@ -273,7 +277,7 @@ public:
 		St i = 0;
 		int flag = GEL(val, vertex(i).val(aix));
 		int nf;
-		for (++i; i < this->size_vertexs(); i++) {
+		for (++i; i < this->size_vertices(); i++) {
 			Vt pv = vertex(i).val(aix);
 			nf = GEL(val, pv);
 			if (flag != nf) {
@@ -283,11 +287,11 @@ public:
 		}
 		nf = GEL(val, vertex(0).val(aix));
 		if (nf != flag) {
-			l_seg_idx.push_back(size_vertexs() - 1);
+			l_seg_idx.push_back(size_vertices() - 1);
 		}
 	}
 
-	inline St size_vertexs() const {
+	inline St size_vertices() const {
 		return _vertices.size();
 	}
 	inline St size_segments() const {  //

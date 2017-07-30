@@ -5,6 +5,7 @@
 #include "geometry_define.hpp"
 #include "objects/_objects.hpp"
 #include "io/_actor_gnuplot.hpp"
+#include "io/_io_file.hpp"
 #include "operations/_sweep.hpp"
 #include "operations/_polygon_boolean.hpp"
 #include "operations/_polygon_partition.hpp"

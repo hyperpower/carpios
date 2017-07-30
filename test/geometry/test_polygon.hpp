@@ -28,7 +28,7 @@ namespace carpio {
 
 typedef Polygon_<double> Polygon;
 
-typedef GnuplotActor_<double, 2> GpActor;
+typedef GPA_Geometry_<double, 2> GpActor;
 using namespace std;
 
 std::string getexepath() {
@@ -57,6 +57,10 @@ TEST(Polygon, signedarea) {
 	std::cout << "Order      = " << "2 1 3 \n";
 	std::cout << "SignedArea = " << res << std::endl;
 	ASSERT_EQ(res, -1);
+
+	res = Op::IsCCW(p1, p2, p3);
+	std::cout << "Order      = " << "1 2 3 \n";
+	std::cout << "IsCCW      = " << res << std::endl;
 }
 
 TEST(Polygon, sweepevent) {
@@ -234,7 +238,7 @@ TEST(Polygon, point_line_touch) {
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
 	Polygon poly2;
-	Cr::Triangle(poly2, Point(1.0, 0.5), Point(1.5,0.5), Point(1.3, 1.0));
+	Cr::Triangle(poly2, Point(1.0, 0.5), Point(1.5, 0.5), Point(1.3, 1.0));
 
 	Clip clip(poly, poly2);
 	Polygon res;
@@ -248,8 +252,6 @@ TEST(Polygon, point_line_touch) {
 	}
 	//gp.plot();
 }
-
-
 
 }
 
