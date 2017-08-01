@@ -71,6 +71,12 @@ public:
 		_lpoints.push_back(p4);
 	}
 
+	template<class Container_Point>
+	PointChain_(const Container_Point& ver,
+			bool closed = true) : _closed(closed){
+		std::copy(ver.begin(), ver.end(), std::back_inserter(_lpoints));
+	}
+
 	void init(const Segment& s) {
 		_lpoints.push_back(s.ps());
 		_lpoints.push_back(s.pe());

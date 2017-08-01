@@ -8,7 +8,8 @@
 
 namespace carpio {
 
-struct TagPoint {
+struct TagPoint :public TagGeometry{
+	TagPoint(){}
 };
 
 //Point T ====================================

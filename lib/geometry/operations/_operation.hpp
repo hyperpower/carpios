@@ -5,6 +5,7 @@
 #include <cmath>
 #include "../geometry_define.hpp"
 #include "../objects/_objects.hpp"
+#include "_intersection.hpp"
 
 namespace carpio {
 
@@ -14,23 +15,11 @@ class Contour_;
 template<class TYPE, St DIM>
 class PointChain_;
 
-enum SegmentIntersectType {
-	NO_INTERSECT = 0,
-	INTERSECT = 1 << 1,
-	START_1 = 1 << 2,
-	END_1 = 1 << 3,
-	START_2 = 1 << 4,
-	END_2 = 1 << 5,
-	OVERLAP = 1 << 6,
-};
+template<typename TYPE, St DIM>
+class Segment_;
 
-enum SegmentIntersectCase {
-	INTERSECT_NORMAL = 1 << 1,
-	INTERSECT_POINT_SEGMENT = 1 << 2,
-	INTERSECT_POINT_POINT = 1 << 3,
-	INTERSECT_POINT_SEGMENT_2 = 1 << 4, //OVERLAP
-	INTERSECT_POINT_POINT_2 = 1 << 5, //SAME
-};
+template<typename TYPE, St DIM>
+class Intersection_;
 
 template<typename TYPE, St DIM>
 class Operation_ {
@@ -44,6 +33,12 @@ public:
 	typedef Segment_<TYPE, DIM>& ref_Segment;
 	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
 	typedef PointChain_<TYPE, DIM> PointChain;
+	typedef Intersection_<TYPE, DIM> Isc;
+
+	template<class CA, class CB>
+	static double Distance(const CA& a, const CB& b) {
+		_Distance(a, b, typename CA::Tag(), typename CB::Tag());
+	}
 
 	/*===============================================
 	 * Calculate the distance between 2 Points
@@ -72,7 +67,10 @@ public:
 		return 0.0;
 	}
 
-	static double Distance(const Point& p1, const Point& p2) {
+//static double Distance(const Point& p1, const Point& p2) {
+//		return std::sqrt(Distance2(p1, p2));
+//	}
+	static double _Distance(const Point& p1, const Point& p2, TagPoint, TagPoint) {
 		return std::sqrt(Distance2(p1, p2));
 	}
 
@@ -257,41 +255,6 @@ public:
 		}
 	}
 
-	static bool IsBoxIntersect(
-			const Point& pmin1,
-			const Point& pmax1,
-			const Point& pmin2,
-			const Point& pmax2) {
-		for (St d = 0; d < Dim; d++) {
-			if(pmax1[d] < pmin2[d]){
-				return false;
-			}
-			if(pmin1[d] > pmax2[d]){
-				return false;
-			}
-		}
-		return true;
-	}
-
-	static bool IsSegmentBoxIntersect(
-			const Point& p11,
-			const Point& p12,
-			const Point& p21,
-			const Point& p22) {
-		Point min1 = Min(p11, p12);
-		Point max1 = Max(p11, p12);
-		Point min2 = Min(p21, p22);
-		Point max2 = Max(p21, p22);
-		return IsBoxIntersect(min1, max1, min2, max2);
-	}
-
-	static bool IsBoxIntersect(
-			const Segment& s1,
-			const Segment& s2) {
-		SHOULD_NOT_REACH;
-		return false;
-	}
-
 	static bool IsInBox(const Segment &s, const Point &pt) {
 		ASSERT(!s.empty());
 		if (s.is_horizontal()) {
@@ -412,106 +375,6 @@ public:
 		return imax;
 	}
 
-	static int IntersectType(
-			const Point& p11, const Point& p12,
-			const Point& p21, const Point& p22) {
-		int type = 0;
-		if (!IsSegmentBoxIntersect(p11, p12, p21, p22)) {
-			return NO_INTERSECT;
-		} else {
-			//step 1
-			int s12s = OnWhichSide3(p11, p12, p21);
-			int s12e = OnWhichSide3(p11, p12, p22);
-			if (s12s == s12e) { //ignore the both equal to 0, overlap is not intersect
-				if (s12s == 0) {
-					// overlap colinear
-					if (p11 == p21) {
-						type = type | START_1 | START_2;
-					}
-					if (p12 == p21) {
-						type = type | END_1 | START_2;
-					}
-					if (p11 == p22) {
-						type = type | START_1 | END_2;
-					}
-					if (p12 == p22) {
-						type = type | END_1 | END_2;
-					}
-					if (type == NO_INTERSECT) {
-						return OVERLAP;
-					} else {
-						return type;
-					}
-				}
-				return NO_INTERSECT;
-			}
-			int s21s = OnWhichSide3(p21, p22, p11);
-			int s21e = OnWhichSide3(p21, p22, p12);
-			if (s21s == s21e) {
-				return NO_INTERSECT;
-			}
-			if ((s12s + s12e) == 0 && (s21s + s21e) == 0) {
-				return INTERSECT;
-			}
-			int res = NO_INTERSECT;
-			if (s12s == 0)
-				res = res | START_2;
-			if (s12e == 0)
-				res = res | END_2;
-			if (s21s == 0)
-				res = res | START_1;
-			if (s21e == 0)
-				res = res | END_1;
-			return res;
-		}
-	}
-
-	static SegmentIntersectCase ToSegmentIntersectCase(int type) {
-		if (type == INTERSECT) {
-			return INTERSECT_NORMAL;
-		}
-		int flagp1 = 0, flagp2 = 0;
-		if (type & START_1) {
-			flagp1++;
-		}
-		if (type & END_1) {
-			flagp1++;
-		}
-		if (type & START_2) {
-			flagp2++;
-		}
-		if (type & END_2) {
-			flagp2++;
-		}
-		if (type & OVERLAP) {
-			return INTERSECT_POINT_SEGMENT_2;
-		}
-		if (flagp1 == 2 && flagp2 == 2) {
-			return INTERSECT_POINT_POINT_2;
-		} else if (flagp1 == 1 && flagp2 == 1) {
-			return INTERSECT_POINT_POINT;
-		} else {
-			return INTERSECT_POINT_SEGMENT;
-		}
-	}
-
-	static bool IsSegmentIntersect(
-			const Point& p11, const Point& p12,
-			const Point& p21, const Point& p22, int typeinclude =
-					INTERSECT_NORMAL) {
-		int type = IntersectType(p11, p12, p21, p22);
-		if (type == NO_INTERSECT) {
-			return false;
-		} else {
-			int typec = ToSegmentIntersectCase(type);
-			if (typec & typeinclude) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
-
 	template<typename _ForwardIterator>
 	static bool IsSimple(_ForwardIterator begin, _ForwardIterator end,
 			bool isclose = false) {
@@ -524,7 +387,7 @@ public:
 		long count = 0;
 		for (iterator iter = begin; iter != end; ++iter) {
 			count++;
-			if(count > 3){
+			if (count > 3) {
 				break;
 			}
 		}
@@ -553,7 +416,7 @@ public:
 //				std::cout << " P3 = " << (*iter2);
 //				std::cout << " P4 = " << (*iter3);
 
-				bool res = IsSegmentIntersect(
+				bool res = Isc::Check_asSegment(
 						*iter0, *iter1, *iter2, *iter3,
 						INTERSECT_NORMAL
 								| INTERSECT_POINT_POINT
@@ -580,7 +443,7 @@ public:
 //				std::cout << " P3 = " << (*iter2);
 //				std::cout << " P4 = " << (*iter3);
 
-				bool res = IsSegmentIntersect(
+				bool res = Isc::Check_asSegment(
 						*iter0, *iter1, *iter2, *iter3,
 						INTERSECT_NORMAL
 								| INTERSECT_POINT_POINT
@@ -598,33 +461,7 @@ public:
 
 };
 
-inline std::string ToString_SegmentIntersectType(
-		const int& type) {
-	std::stringstream stream;
-	if (type == NO_INTERSECT) {
-		stream << "NO_INTERSECT ";
-		return stream.str();
-	}
-	if (type & INTERSECT) {
-		stream << "INTERSECT ";
-	}
-	if (type & OVERLAP) {
-		stream << "OVERLAP ";
-	}
-	if (type & START_1) {
-		stream << "START_1 ";
-	}
-	if (type & START_2) {
-		stream << "START_2 ";
-	}
-	if (type & END_1) {
-		stream << "END_1 ";
-	}
-	if (type & END_2) {
-		stream << "END_2 ";
-	}
-	return stream.str();
-}
+
 
 //template<typename TYPE, St DIM>
 //bool IsBoxCross(const Segment_<TYPE, DIM> &s1, const Segment_<TYPE, DIM> &s2) {

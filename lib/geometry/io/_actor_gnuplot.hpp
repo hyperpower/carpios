@@ -46,7 +46,7 @@ public:
 			actor->data().push_back("");
 			return actor;
 		}
-		for (St i = 0; i < contour.size_vertexs(); ++i) {
+		for (St i = 0; i < contour.size_vertices(); ++i) {
 			const Point& p = contour.v(i);
 			if (color_idx >= 0) {
 				actor->data().push_back(ToString(p.x(), p.y(), color_idx, " "));

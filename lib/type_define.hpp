@@ -50,6 +50,22 @@ inline Axes ToAxes(const St& i) {
 	return _X_;
 }
 
+template<typename C>
+struct IsIterable
+{
+    typedef char true_type;
+    typedef long false_type;
+
+    template<class T>
+    static true_type  is_beg_iterable(
+    		int i,
+            typename T::const_iterator = C().begin());
+    template<class T>
+    static false_type is_beg_iterable(...);
+
+    enum { value = sizeof(is_beg_iterable<C>(0)) == sizeof(true_type) };
+};
+
 //enum Location {
 //	_M_ = 0, _C_ = 1, _P_ = 2,
 //};

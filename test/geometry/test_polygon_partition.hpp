@@ -32,6 +32,7 @@ typedef Point_<double, 2> Point;
 typedef PointChain_<double, 2> PointChain;
 typedef PolygonPartition_<double, 2> PP;
 typedef Operation_<double, 2> Op;
+typedef Intersection_<double, 2> Isc;
 typedef Creation_<double, 2> Cr;
 
 typedef GPA_Geometry_<double, 2> GpActor;
@@ -109,9 +110,9 @@ TEST(Polygon, DISABLED_intersect) {
 	Point P2(-9.8111, -5.23389);
 	Point P3(-8.1276, -7.13455);
 	Point P4(-3.90168, 3.49251);
-	bool resb = Op::IsSegmentBoxIntersect(P1, P2, P3, P4);
+	bool resb = Isc::Check_asSegmentBox(P1, P2, P3, P4);
 	std::cout << "Is box ntersects   = " << resb << "\n";
-	bool res = Op::IsSegmentIntersect(P1, P2, P3, P4);
+	bool res = Isc::Check_asSegment(P1, P2, P3, P4);
 	std::cout << "Is Intersects   = " << res << "\n";
 
 	PointChain lp;
@@ -144,7 +145,7 @@ TEST(Polygon, DISABLED_ec1) {
 	bool res = lp.is_simple();
 
 	std::list<PointChain> lres;
-	int r = PP::EerClipping(lp, lres);
+	int r = PP::EarClipping(lp, lres);
 	std::cout << "return code = " << r << std::endl;
 	ASSERT_EQ(r, 1);
 	Gnuplot gp;
@@ -200,7 +201,7 @@ TEST(Polygon, DISABLED_random_ec) {
 	std::cout << "Is Simple : " << res << std::endl;
 
 	std::list<PointChain> lres;
-	int r = PP::EerClipping(lp, lres);
+	int r = PP::EarClipping(lp, lres);
 	std::cout << "return code = " << r << std::endl;
 	//ASSERT_EQ(r, 1);
 	Gnuplot gp;
@@ -227,7 +228,7 @@ TEST(Polygon, EC2) {
 	lp.push_back(Point(0.989662, -6.21943));
 
 	std::list<PointChain> lres;
-	int r = PP::EerClipping(lp, lres);
+	int r = PP::EarClipping(lp, lres);
 	std::cout << "return code = " << r << std::endl;
 	//ASSERT_EQ(r, 1);
 	Gnuplot gp;
@@ -247,7 +248,7 @@ TEST(Polygon, read) {
 	pc.set_close();
 	std::cout << "size = " << pc.size() << std::endl;
 	std::list<PointChain> lres;
-	int r = PP::EerClipping(pc, lres);
+	int r = PP::EarClipping(pc, lres);
 
 	std::cout << "return code = " << r << std::endl;
 	//ASSERT_EQ(r, 1);
@@ -261,7 +262,72 @@ TEST(Polygon, read) {
 
 	IOF::WritePointChain("./man2", pc);
 
-	gp.plot();
+	//gp.plot();
+}
+
+TEST(Polygon, ec_hole) {
+	PointChain lp;
+	lp.set_close();
+	lp.push_back(Point(0.0, 0.0));
+	lp.push_back(Point(1.0, 0.0));
+	lp.push_back(Point(1.5, 0.5));
+	lp.push_back(Point(1.0, 1.0));
+	lp.push_back(Point(0.5, 1.3));
+	lp.push_back(Point(0.0, 1.0));
+	Contour out(lp);
+	std::cout << "out Is cc = " << out.counterclockwise() << std::endl;
+	PointChain lpi;
+	lpi.set_close();
+	lpi.push_back(Point(0.25, 0.9));
+	lpi.push_back(Point(0.6, 0.8));
+	lpi.push_back(Point(0.5, 0.25));
+	lpi.push_back(Point(0.25, 0.25));
+	Contour in(lpi);
+	in.set_hole(true);
+
+	PointChain lpi2;
+	lpi2.set_close();
+	double x = 0.5, y = 0.5, d = 0.2;
+	lpi2.push_back(Point(x, y));
+	lpi2.push_back(Point(x + d, y));
+	lpi2.push_back(Point(x + d, y + d));
+	lpi2.push_back(Point(x, y + d));
+	Contour in2(lpi2);
+
+	std::cout << "in Is cc = " << in.counterclockwise() << std::endl;
+
+	std::list<Contour> lcon;
+	lcon.push_back(out);
+	lcon.push_back(in);
+	lcon.push_back(in2);
+
+	std::list<Contour> lout;
+
+	int r = PP::RemoveHoles(lcon, lout);
+	std::list<PointChain> lres;
+	for (auto& con : lout) {
+		r = PP::EarClipping(con, lres);
+	}
+
+	std::cout << "size out = " << lout.size() << std::endl;
+
+	Gnuplot gp;
+
+	gp.add(GpActor::Lines(lp, -1, 0));
+	gp.add(GpActor::Lines(lpi, -1, 0));
+
+	int i = 0;
+	for (auto& t : lres) {
+		gp.add(GpActor::Lines(t, -1, i));
+		i++;
+	}
+
+	//IOF::WritePointChain("./man2", pc);
+	//gp.plot();
+    std::cout << IsIterable<int>::value << std::endl;
+
+    std::cout << "is geo obj = " << IsGeoObj<Polygon>::value << std::endl;
+    std::cout << "is geo obj = " << IsGeoObj<Contour>::value << std::endl;
 }
 
 }

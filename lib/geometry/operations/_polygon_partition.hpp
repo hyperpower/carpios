@@ -46,6 +46,7 @@ public:
 	typedef PointChain_<TYPE, Dim> PointChain;
 	typedef Segment_<TYPE, Dim> Segment;
 	typedef Operation_<TYPE, Dim> Op;
+	typedef Intersection_<TYPE, Dim> Isc;
 	typedef Connector_<TYPE, Dim> Connector;
 
 public:
@@ -113,18 +114,7 @@ public:
 	//standard helper functions
 	// ------------------|
 	static bool IsConvex(const Point& p1, const Point& p2, const Point& p3) { // this function should be change to CCW
-		// p0 = p3
-		// p1 = p2
 		return Op::IsCCW(p1, p2, p3);
-//		tppl_float tmp;
-//		tmp = (p3.y() - p1.y()) * (p2.x() - p1.x())
-//				- (p3.x() - p1.x()) * (p2.y() - p1.y());
-//		if (tmp > 0) {
-//			return true;
-//		} else {
-//			return false;
-//
-//		}
 	}
 	bool IsReflex(Point& p1, Point& p2, Point& p3) {
 		tppl_float tmp;
@@ -135,17 +125,9 @@ public:
 		else
 			return 0;
 	}
-//	static bool IsInOn(Point& p1, Point& p2, Point& p3, Point &p) {
-//		if (IsConvex(p1, p, p2))
-//			return false;
-//		if (IsConvex(p2, p, p3))
-//			return false;
-//		if (IsConvex(p3, p, p1))
-//			return false;
-//		return true;
-//	}
 
-	bool InCone(Point &p1, Point &p2, Point &p3, Point &p) {
+	static bool InCone(const Point &p1, const Point &p2, const Point &p3,
+			const Point &p) {
 		bool convex;
 
 		convex = IsConvex(p1, p2, p3);
@@ -178,9 +160,8 @@ public:
 		// same    0
 		// touch   1
 		// overlap 1
-		return Op::IsSegmentIntersect(p11, p12, p21, p22,
+		return Isc::Check_asSegment(p11, p12, p21, p22,
 				INTERSECT_NORMAL
-						| INTERSECT_POINT_POINT
 						| INTERSECT_POINT_SEGMENT
 						| INTERSECT_POINT_SEGMENT_2);
 
@@ -219,8 +200,6 @@ public:
 //
 //		return 1;
 	}
-
-
 
 	//helper functions for Triangulate_EC
 	void UpdateVertexReflexity(PartitionVertex *v) {
@@ -267,15 +246,11 @@ public:
 		}
 	}
 
-
 	//helper functions for ConvexPartition_OPT
 	void UpdateState(long a, long b, long w, long i, long j,
 			DPState2 **dpstates);
 	void TypeA(long i, long j, long k, PartitionVertex *vertices,
 			DPState2 **dpstates);
-	void TypeB(long i, long j, long k, PartitionVertex *vertices,
-			DPState2 **dpstates);
-
 	//helper functions for MonotonePartition
 	bool Below(Point &p1, Point &p2);
 	//	void AddDiagonal(MonotoneVertex *vertices, long *numvertices, long index1,
@@ -288,11 +263,11 @@ public:
 
 	// helper function
 	// copy vertices into PartitionVertex
-	static PartitionVertex* NewPartitionVertex(const PointChain& pc) {
-		ASSERT(pc.size() >= 3);
+	static PartitionVertex* NewPartitionVertex(const Contour& pc) {
+		ASSERT(pc.nvertices() >= 3);
 
-		long numvertices = pc.size();
-//		std::cout << "d size = " << numvertices <<std::endl;
+		long numvertices = pc.nvertices();
+//		std::cout << "d nvertices = " << numvertices <<std::endl;
 		PartitionVertex* vertices = new PartitionVertex[numvertices];
 		long i = 0;
 		for (auto& point : pc) {
@@ -327,7 +302,153 @@ public:
 	//             vertices of all hole polys have to be in clockwise order
 	//   outpolys : a list of polygons without holes
 	//returns 1 on success, 0 on failure
-	int RemoveHoles(std::list<Contour> *inpolys, std::list<Contour> *outpolys);
+	static int RemoveHoles(
+			const Polygon& inpolys,
+			std::list<Contour>& outpolys) {
+		std::list<Contour> polys;
+		typename std::list<Contour>::const_iterator holeiter, polyiter, iter,
+				iter2;
+		long i, i2, holepointindex, polypointindex;
+		Point holepoint, polypoint, bestpolypoint;
+		Point linep1, linep2;
+		Point v1, v2;
+		Contour newpoly;
+		bool hasholes;
+		bool pointvisible;
+		bool pointfound;
+
+		//check for trivial case (no holes)
+		hasholes = false;
+		for (auto& contour : inpolys) {
+			if (contour.is_hole()) {
+				hasholes = true;
+				break;
+			}
+		}
+		if (!hasholes) {
+			for (auto& contour : inpolys) {
+				outpolys.push_back(contour);
+			}
+			return 1;
+		}
+		/// copy inplys to ploy
+		std::copy(inpolys.begin(), inpolys.end(), std::back_inserter(polys));
+
+		while (1) {
+			/// find the hole point with the largest x
+			hasholes = false;
+			for (iter = polys.begin(); iter != polys.end(); iter++) {
+				if (!iter->is_hole())
+					continue;
+
+				if (!hasholes) {
+					hasholes = true;
+					holeiter = iter;
+					holepointindex = 0;
+				}
+
+				for (i = 0; i < iter->nvertices(); i++) {
+					if (iter->v(i).x()
+							> holeiter->v(holepointindex).x()) {
+						holeiter = iter;
+						holepointindex = i;
+					}
+				}
+			}
+
+			if (!hasholes) {
+				/// no holes break while
+				break;
+			}
+
+			holepoint = holeiter->v(holepointindex);
+			pointfound = false;
+			for (iter = polys.begin(); iter != polys.end(); iter++) {
+				if (iter->is_hole()) {
+					continue;
+				}
+				/// for each vertices of NON hole poly
+				St nv = iter->nvertices(); /// number of vertices of NON hole poly
+				for (i = 0; i < nv; i++) {
+					if (iter->v(i).x() <= holepoint.x()) {
+						continue;
+					}
+					if (!InCone(
+							iter->v((i + nv - 1) % nv),
+							iter->v(i),
+							iter->v((i + 1) % nv),
+							holepoint)) {
+						continue;
+					}
+
+					polypoint = iter->v(i);
+					if (pointfound) {
+						v1 = Op::Normalize(polypoint - holepoint);
+						v2 = Op::Normalize(bestpolypoint - holepoint);
+						if (v2.x() > v1.x())
+							continue;
+					}
+					pointvisible = true;
+					for (iter2 = polys.begin(); iter2 != polys.end(); iter2++) {
+						if (iter2->is_hole()){
+							continue;
+						}
+						St nv2 = iter2->nvertices();
+						for (i2 = 0; i2 < nv2; i2++) {
+							linep1 = iter2->v(i2);
+							linep2 = iter2->v((i2 + 1) % nv2);
+							if (IsIntersect(
+									holepoint,
+									polypoint,
+									linep1,
+									linep2)) {
+								pointvisible = false;
+								break;
+							}
+						}
+						if (!pointvisible)
+							break;
+					}
+					if (pointvisible) {
+						pointfound = true;
+						bestpolypoint = polypoint;
+						polyiter = iter;
+						polypointindex = i;
+					}
+				}
+			}
+
+			if (!pointfound)
+				return 0;
+
+			newpoly.resize_vertices(
+					holeiter->nvertices() + polyiter->nvertices() + 2);
+			i2 = 0;
+			for (i = 0; i <= polypointindex; i++) {
+				newpoly.v(i2) = polyiter->v(i);
+				i2++;
+			}
+			for (i = 0; i <= holeiter->nvertices(); i++) {
+				newpoly.v(i2) = holeiter->v(
+						(i + holepointindex) % holeiter->nvertices());
+				i2++;
+			}
+			for (i = polypointindex; i < polyiter->nvertices(); i++) {
+				newpoly.v(i2) = polyiter->v(i);
+				i2++;
+			}
+
+			polys.erase(holeiter);
+			polys.erase(polyiter);
+			polys.push_back(newpoly);
+		}
+
+		for (iter = polys.begin(); iter != polys.end(); iter++) {
+			outpolys.push_back(*iter);
+		}
+
+		return 1;
+	}
 
 	//triangulates a polygon by ear clipping
 	//time complexity O(n^2), n is the number of vertices
@@ -337,7 +458,7 @@ public:
 	//          vertices have to be in counter-clockwise order
 	//   triangles : a list of triangles (result)
 	//returns 1 on success, 0 on failure
-	static int EerClipping(const PointChain& poly,
+	static int EarClipping(const Contour& poly,
 			std::list<PointChain>& triangles) {
 		long numvertices;
 		PartitionVertex *vertices = nullptr;
@@ -348,21 +469,20 @@ public:
 
 		/// if the vertices is less than 3
 		/// return
-		if (poly.size() < 3)
+		if (poly.nvertices() < 3)
 			return 0;
-		if (poly.size() == 3) {
-			triangles.push_back(poly);
+		if (poly.nvertices() == 3) {
+			triangles.push_back(PointChain(poly));
 			return 1;
 		}
 
 		/// copy vertices into PartitionVertex
-		numvertices = poly.size();
+		numvertices = poly.nvertices();
 		vertices = NewPartitionVertex(poly);
 		// update vertices
 		for (i = 0; i < numvertices; i++) {
 			UpdateVertex(&(vertices[i]), vertices, numvertices);
 		}
-//		std::cout << " --------- \n";
 
 		for (i = 0; i < numvertices - 3; i++) {
 			earfound = false;
@@ -381,7 +501,6 @@ public:
 					}
 				}
 			}
-//			std::cout << "ear : " << ear->p << std::endl;
 			if (!earfound) {
 				delete[] vertices;
 				return 0;
@@ -392,9 +511,6 @@ public:
 					ear->p,
 					ear->next->p)
 					);
-//			std::cout << "T : "<< ear->previous->p << std::endl;
-//			std::cout << "  : "<< ear->p << std::endl;
-//			std::cout << "  : "<< ear->next->p << std::endl;
 
 			ear->isActive = false;
 			ear->previous->next = ear->next;
@@ -432,15 +548,16 @@ public:
 	//             vertices of all hole polys have to be in clockwise order
 	//   triangles : a list of triangles (result)
 	//returns 1 on success, 0 on failure
-	int Triangulate_EC(std::list<PointChain> *inpolys,
-			std::list<PointChain> *triangles) {
+	int EarClippingHoles(const Polygon& inpolys,
+			std::list<PointChain>& triangles) {
+
 		std::list<PointChain> outpolys;
 		typename std::list<PointChain>::iterator iter;
 
 		if (!RemoveHoles(inpolys, &outpolys))
 			return 0;
 		for (iter = outpolys.begin(); iter != outpolys.end(); iter++) {
-			if (!Triangulate_EC(&(*iter), triangles))
+			if (!EarClipping(&(*iter), triangles))
 				return 0;
 		}
 		return 1;

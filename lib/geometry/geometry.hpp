@@ -10,6 +10,7 @@
 #include "operations/_polygon_boolean.hpp"
 #include "operations/_polygon_partition.hpp"
 #include "operations/_operation.hpp"
+#include "operations/_intersection.hpp"
 #include "operations/_creation.hpp"
 #include "operations/_tri_tri_intersect.hpp"
 

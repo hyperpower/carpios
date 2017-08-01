@@ -5,6 +5,7 @@
 #include "_point.hpp"
 #include <array>
 #include "math.h"
+
 namespace carpio {
 
 template<typename TYPE, St DIM>
@@ -21,6 +22,8 @@ public:
 	typedef Point_<Vt, DIM>* pPoint;
 	typedef Point_<Vt, DIM>& ref_Point;
 	typedef const Point_<Vt, DIM>& const_ref_Point;
+	typedef Box_<Vt, DIM> Box;
+	typedef Operation_<Vt, Dim> Op;
 public:
 	Segment_() :
 			std::array<Point_<Vt, DIM>, 2>() {
@@ -144,6 +147,12 @@ public:
 	Vt slope() const {
 		ASSERT(Dim == 2);
 		return (pey() - psy()) / (pex() - psx() + SMALL);
+	}
+
+	Box box() const{
+		Point min = Op::Min(ps(), pe());
+		Point max = Op::Max(ps(), pe());
+		return Box(min, max);
 	}
 
 	void scale(Vt xfactor, Vt yfactor, Vt zfactor = 1) {

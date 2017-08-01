@@ -27,7 +27,7 @@ class Clip_;
 template<typename TYPE, St DIM>
 class Operation_;
 
-struct TagContour{
+struct TagContour {
 };
 
 // the new polygon class ======================================================
@@ -62,15 +62,19 @@ protected:
 	bool _precomputedCC;
 	// is count clock wise
 	bool _CC;
+
 public:
 	Contour_() :
 			_vertices(), _holes(), _external(true), _precomputedCC(false), _CC(
-					false) {
+					true) {
 	}
 
-	Contour_(const std::vector<Point>& ver, const std::vector<St>& holes = std::vector<St>(),
-			bool exter = true, bool precomputedcc = false, bool cc = false) :
-
+	template<class Container_Point>
+	Contour_(const Container_Point& ver,
+			const std::vector<St>& holes = std::vector<St>(),
+			bool exter = true,
+			bool precomputedcc = false,
+			bool cc = false) :
 			_external(exter), _precomputedCC(precomputedcc), _CC(cc) {
 		std::copy(ver.begin(), ver.end(), std::back_inserter(_vertices));
 		std::copy(holes.begin(), holes.end(), std::back_inserter(_holes));
@@ -95,7 +99,7 @@ public:
 		}
 		Vt s = 0.0;
 		for (St i = 1; i < _vertices.size() - 1; i++) {
-			s = s + Op::Cro(_vertices[i + 1], _vertices[i], _vertices[0]); // det to cro
+			s = s + Op::Cross(_vertices[i + 1], _vertices[i], _vertices[0]); // det to cro
 		}
 		return std::abs(s) / 2.0;
 	}
@@ -124,13 +128,6 @@ public:
 		return (p == nvertices() - 1) ?
 				Segment(_vertices.back(), _vertices.front()) :
 				Segment(_vertices[p], _vertices[p + 1]);
-	}
-	/** Number of vertices and edges */
-	unsigned nvertices() const {
-		return _vertices.size();
-	}
-	unsigned nedges() const {
-		return _vertices.size();
 	}
 	/** Get the bounding box */
 	void boundingbox(Point& min, Point& max) {
@@ -167,17 +164,17 @@ public:
 	bool clockwise() {
 		return !counterclockwise();
 	}
-	void changeOrientation() {
+	void change_orientation() {
 		reverse(_vertices.begin(), _vertices.end());
 		_CC = !_CC;
 	}
-	void setClockwise() {
+	void set_clockwise() {
 		if (counterclockwise())
-			changeOrientation();
+			change_orientation();
 	}
-	void setCounterClockwise() {
+	void set_counter_clockwise() {
 		if (clockwise())
-			changeOrientation();
+			change_orientation();
 	}
 
 	void move(Vt x, Vt y) {
@@ -202,6 +199,12 @@ public:
 	iterator end() {
 		return _vertices.end();
 	}
+	const_iterator begin() const {
+		return _vertices.begin();
+	}
+	const_iterator end() const {
+		return _vertices.end();
+	}
 	Point& back() {
 		return _vertices.back();
 	}
@@ -217,11 +220,20 @@ public:
 	unsigned hole(unsigned p) const {
 		return _holes[p];
 	}
+
+	/// Should be replaced by is_hole()
 	bool external() const {
 		return _external;
 	}
 	void setExternal(bool e) {
 		_external = e;
+	}
+	/// This function is same as the function external
+	bool is_hole() const {
+		return !_external;
+	}
+	void set_hole(bool e) {
+		_external = !e;
 	}
 	Vt max(int dim) const { //
 		ASSERT(_vertices.size() > 0);
@@ -291,13 +303,26 @@ public:
 		}
 	}
 
+	inline void resize_vertices(St num) {
+		_vertices.resize(num);
+		_external = true;
+		_precomputedCC = false;
+		_CC = true;
+	}
+
 	inline St size_vertices() const {
 		return _vertices.size();
 	}
 	inline St size_segments() const {  //
 		return _vertices.size();
 	}
-
+	/** Number of vertices and edges */
+	unsigned nvertices() const {
+		return _vertices.size();
+	}
+	unsigned nedges() const {
+		return _vertices.size();
+	}
 };
 template<class TYPE>
 std::ostream& operator<<(std::ostream& o, Contour_<TYPE>& c) {

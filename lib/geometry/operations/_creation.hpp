@@ -62,6 +62,7 @@ public:
 	static void RandomSimplePointChain(PointChain& pc, int num,
 			const Point& min = Point(-10, -10, -10),
 			const Point& max = Point(10, 10, 10)) {
+		ASSERT(num < 15);
 		pc.clear();
 		for (int i = 0; i < num; i++) {
 			Point p(Random::nextDouble(min[_X_], max[_X_]),
@@ -84,3 +85,5 @@ public:
 }
 
 #endif
+
+

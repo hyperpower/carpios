@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     std::cout << "size = " << pc.size() << std::endl;
     std::list<PointChain> lres;
     std::cout << "EerClipping ...\n";
-    int r = PP::EerClipping(pc, lres);
+    int r = PP::EarClipping(pc, lres);
     std::cout << "return code = " << r << std::endl;
     int count = 0;
     for(auto& pc: lres){

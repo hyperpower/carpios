@@ -415,7 +415,7 @@ void TriSurface_<TYPE, DIM>::show_face() const {
 }
 
 template<class TYPE, St DIM>
-void TriSurface_<TYPE, DIM>::output_vtk(const String& fn) const {
+void TriSurface_<TYPE, DIM>::output_vtk(const std::string& fn) const {
 	FILE* fptr = fopen(fn.c_str(), "w"); //write
 	if (fptr == NULL) {
 		std::cerr << "!> Open file error! " << fn << " \n";
@@ -426,13 +426,13 @@ void TriSurface_<TYPE, DIM>::output_vtk(const String& fn) const {
 			"ASCII\n"
 			"DATASET POLYDATA\n"
 			"POINTS %lu float\n", size_vertex());
-	Map<pVer, uInt> m_veridx;
+	std::map<pVer, uInt> m_veridx;
 	uInt count = 0;
 	// not ok
 	for (auto iter = c_vertex.begin(); iter != c_vertex.end(); ++iter) {
 		auto pt = (*iter);
 		fprintf(fptr, "%f %f %f \n", pt->x(), pt->y(), pt->z());
-		m_veridx.insert(Pair<pVer, uInt>(pt, count));
+		m_veridx.insert(std::pair<pVer, uInt>(pt, count));
 		count++;
 	}
 	fprintf(fptr, "POLYGONS %lu %lu\n", faces.size(), faces.size() * 4);

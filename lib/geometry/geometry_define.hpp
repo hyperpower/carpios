@@ -8,6 +8,11 @@
 
 namespace carpio {
 
+
+struct TagGeometry{
+	TagGeometry(){};
+};
+
 //template <class TYPE>
 //inline TYPE Distance(
 //		const TYPE &x1,

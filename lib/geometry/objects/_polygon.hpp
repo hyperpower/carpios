@@ -5,7 +5,7 @@
 #include "../operations/_operation.hpp"
 #include "_point.hpp"
 #include "_contour.hpp"
-#include "_bbox.hpp"
+#include "_box.hpp"
 //#include "../algebra/array_list.hpp"
 #include "_segment.hpp"
 #include <array>
@@ -51,6 +51,14 @@ public:
 		if (!(f.eof()))
 			std::cerr << "An error reading file " << filename << " happened\n";
 	}
+
+	template<class Container>
+	Polygon_(const Container& con) {
+		bool st = std::is_same<typename Container::value_type, Contour>::value;
+		ASSERT(st);
+		std::copy(con.begin(), con.end(), std::back_inserter(contours));
+	}
+
 	void read_file(const std::string& filename) {
 		std::ifstream f(filename.c_str());
 		if (!(f.is_open())) {
@@ -164,7 +172,7 @@ std::istream& operator>>(std::istream& is, Polygon_<TYPE>& p) {
 	typedef typename Contour_<TYPE>::Point Point;
 	// read the contours
 	int ncontours;
-	double px,py;
+	double px, py;
 	is >> ncontours;
 	for (int i = 0; i < ncontours; i++) {
 		int npoints;

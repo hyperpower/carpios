@@ -40,13 +40,12 @@ public:
 		TextFile txtf(fn);
 		txtf.read();
 		txtf.parse_config();
-		//txtf.show_config();
 
 		const St dimf = St(std::stoi(txtf.get_config("Dim")));
 		const St size = St(std::stoi(txtf.get_config("Size")));
+		const std::string type = txtf.get_config("Type");
+		ASSERT(type == "PointChain");
 
-//		auto& content = txtf.content();
-//		int count = 0;
 		for (auto& line : txtf.content()) {
 			std::vector<std::string> tokens;
 			if (line == "") {
@@ -64,23 +63,16 @@ public:
 			/// data line
 			std::vector<std::string> tokens_d;
 			TextFile::Tokenize(line, tokens_d, ",");
-//			std::cout << "tokens size  = " << tokens_d.size() << "\n";
 			if (tokens_d.size() > 0) {
 				Point p(0);
 				for (St i = 0; i < dimf; i++) {
 					if (i < Dim) {
-//						std::cout << tokens_d[i] << std::endl;
 						p[i] = Vt(std::stod(tokens_d[i]));
 					}
 				}
-//				std::cout << "\n";
-//				std::cout << p << std::endl;
 				pc.push_back(p);
 			}
-
-//			count++;
 		}
-
 	}
 
 	static void WritePointChain(const std::string& fn, const PointChain& pc) {

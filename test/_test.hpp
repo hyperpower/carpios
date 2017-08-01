@@ -39,7 +39,8 @@ using namespace std;
 //#include "../test/geometry/test_polygon.hpp"
 //#include "../test/geometry/test_contour.hpp"
 //#include "../test/geometry/test_operation.hpp"
-#include "../test/geometry/test_polygon_partition.hpp"
+#include "../test/geometry/test_intersection.hpp"
+//#include "../test/geometry/test_polygon_partition.hpp"
 //#include "../test/io/_test_plotly.hpp"
 
 //#include "../test/parallel/test_mpi.hpp"
