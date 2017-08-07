@@ -42,7 +42,7 @@ public:
 		}
 	}
 
-	const_reference val(Axes axi) const {
+	const_reference val(int axi) const {
 		switch (axi) {
 		case _X_: {
 			return this->at(0);
@@ -61,7 +61,7 @@ public:
 		}
 		return this->at(0); //make compile happy;
 	}
-	reference val(Axes axi) {
+	reference val(int axi) {
 		switch (axi) {
 		case _X_: {
 			return this->at(0);
@@ -94,7 +94,7 @@ public:
 	Vt value(St idx) const {
 		Vt res;
 		if (idx < Dim) {
-			return val(ToAxes(idx));
+			return val(idx);
 		} else {
 			return 0;
 		}
@@ -136,6 +136,15 @@ public:
 		}
 	}
 
+	bool operator<(const Point_<Vt, Dim>& a) const{
+		for (St i = 0; i < Dim; i++){
+			if(this->at(i) < a[i]){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	bool operator==(const Point_<Vt, Dim> &a) const {
 		if (Dim == 2) {
 			return (this->at(0) == a[0] && this->at(1) == a[1]) ? true : false;
@@ -157,7 +166,8 @@ public:
 		std::cout << std::scientific << "( " << this->at(0);
 		if (Dim >= 2) {
 			std::cout << " , " << this->at(1);
-		} else if (Dim == 3) {
+		}
+		if (Dim >= 3) {
 			std::cout << " , " << this->at(2);
 		}
 		std::cout << " )\n";

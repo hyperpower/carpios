@@ -14,7 +14,11 @@
 #include <string>
 #include <memory>
 
+
+
 namespace carpio {
+
+typedef Operation_<double, 3> Op;
 
 TEST(Triangle, construct) {
 	typedef Triangle_<double, 2> Tri2;
@@ -56,9 +60,6 @@ TEST(Triangle, intersect) {
 	//p.plot();
 
 }
-
-
-
 
 TEST(Triangle, intersectm) {
 	typedef Triangle_<double, 3> Tri;
@@ -123,7 +124,7 @@ TEST(Triangle, intersectm) {
 	actor = PlotlyActor::XY(lnum, ltime02);
 	actor->set_name("method 02");
 	p.add(actor);
-	//p.plot();
+//	p.plot();
 }
 
 TEST(Triangle, catch_diff) {
@@ -199,7 +200,7 @@ TEST(Triangle, intersect_cal) {
 	Plotly p;
 	p.add(PlotlyActor::Triangle(tri1));
 	p.add(PlotlyActor::Triangle(tri2));
-	if(res == 1){
+	if (res == 1) {
 		p.add(PlotlyActor::Segment(ps, pe));
 	}
 	//p.plot();
@@ -216,7 +217,7 @@ TEST(Triangle, intersect_cal_special_case) {
 	Poi pc(0.5, 1, 0);
 	Tri tri1(pa, pb, pc);
 
-	Poi pa2(0.5, 0.5,  0.0);
+	Poi pa2(0.5, 0.5, 0.0);
 	Poi pb2(0.51, 0.0, 1.0);
 	Poi pc2(0.52, 1.0, 1.0);
 	Tri tri2(pa2, pb2, pc2);
@@ -233,7 +234,7 @@ TEST(Triangle, intersect_cal_special_case) {
 	Plotly p;
 	p.add(PlotlyActor::Triangle(tri1));
 	p.add(PlotlyActor::Triangle(tri2));
-	if(res == 1){
+	if (res == 1) {
 		p.add(PlotlyActor::Segment(ps, pe));
 	}
 	//p.plot();
@@ -248,7 +249,7 @@ TEST(Triangle, intersect_cal_special_case2) {
 	Poi pc(0.5, 1, 0);
 	Tri tri1(pa, pb, pc);
 
-	Poi pa2(0.5, 0.5,  -1.0);
+	Poi pa2(0.5, 0.5, -1.0);
 	Poi pb2(0.51, 0.0, 0.0);
 	Poi pc2(0.52, 1.0, 0.0);
 	Tri tri2(pa2, pb2, pc2);
@@ -265,10 +266,51 @@ TEST(Triangle, intersect_cal_special_case2) {
 	Plotly p;
 	p.add(PlotlyActor::Triangle(tri1));
 	p.add(PlotlyActor::Triangle(tri2));
-	if(res == 1){
+	if (res == 1) {
 		p.add(PlotlyActor::Segment(ps, pe));
 	}
-	p.plot();
+//	p.plot();
+}
+
+TEST(Triangle, intersect_segment_oritation) {
+	typedef Triangle_<double, 3> Tri;
+	typedef Point_<double, 3> Poi;
+	Poi pa(0, 0, 0);
+	Poi pb(1, 0, 0);
+	Poi pc(0.5, 1, 0);
+	Tri tri1(pa, pb, pc);
+
+	Poi pa2(0.5, 0.5, -1.0);
+	Poi pb2(0.51, 0.0, 0.1);
+	Poi pc2(0.52, 1.0, 0.1);
+	Tri tri2(pa2, pb2, pc2);
+
+	Poi pa3(0.5,  0.5, 1.0);
+	Poi pb3(0.51, 0.0, 0.1);
+	Poi pc3(0.52, 1.0, 0.1);
+	Tri tri3(pa3, pb3, pc3);
+
+	std::cout << "Is intersect 02 : " << TriTriIsect_02(tri1, tri2)
+			<< std::endl;
+	bool cp;
+	Poi ps, pe;
+	int res = TriTriIsect_Segment(tri1, tri2, cp, ps, pe);
+	ps.show();
+	pe.show();
+	std::cout << "coplane  : " << cp << std::endl;
+
+	Poi pother(0,0,1);
+	int side = Op::OnWhichSide3(pother, pb, pa, pc);
+	std::cout << "on which side 3 = " << side << std::endl;
+
+
+	Plotly p;
+	p.add(PlotlyActor::Triangle(tri1));
+	p.add(PlotlyActor::Triangle(tri2));
+	if (res == 1) {
+		p.add(PlotlyActor::Segment(ps, pe));
+	}
+	//p.plot();
 }
 
 }

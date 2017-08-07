@@ -13,6 +13,7 @@
 #include "operations/_intersection.hpp"
 #include "operations/_creation.hpp"
 #include "operations/_tri_tri_intersect.hpp"
+#include "operations/_trisurface_boolean.hpp"
 
 namespace carpio {
 

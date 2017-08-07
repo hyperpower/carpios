@@ -1,4 +1,3 @@
-
 /************************
  //  \file   ts_surface.h
  //  \brief
@@ -9,42 +8,49 @@
 #ifndef _SURFACE_HPP_
 #define _SURFACE_HPP_
 
-
 #include "_edge.hpp"
 #include "_vertex.hpp"
 #include "_triface.hpp"
 #include <fstream>
 #include <sstream>
-#include <list>
+#include <set>
+#include <map>
 #include <algorithm>
+#include <memory>
 
-namespace carpio{
+namespace carpio {
 
 template<class TYPE, St DIM>
 class TriSurface_ {
 public:
 	static const St Dim = DIM;
-	typedef TriSurface_<TYPE, DIM> self_class;
+	typedef TriSurface_<TYPE, DIM> Self;
 	typedef St size_type;
 	typedef TYPE vt;
+	typedef TriFace_<TYPE, DIM, Self> Fac;
+	typedef Edge_<TYPE, DIM, Fac> Edg;
 	typedef Point_<TYPE, DIM> Poi;
 	typedef Poi* pPoi;
-	typedef Vertex_<TYPE, DIM> Ver;
+	typedef Vertex_<TYPE, DIM, Edg> Ver;
 	typedef Ver* pVer;
-	typedef Edge_<TYPE, DIM> Edg;
 	typedef Edg* pEdg;
-	typedef TriFace_<TYPE, DIM> Fac;
 	typedef Fac* pFac;
+	typedef const Ver* const_pVer;
+	typedef const Edg* const_pEdg;
+	typedef const Fac* const_pFac;
 	typedef TriSurface_<TYPE, DIM> Sur;
-	typedef std::shared_ptr<Sur> pSur;
+	typedef Sur* pSur;
 	typedef std::list<pVer> list_pVer;
 	typedef std::list<pFac> list_pFac;
 	typedef std::list<pSur> list_pSur;
 	typedef std::function<void(Fac&)> Fun_Fac;
+
+	typedef typename std::list<pFac>::iterator iterator;
+	typedef typename std::list<pFac>::const_iterator const_iterator;
 public:
 	std::set<pFac> faces;
-	std::set<pVer> c_vertex;
-	std::set<pEdg> c_edge;
+	//std::set<pEdg> c_edge;
+	//std::set<pVer> c_vertex;
 public:
 	TriSurface_() {
 	}
@@ -54,23 +60,98 @@ public:
 	void load_gts_file(const std::string& filename);
 
 	~TriSurface_() {
-		faces.clear();
-		//clear();
+		//faces.clear();
+		clear();
+	}
+
+	void copy_to(Self& other) {
+		other.clear();
+		for (auto& pf : faces) {
+			other.insert(pf);
+		}
+	}
+
+	void insert(pFac f) {
+		auto r = std::find(faces.begin(), faces.end(), f);
+		if (r == faces.end()) { //not found
+			faces.insert(f);
+			f->attach(this);
+		} else {
+			return;
+		}
+//		for (int i = 0; i < 3; i++) {
+//			pEdg e = (*f)[i];
+//			auto re = std::find(c_edge.begin(), c_edge.end(), e);
+//			if (re == c_edge.end()) { //not found
+//				c_edge.insert(e);
+//				auto rv = std::find(c_vertex.begin(), c_vertex.end(), (*e)[0]);
+//				if (rv == c_vertex.end()) { //not found
+//					c_vertex.insert((*e)[0]);
+//				}
+//				rv = std::find(c_vertex.begin(), c_vertex.end(), (*e)[1]);
+//				if (rv == c_vertex.end()) { //not found
+//					c_vertex.insert((*e)[1]);
+//				}
+//
+//			}
+//		}
 	}
 
 	void clear() {
-		//for (auto iter = c_vertex.begin(); iter != c_vertex.end(); ++iter) {
-		//delete (*iter);
-		//}
-		//c_vertex.clear();
-		//for (auto iter = c_edge.begin(); iter != c_edge.end(); ++iter) {
-		//delete (*iter);
-		//}
-		//c_edge.clear();
-		//for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
-		//delete (*iter);
-		//}
-		//faces.clear();
+		std::list<pFac> ldfac;
+		std::list<pEdg> ldedg;
+		std::list<pVer> ldver;
+		for (typename std::set<pFac>::iterator iter = faces.begin();
+				iter != faces.end(); ++iter) {
+			pFac pf = (*iter);
+			if (pf->has_one_parent_surface(this)) {
+				ldfac.push_back(pf);
+			}
+			pf->detach(this);
+			if (pf->is_unattached()) {
+				for (int i = 0; i < 3; i++) {
+					pEdg e = pf->edge(i);
+					if (e->has_one_face(pf)) {
+						ldedg.push_back(e);
+					}
+					e->detach(pf);
+					///
+					for (int iv = 0; i < 2; i++) {
+						pVer v = e->vertex(i);
+						if (v->has_one_edge(e)) {
+							ldver.push_back(v);
+						}
+						v->detach(e);
+					}
+				}
+			}
+		}
+		for (auto& fac : ldfac) {
+			this->faces.erase(fac);
+			delete fac;
+		}
+		for (auto& edg : ldedg) {
+			delete edg;
+		}
+		for (auto& ver : ldver) {
+			delete ver;
+		}
+
+	}
+
+	void clear2() {
+//		for (auto iter = c_vertex.begin(); iter != c_vertex.end(); ++iter) {
+//			delete (*iter);
+//		}
+//		c_vertex.clear();
+//		for (auto iter = c_edge.begin(); iter != c_edge.end(); ++iter) {
+//			delete (*iter);
+//		}
+//		c_edge.clear();
+		for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
+			delete (*iter);
+		}
+		faces.clear();
 	}
 	size_type size_edge() const {
 		return count_edge();   // can be improved
@@ -96,6 +177,10 @@ public:
 	}
 	size_type size_face() const {
 		return faces.size();
+	}
+
+	bool empty() const {
+		return faces.empty();
 	}
 	void foreach_face(std::function<void(Fac&)> fun) {
 		for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
@@ -174,8 +259,8 @@ public:
 				for (auto i = ln.begin(); i != ln.end(); i++) {
 					if (std::find(qnew.begin(), qnew.end(), *i) == qnew.end()) {
 						pFac nei = *i;
-						pEdg come = Tri::GetCommon_pEdge(v, nei);
-						res = Tri::AreCompatible(v, nei, come);
+						pEdg come = Fac::GetCommon_pEdg(v, nei);
+						res = Fac::AreCompatible(v, nei, come);
 						if (res == false) {
 							return res;
 						}
@@ -227,7 +312,7 @@ public:
 		for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
 			pFac pf = (*iter);
 			for (St i = 0; i < 3; i++) {
-				pVer ver = pf->get_vertex(i);
+				pVer ver = pf->vertex(i);
 				if (tmp.find(ver) == tmp.end()) {
 					fun(*ver);
 				}
@@ -240,7 +325,7 @@ public:
 		for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
 			pFac pf = (*iter);
 			for (St i = 0; i < 3; i++) {
-				pVer ver = pf->get_vertex(i);
+				pVer ver = pf->vertex(i);
 				if (tmp.find(ver) == tmp.end()) {
 					fun(*ver);
 				}
@@ -259,6 +344,7 @@ public:
 		};
 		foreach_vertex(fun);
 	}
+
 	bool is_orientable() const {
 		bool res = true;
 		std::function<void(Sur::Edg&)> fun = [&res, this](Sur::Edg& edg) {
@@ -277,7 +363,7 @@ public:
 				}
 				i++;
 			}
-			if (f1 != nullptr && f2 != nullptr && !AreCompatible(f1.get(), f2.get(), &edg)) {
+			if (f1 != nullptr && f2 != nullptr && !Fac::AreCompatible(f1, f2, &edg)) {
 				res = false;
 				//std::cout<<"size "<<pe->faces.size()<<endl;
 				//f2->show();
@@ -288,38 +374,45 @@ public:
 		return res;
 	}
 
-
 	void add_face(const pFac& spf) {
 		pFac f = spf;
 		f->attach_surface(this);
 		faces.insert(spf);
 	}
 
-	// iterator
-	typename std::set<pFac>::iterator begin_face() {
+// iterator
+	typename std::set<pFac>::iterator begin() {
 		return this->faces.begin();
 	}
-	typename std::set<pFac>::const_iterator begin_face() const {
+	typename std::set<pFac>::const_iterator begin() const {
 		return this->faces.begin();
 	}
-	typename std::set<pFac>::iterator end_face() {
+	typename std::set<pFac>::iterator end() {
 		return this->faces.end();
 	}
-	typename std::set<pFac>::const_iterator end_face() const {
+	typename std::set<pFac>::const_iterator end() const {
 		return this->faces.end();
 	}
-	// connection -------------------------------
-	// check ------------------------------------
+// connection -------------------------------
+// check ------------------------------------
 
-	// show -------------------------------------
+// show -------------------------------------
 	void show_vertex() const;
 	void show_edge() const;
 	void show_face() const;
 
-	// output -----------------------------------
+// output -----------------------------------
 	void output_vtk(const std::string& fn) const;
 
-};
+	static void Copy(pSur src, pSur dst) {
+		src->copy_to(*dst);
+	}
+	static void Copy(Sur& src, Sur& dst) {
+		src.copy_to(dst);
+	}
+
+}
+;
 
 template<class TYPE, St DIM>
 void TriSurface_<TYPE, DIM>::load_gts_file(const std::string& filename) {
@@ -349,15 +442,14 @@ void TriSurface_<TYPE, DIM>::load_gts_file(const std::string& filename) {
 				std::istringstream istr(sline);
 				TYPE x, y, z;
 				istr >> x >> y >> z;
-				pVer pver(new Ver(x, y, z));
+				pVer pver = new Ver(x, y, z);
 				v_vertex.push_back(pver);
 				v_vc.push_back(0);
 			} else if (n <= nv + ne) {
 				std::istringstream istr(sline);
 				uInt i_v1, i_v2;
 				istr >> i_v1 >> i_v2;
-				pEdg pedg(new Edg(v_vertex[i_v1 - 1], v_vertex[i_v2 - 1]));
-				pedg->attach();
+				pEdg pedg = new Edg(v_vertex[i_v1 - 1], v_vertex[i_v2 - 1]);
 				v_vc[i_v1 - 1]++;
 				v_vc[i_v2 - 1]++;
 				v_edge.push_back(pedg);
@@ -366,10 +458,8 @@ void TriSurface_<TYPE, DIM>::load_gts_file(const std::string& filename) {
 				std::istringstream istr(sline);
 				uInt i_e1, i_e2, i_e3;
 				istr >> i_e1 >> i_e2 >> i_e3;
-				pFac pfac(
-						new Fac(v_edge[i_e1 - 1], v_edge[i_e2 - 1],
-								v_edge[i_e3 - 1], this));
-				pfac->attach();
+				pFac pfac = new Fac(v_edge[i_e1 - 1], v_edge[i_e2 - 1],
+						v_edge[i_e3 - 1], this);
 				v_ec[i_e1 - 1]++;
 				v_ec[i_e2 - 1]++;
 				v_ec[i_e3 - 1]++;
@@ -381,13 +471,8 @@ void TriSurface_<TYPE, DIM>::load_gts_file(const std::string& filename) {
 	//insert pface to set
 	for (auto iter = v_face.begin(); iter != v_face.end(); ++iter) {
 		auto ptr = (*iter);
-		faces.insert(ptr);
+		this->insert(ptr);
 	}
-	//for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
-	//	auto ptr = (*iter);
-	//	ptr->show();
-	//}
-
 }
 template<class TYPE, St DIM>
 void TriSurface_<TYPE, DIM>::show_vertex() const {
@@ -416,39 +501,39 @@ void TriSurface_<TYPE, DIM>::show_face() const {
 
 template<class TYPE, St DIM>
 void TriSurface_<TYPE, DIM>::output_vtk(const std::string& fn) const {
-	FILE* fptr = fopen(fn.c_str(), "w"); //write
-	if (fptr == NULL) {
-		std::cerr << "!> Open file error! " << fn << " \n";
-		exit(-1);
-	}
-	fprintf(fptr, "# vtk DataFile Version 2.0\n"
-			"Generated by LarusTS\n"
-			"ASCII\n"
-			"DATASET POLYDATA\n"
-			"POINTS %lu float\n", size_vertex());
-	std::map<pVer, uInt> m_veridx;
-	uInt count = 0;
-	// not ok
-	for (auto iter = c_vertex.begin(); iter != c_vertex.end(); ++iter) {
-		auto pt = (*iter);
-		fprintf(fptr, "%f %f %f \n", pt->x(), pt->y(), pt->z());
-		m_veridx.insert(std::pair<pVer, uInt>(pt, count));
-		count++;
-	}
-	fprintf(fptr, "POLYGONS %lu %lu\n", faces.size(), faces.size() * 4);
-	for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
-		auto pt = (*iter);
-		uInt i1, i2, i3;
-		i1 = m_veridx.find(pt->e1->v1)->second;
-		i2 = m_veridx.find(pt->e1->v2)->second;
-		if (pt->e2->v2 != pt->e1->v2 && pt->e2->v2 != pt->e1->v1) {
-			i3 = m_veridx.find(pt->e2->v2)->second;
-		} else {
-			i3 = m_veridx.find(pt->e2->v1)->second;
-		}
-		fprintf(fptr, "3 %u %u %u\n", i1, i2, i3);
-	}
-	fclose(fptr);
+//	FILE* fptr = fopen(fn.c_str(), "w"); //write
+//	if (fptr == NULL) {
+//		std::cerr << "!> Open file error! " << fn << " \n";
+//		exit(-1);
+//	}
+//	fprintf(fptr, "# vtk DataFile Version 2.0\n"
+//			"Generated by LarusTS\n"
+//			"ASCII\n"
+//			"DATASET POLYDATA\n"
+//			"POINTS %lu float\n", size_vertex());
+//	std::map<pVer, uInt> m_veridx;
+//	uInt count = 0;
+//	// not ok
+//	for (auto iter = c_vertex.begin(); iter != c_vertex.end(); ++iter) {
+//		auto pt = (*iter);
+//		fprintf(fptr, "%f %f %f \n", pt->x(), pt->y(), pt->z());
+//		m_veridx.insert(std::pair<pVer, uInt>(pt, count));
+//		count++;
+//	}
+//	fprintf(fptr, "POLYGONS %lu %lu\n", faces.size(), faces.size() * 4);
+//	for (auto iter = faces.begin(); iter != faces.end(); ++iter) {
+//		auto pt = (*iter);
+//		uInt i1, i2, i3;
+//		i1 = m_veridx.find(pt->e1->v1)->second;
+//		i2 = m_veridx.find(pt->e1->v2)->second;
+//		if (pt->e2->v2 != pt->e1->v2 && pt->e2->v2 != pt->e1->v1) {
+//			i3 = m_veridx.find(pt->e2->v2)->second;
+//		} else {
+//			i3 = m_veridx.find(pt->e2->v1)->second;
+//		}
+//		fprintf(fptr, "3 %u %u %u\n", i1, i2, i3);
+//	}
+//	fclose(fptr);
 }
 
 }

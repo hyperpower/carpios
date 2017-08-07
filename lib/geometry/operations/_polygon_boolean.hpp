@@ -22,20 +22,13 @@
 #include <fstream>
 #include <queue>
 
-#define _DEBUG_
+//#define _DEBUG_
 
 namespace carpio {
 
-enum BooleanOpType {
-	INTERSECTION, UNION, DIFFERENCE, XOR
-};
 enum EdgeType {
 	NORMAL, NON_CONTRIBUTING, SAME_TRANSITION, DIFFERENT_TRANSITION
 };
-enum PolygonType {
-	SUBJECT, CLIPPING
-};
-
 template<typename TYPE, St DIM>
 class SweepEvent_;
 
@@ -262,7 +255,7 @@ protected:
 	}
 
 	/** @brief Compute the events associated to segment s, and insert them into pq and eq */
-	void _process_segment(const Segment& s, PolygonType pl) {
+	void _process_segment(const Segment& s, BooleanObjectType pl) {
 		// if the two edge endpoints are equal, the segment is dicarded
 		if (s.ps() == s.pe()) {
 			// in the future this can be done as preprocessing to avoid "polygons" with less than 3 edges

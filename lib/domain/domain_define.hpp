@@ -101,14 +101,7 @@ static const int _F_C_ = 1;
 static const int _C_F_ = 2;
 
 
-/*
- * geometry
- */
-enum Orientation {
-	_M_ = 0, //
-	_P_ = 1, //
-	_C_ = 2, //
-};
+
 
 
 

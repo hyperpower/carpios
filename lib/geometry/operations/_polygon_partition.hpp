@@ -32,8 +32,8 @@ namespace carpio {
 
 typedef double tppl_float;
 
-#define TPPL_CCW 1
-#define TPPL_CW -1
+//#define TPPL_CCW 1
+//#define TPPL_CW -1
 
 template<class TYPE, St DIM>
 class PolygonPartition_ {

@@ -9,6 +9,14 @@
 
 namespace carpio {
 
+enum BooleanOpType {
+	INTERSECTION, UNION, DIFFERENCE, XOR
+};
+
+enum BooleanObjectType {
+	SUBJECT, CLIPPING
+};
+
 template<class TYPE>
 class Contour_;
 
@@ -34,6 +42,7 @@ public:
 	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
 	typedef PointChain_<TYPE, DIM> PointChain;
 	typedef Intersection_<TYPE, DIM> Isc;
+	typedef Box_<TYPE, DIM> Box;
 
 	template<class CA, class CB>
 	static double Distance(const CA& a, const CB& b) {
@@ -70,7 +79,8 @@ public:
 //static double Distance(const Point& p1, const Point& p2) {
 //		return std::sqrt(Distance2(p1, p2));
 //	}
-	static double _Distance(const Point& p1, const Point& p2, TagPoint, TagPoint) {
+	static double _Distance(const Point& p1, const Point& p2, TagPoint,
+			TagPoint) {
 		return std::sqrt(Distance2(p1, p2));
 	}
 
@@ -158,6 +168,21 @@ public:
 		}
 	}
 
+	static int OnWhichSide3(
+			const Point& p0,
+			const Point& p1,
+			const Point& p2,
+			const Point& p3) {
+		double tmp = Cross(p0, p1, p2, p3);
+		if (tmp > 0) {
+			return 1;
+		} else if (tmp < 0) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+
 	/** Signed area of the triangle ( (0,0), p1, p2) */
 	static inline double SignedArea(const Point& p1, const Point& p2) {
 		ASSERT(Dim == 2);
@@ -226,6 +251,89 @@ public:
 		return true;
 	}
 
+	/**
+	 * centroid  (barycenter)
+	 *
+	 * returns center point as a point
+	 */
+	static Point Centroid(const Point& v1, const Point& v2, const Point& v3) {
+		Vt x = (v1.x() + v2.x() + v3.x()) / 3.0;
+		Vt y = (v1.y() + v2.y() + v3.y()) / 3.0;
+		Vt z = (DIM == 3) ? (v1.z() + v2.z() + v3.z()) / 3.0 : 0.0;
+		return Point(x, y, z);
+	}
+
+	/**
+	 * triangle_normal:
+	 * @t: a #GtsTriangle.
+	 * @x: the x coordinate of the normal.
+	 * @y: the y coordinate of the normal.
+	 * @z: the z coordinate of the normal.
+	 *
+	 * Computes the coordinates of the oriented normal of @t as the
+	 * cross-product of two edges, using the left-hand rule. The normal is
+	 * not normalized.  If this triangle is part of a closed and oriented
+	 * surface, the normal points to the outside of the surface.
+	 */
+	static Point Normal(const Point& v1, const Point& v2, const Point& v3) {
+		Vt x1 = v2.x() - v1.x();
+		Vt y1 = v2.y() - v1.y();
+		Vt z1 = (DIM == 3) ? v2.z() - v1.z() : 0.0;
+
+		Vt x2 = v3.x() - v1.x();
+		Vt y2 = v3.y() - v1.y();
+		Vt z2 = (DIM == 3) ? v3.z() - v1.z() : 0.0;
+
+		Vt x = y1 * z2 - z1 * y2;
+		Vt y = z1 * x2 - x1 * z2;
+		Vt z = (DIM == 3) ? x1 * y2 - y1 * x2 : 0.0;
+
+		return Point(x, y, z);
+	}
+
+	// Find the circumcenter of three 2-D points by Cramer's Rule to find
+	// the intersection of two perpendicular bisectors of the triangle's
+	// edges.
+	// http://www.ics.uci.edu/~eppstein/junkyard/circumcenter.html
+	//
+	// Return true if successful; return false if points are collinear
+	static bool Circumcenter(Vt x0, Vt y0,
+			Vt x1, Vt y1,
+			Vt x2, Vt y2,
+			Vt& centerx, Vt& centery)
+			{
+		Vt D;
+		Vt x0m2, y1m2, x1m2, y0m2;
+		Vt x0p2, y1p2, x1p2, y0p2;
+		x0m2 = x0 - x2;
+		y1m2 = y1 - y2;
+		x1m2 = x1 - x2;
+		y0m2 = y0 - y2;
+		x0p2 = x0 + x2;
+		y1p2 = y1 + y2;
+		x1p2 = x1 + x2;
+		y0p2 = y0 + y2;
+
+		D = x0m2 * y1m2 - x1m2 * y0m2;
+		if ((D < SMALL) && (D > -SMALL))
+			return false;
+
+		centerx = (((x0m2 * x0p2 + y0m2 * y0p2) / 2 * y1m2)
+				- (x1m2 * x1p2 + y1m2 * y1p2) / 2 * y0m2) / D;
+		centery = (((x1m2 * x1p2 + y1m2 * y1p2) / 2 * x0m2)
+				- (x0m2 * x0p2 + y0m2 * y0p2) / 2 * x1m2) / D;
+
+		return true;
+	}
+
+	static Box BoundingBox(const Point& v1, const Point& v2, const Point& v3) {
+		Point max = Max(v1, v2);
+		max = Max(max, v3);
+		Point min = Min(v1, v2);
+		min = Min(min, v3);
+		return Box(min, max);
+	}
+
 	static bool IsInOn(
 			const Vt& xmin, const Vt& xmax,
 			const Vt& ymin, const Vt& ymax,
@@ -277,6 +385,7 @@ public:
 	// --------|------|--------|-----|---------
 	//        u0     v0        u1   v1
 	//               w[0]      w[1]
+	// should be move to intersection class
 	static int FindIntersection(Vt u0, Vt u1, Vt v0, Vt v1, Vt w[2]) {
 		if ((u1 < v0) || (u0 > v1))
 			return 0;
@@ -298,6 +407,7 @@ public:
 	}
 
 	// Find intersection on 2d
+	// should be move to intersection class
 	static int FindIntersection(const Segment& seg0, const Segment& seg1,
 			Point& pi0, Point& pi1) {
 		ASSERT(Dim == 2);
@@ -460,8 +570,6 @@ public:
 	}
 
 };
-
-
 
 //template<typename TYPE, St DIM>
 //bool IsBoxCross(const Segment_<TYPE, DIM> &s1, const Segment_<TYPE, DIM> &s2) {

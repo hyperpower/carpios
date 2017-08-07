@@ -64,21 +64,10 @@ public:
 
 protected:
 
-	pPO _to_list(const Arrd& arr, int jump = 0) const {
-		pPO pl = PyList_New(0);
-		for (Arrd::size_type i = 0; i < arr.size(); i++) {
-			pPO p = PyFloat_FromDouble(arr[i]);
-			if (jump > 0) {
-				if (i % jump == 0 && i > 0 && jump > 0) {
-					PyList_Append(pl, Py_None);
-				}
-			}
-			PyList_Append(pl, p);
-		}
-		return pl;
-	}
-
-	pPO _to_list(const Listd& arr, int jump = 0) const {
+	template <class Container>
+	pPO _to_list(const Container& arr, int jump = 0) const {
+		bool checkt = IsIterable<Container>::value;
+		ASSERT(checkt);
 		pPO pl = PyList_New(0);
 		int i = 0;
 		for (Listd::value_type v : arr) {
@@ -212,8 +201,13 @@ public:
 	typedef ArrayListV<double> Arrd;
 	typedef std::list<double> Listd;
 public:
-	Plotly_actor_scatter3d(const Arrd& x, const Arrd& y, const Arrd& z,
+	template<class Container>
+	Plotly_actor_scatter3d(
+			const Container& x,
+			const Container& y,
+			const Container& z,
 			int jump = 0) {
+		bool checkt = IsIterable<Container>::value;
 		//Py_Initialize();
 		_module = this->get_module("Scatter3d");
 		pPO px = this->_to_list(x, jump);
@@ -223,17 +217,7 @@ public:
 		this->_map["y"] = py;
 		this->_map["z"] = pz;
 	}
-	Plotly_actor_scatter3d(const Listd& x, const Listd& y, const Listd& z,
-			int jump = 0) {
-		//Py_Initialize();
-		_module = this->get_module("Scatter3d");
-		pPO px = this->_to_list(x, jump);
-		pPO py = this->_to_list(y, jump);
-		pPO pz = this->_to_list(z, jump);
-		this->_map["x"] = px;
-		this->_map["y"] = py;
-		this->_map["z"] = pz;
-	}
+
 	void set_colorscale(const Listd& d, const int& size = 10,
 			const std::string name = "Viridis") {
 		typedef typename Listd::value_type vt;
@@ -265,20 +249,10 @@ public:
 	typedef PyObject* pPO;
 	typedef ArrayListV<double> Arrd;
 public:
-	Plotly_actor_mesh3d(const Arrd& x, const Arrd& y, const Arrd& z) {
-
-		_module = this->get_module("Mesh3d");
-		pPO px = this->_to_list(x);
-		pPO py = this->_to_list(y);
-		pPO pz = this->_to_list(z);
-		this->_map["x"] = px;
-		this->_map["y"] = py;
-		this->_map["z"] = pz;
-		//_data = nullptr;
-	}
-
-	Plotly_actor_mesh3d(const Listd& x, const Listd& y, const Listd& z) {
-
+	template<class Container>
+	Plotly_actor_mesh3d(const Container& x, const Container& y, const Container& z) {
+		bool checkt = IsIterable<Container>::value;
+		ASSERT(checkt);
 		_module = this->get_module("Mesh3d");
 		pPO px = this->_to_list(x);
 		pPO py = this->_to_list(y);

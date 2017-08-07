@@ -30,7 +30,7 @@ public:
 	// is the point the left endpoint of the segment (p, other->p)?
 	bool left;
 	// Polygon to which the associated segment belongs to
-	PolygonType pl;
+	BooleanObjectType pl;
 	// Event associated to the other endpoint of the segment
 	SweepEvent *other;
 	/**  Does the segment (p, other->p) represent an inside-outside transition in the polygon for a vertical ray from (p.x, -infinite) that crosses the segment? */
@@ -42,7 +42,7 @@ public:
 	typename std::set<SweepEvent*>::iterator* poss;
 
 	/** Class constructor */
-	SweepEvent_(const Point& pp, bool isleft, PolygonType apl, SweepEvent* o,
+	SweepEvent_(const Point& pp, bool isleft, BooleanObjectType apl, SweepEvent* o,
 			EdgeType t = NORMAL) :
 			p(pp), left(isleft), pl(apl), other(o), type(t), poss(0) {
 	}

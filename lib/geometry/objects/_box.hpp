@@ -7,6 +7,8 @@
 #include <array>
 #include "../../utility/any.hpp"
 
+#include "_triface.hpp"
+
 namespace carpio {
 
 template<typename TYPE, St DIM>
@@ -32,7 +34,7 @@ public:
 	typedef const TYPE& const_reference;
 
 	typedef Operation_<TYPE, DIM> Op;
-	private:
+	protected:
 	Point _min, _max;
 	//TYPE _xmin,_ymin,_xmax,_ymax;
 public:
@@ -61,6 +63,13 @@ public:
 		_min = pmin;
 		_max = pmax;
 	}
+
+	Box_(const Self& a, const Self& b) { // union to one box without data
+		Self& self = (*this);
+		self._min = Op::Min(a._min, b._min);
+		self._max = Op::Max(a._max, b._max);
+	}
+
 	Vt min(int a) const {
 		ASSERT(a < Dim);
 		return _min[a];
@@ -108,10 +117,10 @@ public:
 		return res;
 	}
 
-	Self& operator=(const Self& other) const {
+	Self& operator=(const Self& other) {
 		if (this != &other) { // self-assignment check expected
-			_min = other._min;
-			_max = other._max;
+			this->_min = other._min;
+			this->_max = other._max;
 		}
 		return *this;
 	}
@@ -142,12 +151,63 @@ public:
 		Point max = Op::Max(_max, b._max);
 		return Self(min, max);
 	}
+
+	Vt get(Axes aix, Orientation loc) const {
+		if (aix == _Z_ && DIM == 2) {
+			return 0;
+		}
+		Vt xv = 0;
+		const Self& self = (*this);
+		switch (loc) {
+		case _M_: {
+			xv = _min[aix];
+			break;
+		}
+		case _C_: {
+			xv = (_min[aix] + _max[aix]) * 0.5;
+			break;
+		}
+		case _P_: {
+			xv = _max[aix];
+			break;
+		}
+		default: {
+			break;
+		}
+		}
+		return xv;
+	}
+
+	Vt get(Orientation loc, Axes aix) const {
+		return get(aix, loc);
+	}
+
+	Vt get_d(Axes aix) const {
+		const Self& self = (*this);
+		return _max[aix] - _min[aix];
+	}
+
+	Vt get_dh(Axes aix) const {
+		const Self& self = (*this);
+		return (_max[aix] - _min[aix]) / 2.0;
+	}
+
+	Point get_point(Orientation lx, Orientation ly, Orientation lz) const {
+		return Poi(get(_X_, lx), get(_Y_, ly), get(_Z_, lz));
+	}
+
 };
 
 struct TagBBox: public TagGeometry {
 	TagBBox() {
 	}
 };
+
+template<class TYPE, St DIM>
+class TriSurface_;
+
+template<class TYPE, St DIM, class SURFACE>
+class TriFace_;
 
 template<typename TYPE, St DIM>
 class BBox_: public Box_<TYPE, DIM> {
@@ -167,27 +227,43 @@ public:
 
 	typedef Operation_<TYPE, DIM> Op;
 
+	typedef TriSurface_<TYPE, DIM> TriSurface;
+	typedef TriFace_<TYPE, DIM, TriSurface> TriFace;
+
 protected:
 	Any _obj;
 
 public:
+	BBox_() {
+		_obj = nullptr;
+	}
 	BBox_(const Any& o) {
 		_obj = o;
 		_set_box();
 	}
 
-	Any& get_obj(){
+	BBox_(const Point& min, const Point& max): Box(min, max){
+		_obj = nullptr;
+	}
+
+
+	BBox_(const Self& a, const Self& b) :
+			Box(a, b) { // union to one box without data
+		_obj = nullptr;
+	}
+
+	Any& get_obj() {
 		return _obj;
 	}
 
-	const Any& get_obj() const{
+	const Any& get_obj() const {
 		return _obj;
 	}
 
 protected:
 	void _set_box() {
 		if (_obj.type() == typeid(Segment)) {
-			Segment& s = any_cast<Segment>(_obj);
+			Segment s = any_cast<Segment>(_obj);
 			Box bs = s.box();
 			this->_min = bs.min();
 			this->_max = bs.max();
@@ -199,7 +275,20 @@ protected:
 			this->_min = bs.min();
 			this->_max = bs.max();
 			return;
-
+		}
+		if ((_obj.type() == typeid(TriFace))) {
+			TriFace s = any_cast<TriFace>(_obj);
+			Box bs = s.box();
+			this->_min = bs.min();
+			this->_max = bs.max();
+			return;
+		}
+		if ((_obj.type() == typeid(TriFace*))) {
+			TriFace* s = any_cast<TriFace*>(_obj);
+			Box bs = s->box();
+			this->_min = bs.min();
+			this->_max = bs.max();
+			return;
 		}
 
 	}

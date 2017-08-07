@@ -14,6 +14,11 @@
 #include "_contour.hpp"
 #include "_point_chain.hpp"
 #include "_triangle.hpp"
+#include "_edge.hpp"
+#include "_triface.hpp"
+#include "_trisurface.hpp"
+#include "_vertex.hpp"
+#include "_bbtree.hpp"
 
 namespace carpio {
 
