@@ -43,7 +43,7 @@ public:
 	typedef typename std::vector<Point>::iterator iterator;
 	typedef typename std::vector<Point>::const_iterator const_iterator;
 	typedef Segment_<TYPE, Dim> Segment;
-	typedef Segment_<TYPE, Dim>& ref_Segment;
+	typedef Segment& ref_Segment;
 	typedef TYPE Vt;
 
 	//typedef ArrayListT<Point> ArrP;

@@ -14,14 +14,15 @@
 #include "operations/_creation.hpp"
 #include "operations/_tri_tri_intersect.hpp"
 #include "operations/_trisurface_boolean.hpp"
+#include "operations/_delaunay_triangulation.hpp"
 
 namespace carpio {
 
 typedef Point_<Float, 2> Point_2D;
 typedef Point_<Float, 3> Point_3D;
 
-typedef Segment_<Float, 2> Segment_2D;
-typedef Segment_<Float, 3> Segment_3D;
+//typedef Segment_<Float, 2> Segment_2D;
+//typedef Segment_<Float, 3> Segment_3D;
 
 //typedef Polygon_<Float> Polygon;
 

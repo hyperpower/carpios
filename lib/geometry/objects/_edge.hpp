@@ -11,6 +11,8 @@
 #include "_vertex.hpp"
 #include <iomanip>
 #include <list>
+#include <set>
+#include <functional>
 
 namespace carpio {
 
@@ -50,6 +52,8 @@ public:
 	pVer v2;
 
 	list_pTriFace faces;
+
+	Any _any_data;
 
 public:
 	Edge_(pVer a, pVer b) :
@@ -97,6 +101,11 @@ public:
 		return idx == 0 ? v1 : v2;
 	}
 
+	bool has_vertex(const_pVer pv) const {
+		_RETURN_VAL_IF_FAIL(pv != nullptr, false);
+		return v1 == pv || v2 == pv;
+	}
+
 	bool has_face(const_pFac pf) const {
 		_RETURN_VAL_IF_FAIL(pf != nullptr, false);
 		for (const_pFac s : this->faces) {
@@ -122,6 +131,35 @@ public:
 		}
 	}
 
+	void attach(pFac pf) {
+		if (!has_face(pf)) {
+			faces.push_back(pf);
+		}
+	}
+
+	void reverse() {
+		pVer tmp;
+		tmp = v1;
+		v1 = v2;
+		v2 = tmp;
+	}
+
+	Poi tangent() const {
+		return (*v2) - (*v1);
+	}
+
+	St size_faces() const {
+		return faces.size();
+	}
+
+	Any& data() {
+		return _any_data;
+	}
+
+	const Any& data() const{
+		return _any_data;
+	}
+
 	// show =====================================
 	void show() const {
 		std::ios::fmtflags f(std::cout.flags());
@@ -144,7 +182,7 @@ public:
 		std::cout.setf(f);
 	}
 
-	bool is_connected(pVer pv) const{
+	bool is_connected(pVer pv) const {
 		_RETURN_VAL_IF_FAIL(pv != nullptr, false);
 		return (pv == this->v1) || (pv == this->v2);
 	}
@@ -156,18 +194,41 @@ public:
 		return v1 == (e.v1) || v1 == (e.v2);
 	}
 
-	static bool IsConnected(  //
-			const Edg& s, //
-			const Ver& e1, //
-			const Ver& e2) { //
-		return ((*(s.v1)) == e1 && (*(s.v2)) == e2)
-				|| ((*(s.v1)) == e2 && (*(s.v2)) == e1);
+	static bool IsSameV(  //
+			const Edg& e, //
+			const Ver& ver1, //
+			const Ver& ver2) { //
+		return ((*(e.v1)) == ver1 && (*(e.v2)) == ver2)
+				|| ((*(e.v1)) == ver2 && (*(e.v2)) == ver1);
 	}
-	static bool IsIdentical(     //
-			const Edg& s1,   //
-			const Edg& s2) { //
-		return ((*(s1.v1)) == (*(s2.v1)) && (*(s1.v2)) == (*(s2.v2)))
-				|| ((*(s1.v1)) == (*(s2.v2)) && (*(s1.v2)) == (*(s2.v1)));
+
+	static bool IsSameDirectionV(  //
+				const Edg& e, //
+				const Ver& ver1, //
+				const Ver& ver2) { //
+		if (IsSameV(e,ver1, ver2)){
+			return ((*(e.v1)) == ver1 && (*(e.v2)) == ver2);
+		}
+		return false;
+	}
+	static bool IsSameA(  //
+			const Edg& e, //
+			const Ver& ver1, //
+			const Ver& ver2) { //
+		return ((e.v1) == &ver1 && (e.v2) == &ver2)
+				|| ((e.v1) == &ver2 && (e.v2) == &ver1);
+	}
+	static bool IsSameV( // comapare value
+			const Edg& e1,   //
+			const Edg& e2) { //
+		return ((*(e1.v1)) == (*(e2.v1)) && (*(e1.v2)) == (*(e2.v2)))
+				|| ((*(e1.v1)) == (*(e2.v2)) && (*(e1.v2)) == (*(e2.v1)));
+	}
+	static bool IsSameA( // comapare adress
+			const Edg& e1,   //
+			const Edg& e2) { //
+		return (((e1.v1)) == ((e2.v1)) && ((e1.v2)) == ((e2.v2)))
+				|| (((e1.v1)) == ((e2.v2)) && ((e1.v2)) == ((e2.v1)));
 	}
 	/// compare pointer address
 	static bool IsConnected(
@@ -185,6 +246,82 @@ public:
 				|| *(s1.v2) == *(s2.v1) || *(s1.v2) == *(s2.v2));
 	}
 
+	/// for each vertex in list of edges
+	template<class Container>
+	static void ForEachVertex(
+			Container& edges,
+			std::function<void(pVer&)> fun) {
+		typename Container::value_type dummy;
+		_ForEachVertex(edges, fun, dummy);
+	}
+
+	template<class Container>
+	static void _ForEachVertex(
+			Container& edges,
+			std::function<void(pVer&)> fun,
+			pEdg dummy) {
+		std::set<pVer> tmp;
+		for (auto& edg : edges) {
+			for (int i = 0; i < 2; ++i) {
+				pVer v = edg->vertex(i);
+				if (tmp.find(v) == tmp.end()) {
+					fun(v);
+					tmp.insert(v);
+				}
+			}
+		}
+	}
+
+	template<class Container>
+	static void _ForEachVertex(
+			Container& edges,
+			std::function<void(pVer&)> fun,
+			Edg dummy) {
+		std::set<pEdg> tmp;
+		for (auto& edg : edges) {
+			for (int i = 0; i < 2; ++i) {
+				pVer v = edg.vertex(i);
+				if (tmp.find(v) == tmp.end()) {
+					fun(v);
+					tmp.insert(v);
+				}
+			}
+		}
+	}
+
+};
+
+template<class TYPE, St DIM, class FACE, class DATA>
+class EdgeD_: public Edge_<TYPE, DIM, FACE> {
+public:
+	static const St Dim = DIM;
+	typedef Edge_<TYPE, DIM, FACE> Base;
+	typedef EdgeD_<TYPE, DIM, FACE, DATA> Self;
+	typedef St size_type;
+	typedef TYPE Vt;
+	typedef Point_<TYPE, DIM> Poi;
+	typedef Poi* pPoi;
+	typedef Vertex_<TYPE, DIM, Self> Ver;
+	typedef Ver* pVer;
+	typedef const Ver* const_pVer;
+	typedef EdgeD_<TYPE, DIM, FACE, DATA> Edg;
+	typedef Edg* pEdg;
+	typedef FACE Fac;
+	typedef Fac* pFac;
+	typedef const Fac* const_pFac;
+
+protected:
+	DATA _data;
+	public:
+	EdgeD_(pVer a, pVer b) :
+			Base(a, b) {
+	}
+	const DATA& data() const {
+		return _data;
+	}
+	DATA& data() {
+		return _data;
+	}
 };
 
 }

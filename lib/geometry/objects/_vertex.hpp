@@ -17,8 +17,8 @@ template<class TYPE, St DIM, class EDGE>
 class Vertex_: public Point_<TYPE, DIM> {
 public:
 	static const St Dim = DIM;
-	typedef Point_<TYPE, DIM> base_class;
-	typedef Vertex_<TYPE, DIM, EDGE> self_class;
+	typedef Point_<TYPE, DIM> Base;
+	typedef Vertex_<TYPE, DIM, EDGE> Self;
 	typedef St size_type;
 	typedef TYPE Vt;
 	typedef Point_<TYPE, DIM> Poi;
@@ -36,13 +36,16 @@ public:
 
 public:
 	list_pEdg _ledges;
-	public:
-	Vertex_(const base_class& poi) :
-			base_class(poi), _ledges() {
+
+	Any _any_data;
+
+public:
+	Vertex_(const Base& poi) :
+		Base(poi), _ledges() {
 	}
 
 	Vertex_(const Vt&x, const Vt& y, const Vt& z = 0) :
-			base_class(x, y, z), _ledges() {
+		Base(x, y, z), _ledges() {
 	}
 
 	void attach(pEdg pe) {
@@ -102,6 +105,7 @@ public:
 	const_iterator_pEdg end_edge() const {
 		return this->_ledges.end();
 	}
+
 
 	/**
 	 * vertex_replace:
@@ -193,12 +197,12 @@ public:
 	static bool IsClosed(const std::list<pVer>& lver) {
 		for (auto iter = lver.begin(); iter != lver.end(); ++iter) {
 			auto itern = std::next(iter, 1);
-			if(itern == lver.end()){
+			if (itern == lver.end()) {
 				itern = lver.begin();
 			}
 			pVer pv = *iter;
 			pVer pvn = *itern;
-			if(IsConnected(pv, pvn) == nullptr){
+			if (IsConnected(pv, pvn) == nullptr) {
 				return false;
 			}
 		}

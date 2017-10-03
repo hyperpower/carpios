@@ -70,6 +70,10 @@ public:
 		self._max = Op::Max(a._max, b._max);
 	}
 
+	bool empty() const{
+		return _min == _max;
+	}
+
 	Vt min(int a) const {
 		ASSERT(a < Dim);
 		return _min[a];
@@ -123,6 +127,14 @@ public:
 			this->_max = other._max;
 		}
 		return *this;
+	}
+
+	bool operator==(const Self& other) {
+		return (this->_min == other._min) &&
+				(this->_max == other._max);
+	}
+	bool operator!=(const Self& other){
+		return !(this->operator ==(other));
 	}
 
 	bool operator<(const Self& rhs) const {
@@ -182,6 +194,14 @@ public:
 		return get(aix, loc);
 	}
 
+	Point d() const {
+		Point res;
+		for (St i = 0; i < Dim; i++) {
+			res[i] = _max[i] - _min[i];
+		}
+		return res;
+	}
+
 	Vt get_d(Axes aix) const {
 		const Self& self = (*this);
 		return _max[aix] - _min[aix];
@@ -197,6 +217,13 @@ public:
 	}
 
 };
+
+template<typename TYPE, St DIM>
+std::ostream& operator<<(std::ostream& stream, const Box_<TYPE, DIM>& box) {
+	stream << "max = " << box.max();
+	stream << "  min = " << box.min();
+	return stream;
+}
 
 struct TagBBox: public TagGeometry {
 	TagBBox() {
@@ -242,10 +269,10 @@ public:
 		_set_box();
 	}
 
-	BBox_(const Point& min, const Point& max): Box(min, max){
+	BBox_(const Point& min, const Point& max) :
+			Box(min, max) {
 		_obj = nullptr;
 	}
-
 
 	BBox_(const Self& a, const Self& b) :
 			Box(a, b) { // union to one box without data

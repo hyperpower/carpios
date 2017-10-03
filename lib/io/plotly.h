@@ -17,10 +17,10 @@ public:
 	typedef std::map<std::string, pPO> Map;
 	typedef ArrayListV<double> Arrd;
 	typedef std::list<double> Listd;
-protected:
+	protected:
 	Map _map;
 	pPO _module;
-public:
+	public:
 	Plotly_actor();
 	virtual ~Plotly_actor();
 
@@ -64,7 +64,7 @@ public:
 
 protected:
 
-	template <class Container>
+	template<class Container>
 	pPO _to_list(const Container& arr, int jump = 0) const {
 		bool checkt = IsIterable<Container>::value;
 		ASSERT(checkt);
@@ -111,24 +111,19 @@ public:
 	typedef PyObject* pPO;
 	typedef ArrayListV<double> Arrd;
 	typedef std::list<double> Listd;
-public:
-	Plotly_actor_scatter(const Arrd& x, const Arrd& y, int jump = 0) {
+	public:
+	template<class Container>
+	Plotly_actor_scatter(
+			const Container& x,
+			const Container& y,
+			int jump = 0) {
+		bool checkt = IsIterable<Container>::value;
 		//Py_Initialize();
 		_module = this->get_module("Scatter");
 		pPO px = this->_to_list(x, jump);
 		pPO py = this->_to_list(y, jump);
 		this->_map["x"] = px;
 		this->_map["y"] = py;
-		//_data = nullptr;
-	}
-	Plotly_actor_scatter(const Listd& x, const Listd& y, int jump = 0) {
-		//Py_Initialize();
-		_module = this->get_module("Scatter");
-		pPO px = this->_to_list(x, jump);
-		pPO py = this->_to_list(y, jump);
-		this->_map["x"] = px;
-		this->_map["y"] = py;
-		//_data = nullptr;
 	}
 
 	void set_colorscale_range(const double& minv, const double & maxv) {
@@ -200,7 +195,7 @@ public:
 	typedef PyObject* pPO;
 	typedef ArrayListV<double> Arrd;
 	typedef std::list<double> Listd;
-public:
+	public:
 	template<class Container>
 	Plotly_actor_scatter3d(
 			const Container& x,
@@ -248,9 +243,10 @@ class Plotly_actor_mesh3d: public Plotly_actor {
 public:
 	typedef PyObject* pPO;
 	typedef ArrayListV<double> Arrd;
-public:
+	public:
 	template<class Container>
-	Plotly_actor_mesh3d(const Container& x, const Container& y, const Container& z) {
+	Plotly_actor_mesh3d(const Container& x, const Container& y,
+			const Container& z) {
 		bool checkt = IsIterable<Container>::value;
 		ASSERT(checkt);
 		_module = this->get_module("Mesh3d");
@@ -278,7 +274,7 @@ public:
 	typedef PyObject* pPO;
 	typedef ArrayListV<double> Arrd;
 	typedef std::list<double> Listd;
-public:
+	public:
 	// x, y indicate the location of the faces
 	Plotly_actor_heatmap(const Listd& x, const Listd& y, const Listd& z) {
 		//Py_Initialize();
@@ -303,7 +299,7 @@ public:
 	typedef PyObject* pPO;
 	typedef std::shared_ptr<Plotly_actor> spPA;
 	typedef std::map<std::string, pPO> Map;
-public:
+	public:
 	Plotly() {
 		_init();
 	}
@@ -336,8 +332,8 @@ public:
 		//
 		pPO layout = _get_layout();
 		pPO args;
-			args = Py_BuildValue("({s:O, s:O})", "data", data, "layout",
-					layout);
+		args = Py_BuildValue("({s:O, s:O})", "data", data, "layout",
+				layout);
 		pPO pRet = PyObject_CallObject(_funPlot, args);
 	}
 

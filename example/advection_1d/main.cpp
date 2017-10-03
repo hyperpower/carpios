@@ -1,7 +1,6 @@
 #include "structure/s_grid.hpp"
 #include "structure/s_poisson.hpp"
 #include "structure/s_advection.hpp"
-#include "structure/s_io_plotly.hpp"
 #include "structure/s_operation.hpp"
 #include "structure/s_io_file.hpp"
 #include <math.h>

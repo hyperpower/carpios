@@ -25,10 +25,9 @@ public:
 	typedef TYPE Vt;
 	typedef Point_<TYPE, DIM> Point;
 	typedef Point_<TYPE, DIM>& ref_Point;
+	typedef Point_<TYPE, DIM>* pPoint;
+	typedef const Point_<TYPE, DIM>* const_pPoint;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
-	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
-	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
 
 	typedef Contour_<TYPE> Contour;
 	typedef PointChain_<TYPE, DIM> PointChain;
@@ -75,6 +74,51 @@ public:
 		}
 	}
 
+	static void _WritePointsHead(TextFile& txtf, St size) {
+		// write head
+		int d = Dim;
+		txtf.add_line(fmt::format("## DIM  : {0:d}", d));
+		txtf.add_line(fmt::format("## SIZE : {0:d}", size));
+		txtf.add_line(fmt::format("## TYPE : {0:s}", "Points"));
+	}
+	static void _WriteTrianglesHead(TextFile& txtf, St size) {
+		// write head
+		int d = Dim;
+		txtf.add_line(fmt::format("## DIM  : {0:d}", d));
+		txtf.add_line(fmt::format("## SIZE : {0:d}", size));
+		txtf.add_line(fmt::format("## TYPE : {0:s}", "Triangles"));
+	}
+
+	template<class Container>
+	static void _WritePointsBody(TextFile& txtf, const Container& con,
+			const_pPoint dummy) {
+		for (auto& p : con) {
+			fmt::MemoryWriter mw;
+			for (St i = 0; i < Dim; i++) {
+				if (i == Dim - 1) {
+					mw.write("{0:10.5f}", (*p)[i]);
+				} else {
+					mw.write("{0:10.5f},", (*p)[i]);
+				}
+			}
+			txtf.add_line(mw.str());
+		}
+	}
+	template<class Container>
+	static void _WritePointsBody(TextFile& txtf, const Container& con,
+			const Point& dummy) {
+		for (auto& p : con) {
+			fmt::MemoryWriter mw;
+			for (St i = 0; i < Dim; i++) {
+				if (i == Dim - 1) {
+					mw.write("{0:10.5f}", p[i]);
+				} else {
+					mw.write("{0:10.5f},", p[i]);
+				}
+			}
+			txtf.add_line(mw.str());
+		}
+	}
 	static void WritePointChain(const std::string& fn, const PointChain& pc) {
 		TextFile txtf(fn);
 		// write head
@@ -83,17 +127,45 @@ public:
 		txtf.add_line(fmt::format("## SIZE : {0:d}", pc.size()));
 		txtf.add_line(fmt::format("## TYPE : {0:s}", "PointChain"));
 		txtf.add_line(fmt::format("## CLOSED : {0:d}", pc.closed()));
+		typedef typename PointChain::value_type value_type;
+		value_type dummy;
+		_WritePointsBody(txtf, pc, dummy);
+		txtf.write();
+	}
 
-		for (auto& p : pc) {
-			fmt::MemoryWriter mw;
-			for (St i = 0; i < Dim; i++) {
-				if (i == Dim - 1) {
-					mw.write("{0:10.5f}", p[i]);
-				}else{
-					mw.write("{0:10.5f},", p[i]);
-				}
-			}
-			txtf.add_line(mw.str());
+	template<class Container>
+	static void WritePoints(const std::string& fn, const Container& con) {
+		ASSERT(IsIterable<Container>::value);
+		TextFile txtf(fn);
+		// write head
+		_WritePointsHead(txtf, con.size());
+		typedef typename Container::value_type value_type;
+		value_type dummy;
+		_WritePointsBody(txtf, con, dummy);
+		txtf.write();
+	}
+
+	template<class Container, class Triangles>
+	static void _WriteTrianglesBody(
+			TextFile& txtf,
+			const Container& con,
+			const Triangles& tri) {
+		typedef typename Triangles::value_type value_type;
+		value_type dummy;
+		_WritePointsBody(txtf, tri, dummy);
+	}
+
+	template<class Container>
+	static void WriteTriangles(const std::string& fn, const Container& con) {
+		ASSERT(IsIterable<Container>::value);
+		TextFile txtf(fn);
+		// write head
+		_WriteTrianglesHead(txtf, con.size());
+		typedef typename Container::value_type value_type;
+		value_type dummy;
+		for (auto& tri : con) {
+			_WriteTrianglesBody(txtf, con, tri);
+			txtf.add_line(""); // add empty line
 		}
 		txtf.write();
 	}

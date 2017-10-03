@@ -105,16 +105,27 @@ public:
 		std::list<std::array<Point, 2> > lsegres;
 
 		_intersection_list(tsub, tclip, lsub, lclip, lsegres);
+		std::cout << "list sub     = " << lsub.size() << "\n";
+		std::cout << "list clip    = " << lclip.size() << "\n";
+		std::cout << "list segres  = " << lsegres.size() << "\n";
+		std::cout << "intersection list =========\n";
 
 		std::list<pEdge> ledge;
-		_new_edge_list(lsegres, ledge);
+		_new_edge_list(lsub, lclip, lsegres, ledge);
+		std::cout << "new edge list =============\n";
 
 		/// recontruct face
+		std::list<pVertex> lvend;
 		for (auto& pfsub : lsub) {
-			_reconstruct_subface(pfsub, lsub, lclip, ledge);
+//			_reconstruct_subface(pfsub, lsub, lclip, ledge);
+			std::list<pTriFace> lonclip;
+			std::list<pEdge> lonedge;
+			_choose_clip_face_on_subject(pfsub, lsub, lclip, ledge, lonclip, lonedge);
+			_find_ends_vertex(lonedge, lvend);
+			std::cout<< "ends p = " << lvend.size() <<std::endl;
+
 			break;
 		}
-
 		typedef PlotlyActor_Geometry_<TYPE, 3> PAG;
 		Plotly p;
 		auto actor = PAG::Surface(*_subject);
@@ -129,10 +140,12 @@ public:
 			p.add(actorap);
 		}
 
+		auto actorpoints = PAG::ScalarPoints(lvend);
+		p.add(actorpoints);
 		auto actor3 = PAG::Surface(result);
 		//p.add(actor3);
 		//actor3->set_opacity(0.5);
-//		p.plot();
+		p.plot();
 
 	}
 protected:
@@ -184,11 +197,26 @@ protected:
 	}
 
 	void _new_edge_list(
+			std::list<pTriFace>& lsub,
+			std::list<pTriFace>& lclip,
 			std::list<std::array<Point, 2> >& lsegres,
 			std::list<pEdge>& ledg) {
 		ledg.clear();
-		std::list<pVertex> used;
-		for (auto& arr : lsegres) {
+		std::set<pVertex> used;
+		auto iter_sub = lsub.begin();
+		auto iter_clip = lclip.begin();
+		auto iter_arr = lsegres.begin();
+		for (; iter_sub != lsub.end();) {
+			auto fsub = *iter_sub;
+			auto fclip = *iter_clip;
+			auto arr = *iter_arr;
+
+			// add vertex on face
+			for (int i = 0; i < 3; ++i) {
+				used.insert(fsub->vertex(i));
+				used.insert(fclip->vertex(i));
+			}
+
 			Point& p1 = arr[0];
 			Point& p2 = arr[1];
 			pVertex v1 = nullptr, v2 = nullptr;
@@ -204,14 +232,25 @@ protected:
 			}
 			if (v1 == nullptr) {
 				v1 = new Vertex(p1);
-				used.push_back(v1);
+				used.insert(v1);
 			}
 			if (v2 == nullptr) {
 				v2 = new Vertex(p2);
-				used.push_back(v2);
+				used.insert(v2);
 			}
 			pEdge pe = new Edge(v1, v2);
+			/// direction
+			auto nsub = fsub->normal();
+			auto nclip = fclip->normal();
+			auto te = pe->tangent();
+			double svolume = Op::TripleScalar(nsub, nclip, te);
+			if (svolume < 0) {
+				pe->reverse();
+			}
 			ledg.push_back(pe);
+			++iter_sub;
+			++iter_clip;
+			++iter_arr;
 		}
 	}
 
@@ -245,6 +284,61 @@ protected:
 		};
 	};
 
+	int _choose_clip_face_on_subject(
+			pTriFace pfsub,
+			const std::list<pTriFace>& lsub,
+			const std::list<pTriFace>& lclip,
+			const std::list<pEdge>& ledge,
+			std::list<pTriFace>& lonclip,
+			std::list<pEdge>& lonedge) {
+		auto iter_sub = lsub.begin();
+		auto iter_clip = lclip.begin();
+		auto iter_edg = ledge.begin();
+		/// get edges on subject face
+		for (; iter_sub != lsub.end();) {
+			pTriFace pfs = *iter_sub;
+			pTriFace pfc = *iter_clip;
+			pEdge edg = *iter_edg;
+			if (pfs == pfsub) {
+				// on subject face
+				lonclip.push_back(pfc);
+				lonedge.push_back(edg);
+			}
+			++iter_sub;
+			++iter_clip;
+			++iter_edg;
+		}
+		ASSERT(lonclip.size() == lonedge.size());
+		return _SUCCESS;
+	}
+
+	int _find_ends_vertex(
+			std::list<pEdge>& ledge,
+			std::list<pVertex>& lvend) {
+		std::set<pEdge> smain;
+		for (auto& e : ledge) {
+			smain.insert(e);
+		}
+		// find two end vertex
+		std::function<void(pVertex&)> fun_find_end_vertex =
+				[&smain, &lvend](pVertex pv) {
+					int count = 0;
+					for(auto it = pv->begin_edge(); it!= pv->end_edge();++it) {
+						pEdge e = *it;
+						if(smain.find(e) != smain.end()) {
+							++count;
+						}
+					}
+					if(count == 1) {
+						lvend.push_back(pv);
+					}
+					ASSERT(count != 0 && count <=2);
+				};
+
+		Edge::ForEachVertex(smain, fun_find_end_vertex);
+
+	}
+
 	int _reconstruct_subface(
 			pTriFace pfsub,
 			std::list<pTriFace>& lsub,
@@ -271,16 +365,15 @@ protected:
 		/// this step will connect Edges as vertex list
 		/// 1 regroup edges
 		int groups = _regroup(l_on);
+		std::cout << "Groups = " << groups << "\n";
 
 		//std::cout << "group size = " << group.size() << std::endl;
-		if (groups == 1) {
+		for (int i = 0; i < groups; i++) {
 			std::list<pVertex> lver;
-			_to_vertex_list(l_on, lver, 0);
-			pVertex theone;
-			int vc = _choose_the_one_vertex(pfsub, l_on, theone, 0);
-
-		} else {
-			SHOULD_NOT_REACH;
+			//_to_vertex_list(l_on, lver, i);
+			// gver[i] = lver;
+			std::list<pEdge> ledge;
+			_sort_edges(l_on, i, lver);
 		}
 
 		///
@@ -313,6 +406,7 @@ protected:
 		}
 		int flag = 0;
 		while (smain.size() > 0) {
+			std::cout << "flag = " << flag << std::endl;
 			int count = 0;
 			for (auto& unit : smain) {
 				if (count == 0) {
@@ -322,7 +416,7 @@ protected:
 				for (auto& unit_other : ssec) {
 					if (Edge::IsConnected(*(unit.first), *(unit_other.first))) {
 						unit.second->group = flag;
-						ssec.erase(unit.first);
+						ssec.erase(unit_other.first);
 						break;
 					}
 				}
@@ -350,8 +444,10 @@ protected:
 		lver.clear();
 		pEdge pbegin = smain.begin()->first;
 		lver.push_back(pbegin->vertex(0));
+
 		while (smain.size() > 0) {
 			pVertex v = lver.back();
+			std::cout << "ver " << *v << "\n";
 			short found = 0;
 			for (auto iter = v->begin_edge(); iter != v->end_edge(); ++iter) {
 				pEdge edge = *(iter);

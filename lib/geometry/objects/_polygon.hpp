@@ -32,7 +32,7 @@ public:
 	typedef Point_<TYPE, 2>& ref_Point;
 
 	typedef Segment_<TYPE, 2> Segment;
-	typedef Segment_<TYPE, 2>& ref_Segment;
+	typedef Segment& ref_Segment;
 
 protected:
 	/** Set of contours conforming the polygon */

@@ -4,33 +4,38 @@
 #include "../geometry_define.hpp"
 #include "_point.hpp"
 #include <array>
+#include <type_traits>
+#include <typeinfo>
 #include "math.h"
 
 namespace carpio {
-struct TagSegment : public TagGeometry{
-	TagSegment(){};
+struct TagSegment: public TagGeometry {
+	TagSegment() {
+	}
+	;
 };
 
 template<typename TYPE, St DIM>
-class Segment_: public std::array<Point_<TYPE, DIM>, 2> {
+class Segment_: public std::array< Point_<TYPE, DIM>, 2> {
 public:
+
 	static const St Dim = DIM;
 	typedef TagSegment Tag;
 	typedef TYPE Vt;
 	typedef Vt& ref_Vt;
 	typedef const Vt& const_ref_Vt;
-	typedef Segment_<Vt, DIM> Self;
-	typedef Segment_<Vt, DIM>& ref_Self;
-	typedef const Segment_<Vt, DIM>& const_ref_Self;
-	typedef Point_<Vt, DIM> Point;
-	typedef Point_<Vt, DIM>* pPoint;
-	typedef Point_<Vt, DIM>& ref_Point;
-	typedef const Point_<Vt, DIM>& const_ref_Point;
-	typedef Box_<Vt, DIM> Box;
+	typedef Segment_<TYPE, DIM> Self;
+	typedef Segment_<TYPE, DIM>& ref_Self;
+	typedef const Segment_<TYPE, DIM>& const_ref_Self;
+	typedef Point_<TYPE, DIM> Point;
+	typedef Point* pPoint;
+	typedef Point& ref_Point;
+	typedef const Point& const_ref_Point;
+	typedef Box_<Vt, Dim> Box;
 	typedef Operation_<Vt, Dim> Op;
-public:
+	public:
 	Segment_() :
-			std::array<Point_<Vt, DIM>, 2>() {
+			std::array<Point, 2>() {
 		_set_empty();
 	}
 	Segment_(const Point& s, const Point& e) {
@@ -70,16 +75,16 @@ public:
 		return (this->ps() == rhs.ps() && this->pe() == rhs.pe()) ? true : false;
 	}
 
-	ref_Point ps() {
+	Point& ps() {
 		return this->at(0);
 	}
-	const_ref_Point ps() const {
+	const Point& ps() const {
 		return this->at(0);
 	}
-	ref_Point pe() {
+	Point& pe() {
 		return this->at(1);
 	}
-	const_ref_Point pe() const {
+	const Point& pe() const {
 		return this->at(1);
 	}
 	Point pc() const {
@@ -153,7 +158,7 @@ public:
 		return (pey() - psy()) / (pex() - psx() + SMALL);
 	}
 
-	Box box() const{
+	Box box() const {
 		Point min = Op::Min(ps(), pe());
 		Point max = Op::Max(ps(), pe());
 		return Box(min, max);

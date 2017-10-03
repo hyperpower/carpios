@@ -43,7 +43,7 @@ def build():
     os.system("./build/main superbee")
     os.system("./build/main WAHYD")
     print "plot   -------------------------------- "
-    os.system("python plot.py")
+    #os.system("python plot.py")
 
 def main():
     clean() 

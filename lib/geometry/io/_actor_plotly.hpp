@@ -54,13 +54,14 @@ public:
 	typedef Point_<TYPE, DIM> Point;
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
-	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
-	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
+	//	typedef Segment_<TYPE, DIM> Segment;
+//	typedef Segment_<TYPE, DIM>& ref_Segment;
+//	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
 
 	typedef Contour_<TYPE> Contour;
 	typedef PointChain_<TYPE, DIM> PointChain;
 	typedef Polygon_<TYPE> Polygon;
+	typedef Triangle_<TYPE, DIM> Triangle;
 
 	typedef TriSurface_<TYPE, DIM> TriSurface;
 	typedef typename TriSurface::pVer pVertex;
@@ -252,6 +253,49 @@ public:
 		return res;
 	}
 
+	static spPA_scatter3d WireFrame(const Triangle& t) {
+		Listd lx;
+		Listd ly;
+		Listd lz;
+
+		for (int i = 0; i < 3; i++) {
+			const Point& p = t.p(i);
+			std::cout << "p " << p << std::endl;
+			lx.push_back(p.value(_X_));
+			ly.push_back(p.value(_Y_));
+			lz.push_back(p.value(_Z_));
+		}
+		const Point& p = t.p(0);
+		lx.push_back(p.value(_X_));
+		ly.push_back(p.value(_Y_));
+		lz.push_back(p.value(_Z_));
+		spPA_scatter3d res = spPA_scatter3d(
+				new Plotly_actor_scatter3d(lx, ly, lz));
+		res->set_mode("lines");
+		return res;
+	}
+
+	static spPA_scatter3d WireFrame(const Point& p1, const Point& p2,
+			const Point& p3) {
+		Listd lx;
+		Listd ly;
+		Listd lz;
+		const Point arrp[] = { p1, p2, p3 };
+		for (int i = 0; i < 3; i++) {
+			const Point& p = arrp[i];
+			lx.push_back(p.value(_X_));
+			ly.push_back(p.value(_Y_));
+			lz.push_back(p.value(_Z_));
+		}
+		lx.push_back(p1.value(_X_));
+		ly.push_back(p1.value(_Y_));
+		lz.push_back(p1.value(_Z_));
+		spPA_scatter3d res = spPA_scatter3d(
+				new Plotly_actor_scatter3d(lx, ly, lz));
+		res->set_mode("lines");
+		return res;
+	}
+
 	static spPA_scatter3d WireFrame(const Box& box
 			) {
 		Listd lx;
@@ -299,6 +343,139 @@ public:
 				new Plotly_actor_scatter3d(lx, ly, lz));
 		return res;
 	}
+
+	static spPA_scatter ScalarPoint(pVertex& pv) {
+		ASSERT(Dim == 2);
+		Listd lx;
+		Listd ly;
+
+		lx.push_back(pv->value(_X_));
+		ly.push_back(pv->value(_Y_));
+		spPA_scatter res = spPA_scatter(
+				new Plotly_actor_scatter(lx, ly, 1));
+		return res;
+	}
+
+	static spPA_scatter3d ScalarPoints(std::list<pVertex>& listpv) {
+		Listd lx;
+		Listd ly;
+		Listd lz;
+
+		for (auto& pv : listpv) {
+			lx.push_back(pv->value(_X_));
+			ly.push_back(pv->value(_Y_));
+			lz.push_back(pv->value(_Z_));
+		}
+		spPA_scatter3d res = spPA_scatter3d(
+				new Plotly_actor_scatter3d(lx, ly, lz, 1));
+		return res;
+	}
+
+	template<class Container>
+	static spPA_scatter3d ScalarPoints(const Container& listpv) {
+		return _ScalarPoints(listpv, typename Container::value_type());
+	}
+
+	template<class Container>
+	static spPA_scatter3d _ScalarPoints(const Container& listpv, Point) {
+		Listd lx;
+		Listd ly;
+		Listd lz;
+
+		for (auto& pv : listpv) {
+			lx.push_back(pv.value(_X_));
+			ly.push_back(pv.value(_Y_));
+			lz.push_back(pv.value(_Z_));
+		}
+		spPA_scatter3d res = spPA_scatter3d(
+				new Plotly_actor_scatter3d(lx, ly, lz, 1));
+		return res;
+	}
+
+	template<class Container>
+	static spPA_scatter3d _ScalarPoints(const Container& listpv, Point*) {
+		Listd lx;
+		Listd ly;
+		Listd lz;
+
+		for (auto& pv : listpv) {
+			lx.push_back(pv->value(_X_));
+			ly.push_back(pv->value(_Y_));
+			lz.push_back(pv->value(_Z_));
+		}
+		spPA_scatter3d res = spPA_scatter3d(
+				new Plotly_actor_scatter3d(lx, ly, lz, 1));
+		return res;
+	}
+
+	template<class Container>
+	static spPA_scatter WireFrame2D(const Container& listpv) {
+		return _WireFrame2D(listpv, typename Container::value_type());
+	}
+
+	template<class Container>
+	static spPA_scatter _WireFrame2D(const Container& listpv, Point*) {
+		Listd lx;
+		Listd ly;
+		auto iter_s = listpv.begin();
+		auto iter_e = std::next(iter_s, 1);
+		for (; iter_e != listpv.end();) {
+			lx.push_back(iter_s->value(_X_));
+			ly.push_back(iter_s->value(_Y_));
+
+			lx.push_back(iter_e->value(_X_));
+			ly.push_back(iter_e->value(_Y_));
+
+			std::advance(iter_s, 1);
+			std::advance(iter_e, 1);
+		}
+		spPA_scatter res = spPA_scatter(
+				new Plotly_actor_scatter(lx, ly, 2));
+		res->set_mode("lines");
+		return res;
+	}
+
+	template<class Container>
+	static spPA_scatter _WireFrame2D(const Container& listpv, Point) {
+		Listd lx;
+		Listd ly;
+		auto iter_s = listpv.begin();
+		auto iter_e = std::next(iter_s, 1);
+		for (; iter_e != listpv.end();) {
+			lx.push_back(iter_s->value(_X_));
+			ly.push_back(iter_s->value(_Y_));
+
+			lx.push_back(iter_e->value(_X_));
+			ly.push_back(iter_e->value(_Y_));
+
+			std::advance(iter_s, 1);
+			std::advance(iter_e, 1);
+		}
+		spPA_scatter res = spPA_scatter(
+				new Plotly_actor_scatter(lx, ly, 2));
+		res->set_mode("lines");
+		return res;
+	}
+
+	static spPA_scatter WireFrame2D(const Point& p1, const Point& p2,
+			const Point& p3) {
+		Listd lx;
+		Listd ly;
+		const Point arrp[] = { p1, p2, p3 };
+		for (int i = 0; i < 3; i++) {
+			const Point& p = arrp[i];
+			lx.push_back(p.value(_X_));
+			ly.push_back(p.value(_Y_));
+//			lz.push_back(p.value(_Z_));
+		}
+		lx.push_back(p1.value(_X_));
+		ly.push_back(p1.value(_Y_));
+//		lz.push_back(p1.value(_Z_));
+		spPA_scatter res = spPA_scatter(new Plotly_actor_scatter(lx, ly, 4));
+		res->set_mode("lines");
+		return res;
+	}
+
 };
 
 }

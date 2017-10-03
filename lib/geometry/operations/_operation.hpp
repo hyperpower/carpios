@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cmath>
+#include <memory>
 #include "../geometry_define.hpp"
 #include "../objects/_objects.hpp"
 #include "_intersection.hpp"
@@ -38,11 +39,13 @@ public:
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
 	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
-	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
+	typedef Segment& ref_Segment;
+	typedef const Segment& const_ref_Segment;
 	typedef PointChain_<TYPE, DIM> PointChain;
 	typedef Intersection_<TYPE, DIM> Isc;
 	typedef Box_<TYPE, DIM> Box;
+
+	typedef Point_<TYPE, 2> Point2;
 
 	template<class CA, class CB>
 	static double Distance(const CA& a, const CB& b) {
@@ -102,18 +105,20 @@ public:
 	}
 
 	//===============================================
-	// Cross product (v1-v3) x (v2-v3)
+	// Cross product (v1 - v4) . ((v2-v4) x (v3-v4))
 	// for Point
 	// @param    p1 Point1
 	// @param    p2 Point1
 	// @return      the resualt of cross multiply
+	//              The scalar triple product
+	//              (also called the mixed product, box product)
 	//-----------------------------------------------
-	static double Cross(const Point &v1, const Point&v2, const Point &v3,
+	static double TripleScalar(const Point &v1, const Point&v2, const Point &v3,
 			const Point &v4 = Point()) {
 		if (Dim == 2) {
 			/// d1    = v1 - v3
 			/// d2    = v2 - v3
-			/// corss = d1x * d2y - d1y * d2x
+			/// cross = d1x * d2y - d1y * d2x
 			return ((v1.x() - v3.x()) * (v2.y() - v3.y())
 					- (v2.x() - v3.x()) * (v1.y() - v3.y()));
 		}
@@ -126,9 +131,12 @@ public:
 				a[2][i] = v3[i] - v4[i];
 			}
 
-			return a[0][0] * a[1][1] * a[2][2] + a[0][1] * a[1][2] * a[2][0]
-					+ a[0][2] * a[1][0] * a[2][1] - a[0][2] * a[1][1] * a[2][0]
-					- a[0][1] * a[1][0] * a[2][2] - a[0][0] * a[1][2] * a[2][1];
+			return a[0][0] * a[1][1] * a[2][2]
+					+ a[0][1] * a[1][2] * a[2][0]
+					+ a[0][2] * a[1][0] * a[2][1]
+					- a[0][2] * a[1][1] * a[2][0]
+					- a[0][1] * a[1][0] * a[2][2]
+					- a[0][0] * a[1][2] * a[2][1];
 		}
 		SHOULD_NOT_REACH;
 		return 0.0;
@@ -138,7 +146,7 @@ public:
 	static inline double SignedArea( //
 			const Point& v1, const Point& v2, const Point& v3) {
 		ASSERT(Dim == 2);
-		return Cross(v1, v2, v3);
+		return TripleScalar(v1, v2, v3);
 	}
 
 	static bool IsCCW(const Point& p0, const Point& p1, const Point& p2) {
@@ -173,7 +181,7 @@ public:
 			const Point& p1,
 			const Point& p2,
 			const Point& p3) {
-		double tmp = Cross(p0, p1, p2, p3);
+		double tmp = TripleScalar(p0, p1, p2, p3);
 		if (tmp > 0) {
 			return 1;
 		} else if (tmp < 0) {
@@ -232,16 +240,88 @@ public:
 		return res;
 	}
 
-	static Point Normalize(const Point &p) {
-		Point r;
-		r.normalize();
-		return r;
+	static bool CircumCircle(
+			Vt xp, Vt yp,  // p
+			Vt x1, Vt y1,  // p1
+			Vt x2, Vt y2,  // p2
+			Vt x3, Vt y3,  // p3
+			Vt &xc, Vt &yc, Vt &r) {
+		double m1, m2, mx1, mx2, my1, my2;
+		double dx, dy, rsqr, drsqr;
+
+		/* Check for coincident points */
+		if (std::abs(y1 - y2) < SMALL && std::abs(y2 - y3) < SMALL)
+			return (false);
+		if (std::abs(y2 - y1) < SMALL) {
+			m2 = -(x3 - x2) / (y3 - y2);
+			mx2 = (x2 + x3) / 2.0;
+			my2 = (y2 + y3) / 2.0;
+			xc = (x2 + x1) / 2.0;
+			yc = m2 * (xc - mx2) + my2;
+		} else if (std::abs(y3 - y2) < SMALL) {
+			m1 = -(x2 - x1) / (y2 - y1);
+			mx1 = (x1 + x2) / 2.0;
+			my1 = (y1 + y2) / 2.0;
+			xc = (x3 + x2) / 2.0;
+			yc = m1 * (xc - mx1) + my1;
+		} else {
+			m1 = -(x2 - x1) / (y2 - y1);
+			m2 = -(x3 - x2) / (y3 - y2);
+			mx1 = (x1 + x2) / 2.0;
+			mx2 = (x2 + x3) / 2.0;
+			my1 = (y1 + y2) / 2.0;
+			my2 = (y2 + y3) / 2.0;
+			xc = (m1 * mx1 - m2 * mx2 + my2 - my1) / (m1 - m2);
+			yc = m1 * (xc - mx1) + my1;
+		}
+		dx = x2 - xc;
+		dy = y2 - yc;
+		rsqr = dx * dx + dy * dy;
+		r = std::sqrt(rsqr);
+		dx = xp - xc;
+		dy = yp - yc;
+		drsqr = dx * dx + dy * dy;
+		return ((drsqr <= rsqr) ? true : false);
+	}
+
+	static bool CircumCircle(
+			const Point2& p,
+			const Point2& p1,  // p1
+			const Point2& p2,  // p2
+			const Point2& p3,  // p3
+			Point2& pc, Vt &r) {
+		return CircumCircle(
+				p[0], p[1],
+				p1[0], p1[1],
+				p2[0], p2[1],
+				p3[0], p3[1],
+				pc[0], pc[1], r);
+	}
+
+	static bool IsInOnCircumCircle(
+			const Point2& p,
+			const Point2& p1,  // p1
+			const Point2& p2,  // p2
+			const Point2& p3  // p3
+			) {
+		Point pc;
+		Vt r = 0;
+		return CircumCircle(
+				p[0], p[1],
+				p1[0], p1[1],
+				p2[0], p2[1],
+				p3[0], p3[1],
+				pc[0], pc[1], r);
 	}
 
 	/**
 	 * p in on Triangle (p1, p2, p3)
 	 */
-	static bool IsInOn(Point& p1, Point& p2, Point& p3, Point &p) {
+	static bool IsInOn(
+			const Point& p1,
+			const Point& p2,
+			const Point& p3,
+			const Point &p) {
 		if (IsCCW(p1, p, p2))
 			return false;
 		if (IsCCW(p2, p, p3))
@@ -333,6 +413,131 @@ public:
 		min = Min(min, v3);
 		return Box(min, max);
 	}
+	static Box BoundingBox(const Box& box, const Point& pnew) {
+		Point max = Max(box.max(), pnew);
+		Point min = Min(box.min(), pnew);
+		return Box(min, max);
+	}
+
+	template<class Container>
+	static Box BoundingBox(const Container& con) {
+		typename Container::value_type dummy;
+		return _BoundingBox(con, dummy);
+	}
+
+	template<class Container>
+	static Box _BoundingBox(const Container& con, Point dummy) {
+		Point min, max;
+
+		auto iter = con.begin();
+		const Point& p = (*iter);
+		max = p;
+		min = p;
+		for (; iter != con.end(); ++iter) {
+			const Point& p = (*iter);
+			for (St d = 0; d < Dim; d++) {
+				if (p[d] > max[d]) {
+					max[d] = p[d];
+				}
+				if (p[d] < min[d]) {
+					min[d] = p[d];
+				}
+			}
+		}
+		return Box(min, max);
+	}
+
+	template<class Container>
+	static Box _BoundingBox(const Container& con, Point* dummy) {
+		Point min, max;
+
+		auto iter = con.begin();
+		const Point& p = *(*iter);
+		max = p;
+		min = p;
+		for (; iter != con.end(); ++iter) {
+			const Point& p = *(*iter);
+			for (St d = 0; d < Dim; d++) {
+				if (p[d] > max[d]) {
+					max[d] = p[d];
+				}
+				if (p[d] < min[d]) {
+					min[d] = p[d];
+				}
+			}
+		}
+		return Box(min, max);
+	}
+
+	template<class Container>
+	static Box _BoundingBox(const Container& con,
+			std::shared_ptr<Point> dummy) {
+		Point min, max;
+
+		auto iter = con.begin();
+		const Point& p = *(*iter);
+		max = p;
+		min = p;
+		for (; iter != con.end(); ++iter) {
+			const Point& p = *(*iter);
+			for (St d = 0; d < Dim; d++) {
+				if (p[d] > max[d]) {
+					max[d] = p[d];
+				}
+				if (p[d] < min[d]) {
+					min[d] = p[d];
+				}
+			}
+		}
+		return Box(min, max);
+	}
+	/// normalize itself
+	static Point Normalize(const Point &p) {
+		Point r;
+		r.normalize();
+		return r;
+	}
+
+	static void Normalize(Point &p, const Point& dis, const Point& min) {
+		for (St d = 0; d < Dim; d++) {
+			p[d] = (p[d] - min[d]) / dis[d];
+		}
+	}
+
+	static void UnNormalize(Point &p, const Point& dis, const Point& min) {
+		for (St d = 0; d < Dim; d++) {
+			p[d] = p[d] * dis[d] + min[d];
+		}
+	}
+
+	template<class Container>
+	static void Normalize(Container& con) {
+		typename Container::value_type dummy;
+		Box bb = _BoundingBox(con, dummy);
+
+		Point dis = bb.d();
+		Point min = bb.min();
+
+		_Normalize(con, dummy, dis, min);
+	}
+
+	template<class Container>
+	static void _Normalize(Container& con,
+			std::shared_ptr<Point> dummy,
+			const Point& dis, const Point& min) {
+		for (auto& p : con) {
+			Normalize(*p, dis, min);
+		}
+	}
+
+	template<class Container>
+	static void _Normalize(Container& con,
+			Point* dummy,
+			const Point& dis, const Point& min) {
+		for (auto& p : con) {
+			Normalize(*p, dis, min);
+		}
+	}
 
 	static bool IsInOn(
 			const Vt& xmin, const Vt& xmax,
@@ -379,13 +584,13 @@ public:
 						|| ((s.pey() <= pt.y()) && (pt.y() <= s.psy())));
 	}
 
-	// Find intersetion on 1d
-	//                ----------------
-	//         -------|---------     |
-	// --------|------|--------|-----|---------
-	//        u0     v0        u1   v1
-	//               w[0]      w[1]
-	// should be move to intersection class
+// Find intersetion on 1d
+//                ----------------
+//         -------|---------     |
+// --------|------|--------|-----|---------
+//        u0     v0        u1   v1
+//               w[0]      w[1]
+// should be move to intersection class
 	static int FindIntersection(Vt u0, Vt u1, Vt v0, Vt v1, Vt w[2]) {
 		if ((u1 < v0) || (u0 > v1))
 			return 0;
@@ -406,8 +611,8 @@ public:
 		}
 	}
 
-	// Find intersection on 2d
-	// should be move to intersection class
+// Find intersection on 2d
+// should be move to intersection class
 	static int FindIntersection(const Segment& seg0, const Segment& seg1,
 			Point& pi0, Point& pi1) {
 		ASSERT(Dim == 2);
@@ -576,17 +781,17 @@ public:
 //	return IsInBox(s1, s2.ps()) || IsInBox(s1, s2.pe()) || IsInBox(s2, s1.ps())
 //			|| IsInBox(s2, s1.pe());
 //}
-template<typename TYPE>
-int OnWhichSide3(const Segment_<TYPE, 2> &s, const Point_<TYPE, 2> &pt) {
-	Float rcro = Cro(s.pe(), pt, s.ps());
-	if (rcro == 0.0) {
-		return 0;
-	} else if (rcro < 0) {
-		return -1;
-	} else {
-		return 1;
-	}
-}
+//template<typename TYPE>
+//int OnWhichSide3(const Segment_<TYPE, 2> &s, const Point_<TYPE, 2> &pt) {
+//	Float rcro = Cro(s.pe(), pt, s.ps());
+//	if (rcro == 0.0) {
+//		return 0;
+//	} else if (rcro < 0) {
+//		return -1;
+//	} else {
+//		return 1;
+//	}
+//}
 /*
  * Segment -------------------  Segment
  */
@@ -622,123 +827,123 @@ int OnWhichSide3(const Segment_<TYPE, 2> &s, const Point_<TYPE, 2> &pt) {
 //		return res;
 //	}
 //}
-template<typename TYPE, St DIM>
-bool IsIntersect(const Segment_<TYPE, DIM> &s1, const Segment_<TYPE, DIM> &s2) {
-	int type = IntersectType(s1, s2);
-	return (type | INTERSECT) == type ? true : false;
-}
-template<typename TYPE, St DIM>
-bool IsIntersect(const Point_<TYPE, 2>& s1s, const Point_<TYPE, 2>& s1e,
-		const Point_<TYPE, 2>& s2s, const Point_<TYPE, 2>& s2e) {
-	Segment_<TYPE, DIM> s1(s1s, s1e);
-	Segment_<TYPE, DIM> s2(s2s, s2e);
-	return IsIntersect(s1, s2);
-}
-template<typename TYPE>
-Point_<TYPE, 2> CalIntersect(const Segment_<TYPE, 2> &s1,
-		const Segment_<TYPE, 2> &s2) {
-	ASSERT(IsIntersect(s1, s2));
-	Float x1, x2, y1, y2;
-	Float x3, x4, y3, y4;
-	Float resxx;
-	Float resyy;
-	x1 = Float(s1.psx());
-	y1 = Float(s1.psy());
-	x2 = Float(s1.pex());
-	y2 = Float(s1.pey());
-	x3 = Float(s2.psx());
-	y3 = Float(s2.psy());
-	x4 = Float(s2.pex());
-	y4 = Float(s2.pey());
-	Float b1 = (y2 - y1) * x1 + (x1 - x2) * y1;
-
-	Float b2 = (y4 - y3) * x3 + (x3 - x4) * y3;
-	if (s1.is_horizontal() && s2.is_vertical()) {
-		resxx = x3;
-		resyy = y1;
-	} else if (s2.is_horizontal() && s1.is_vertical()) {
-		resxx = x1;
-		resyy = y3;
-	} else if (s1.is_horizontal()) {
-		resxx = (b2 + (x4 - x3) * y1) / (y4 - y3);
-		resyy = y1;
-	} else if (s1.is_vertical()) {
-		resxx = x1;
-		resyy = (b2 - (y4 - y3) * x1) / (x3 - x4);
-	} else if (s2.is_horizontal()) {
-		resxx = (b1 + (x2 - x1) * y3) / (y2 - y1);
-		resyy = y3;
-	} else if (s2.is_vertical()) {
-		resxx = x3;
-		resyy = (b1 - (y2 - y1) * x3) / (x1 - x2);
-	} else {
-		Float d = (x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1);
-		Float d1 = b2 * (x2 - x1) - b1 * (x4 - x3);
-		Float d2 = b2 * (y2 - y1) - b1 * (y4 - y3);
-		ASSERT(d != 0);
-		resxx = d1 / d;
-		resyy = d2 / d;
-	}
-	return Point_<TYPE, 2>(resxx, resyy);
-}
-/*
- * Segment -------- Line
- */
-template<typename TYPE, St DIM>
-bool IsIntersect(const Segment_<TYPE, DIM> &s1, //
-		const Point_<TYPE, DIM>& ps, //
-		const Point_<TYPE, DIM>& pe) {
-	// ps --> pe are two points on line
-	Segment_<TYPE, DIM> s(ps, pe);
-	int s12s = OnWhichSide3(s, s1.ps());
-	int s12e = OnWhichSide3(s, s1.pe());
-	int sum = s12s + s12e;
-	// co-linear is not intersect
-	if (sum == 0 || sum == -2 || sum == 2) {
-		return false;
-	} else {
-		return true;
-	}
-}
-/*
- * Point   -------- Polygon
- */
-template<typename TYPE>
-double _WindingNumber(const Point_<TYPE, 2>& ref, const Point_<TYPE, 2>& vi,
-		const Point_<TYPE, 2>& vip) {
-	Point_<TYPE, 2> refh(ref.x() + 1.0, ref.y());
-	Float wn = 0;
-	Float a = Cro(refh, vi, ref);
-	Float b = Cro(refh, vip, ref);
-	if (a == 0 && b == 0) {
-		return wn;
-	}
-	if (a * b < 0) {
-		//vi vi+1 crosses the x
-		Float c = Cro(vip, ref, vi);
-		if ((c > 0 && a < 0) || (c < 0 && a > 0)) {
-			//vi vi+1 crosses the positive x
-			if (a < 0) {
-				wn++;
-			} else {
-				wn--;
-			}
-		}
-	} else if (a == 0 && (vi.x() > ref.x())) {
-		if (b > 0) {
-			wn = wn + 0.5;
-		} else {
-			wn = wn - 0.5;
-		}
-	} else if (b == 0 && (vip.x() > ref.x())) {
-		if (a < 0) {
-			wn = wn + 0.5;
-		} else {
-			wn = wn - 0.5;
-		}
-	}
-	return wn;
-}
+////template<typename TYPE, St DIM>
+////bool IsIntersect(const Segment_<TYPE, DIM> &s1, const Segment_<TYPE, DIM> &s2) {
+////	int type = IntersectType(s1, s2);
+////	return (type | INTERSECT) == type ? true : false;
+////}
+////template<typename TYPE, St DIM>
+////bool IsIntersect(const Point_<TYPE, 2>& s1s, const Point_<TYPE, 2>& s1e,
+////		const Point_<TYPE, 2>& s2s, const Point_<TYPE, 2>& s2e) {
+////	Segment_<TYPE, DIM> s1(s1s, s1e);
+////	Segment_<TYPE, DIM> s2(s2s, s2e);
+////	return IsIntersect(s1, s2);
+////}
+////template<typename TYPE>
+////Point_<TYPE, 2> CalIntersect(const Segment_<TYPE, 2> &s1,
+////		const Segment_<TYPE, 2> &s2) {
+////	ASSERT(IsIntersect(s1, s2));
+////	Float x1, x2, y1, y2;
+////	Float x3, x4, y3, y4;
+////	Float resxx;
+////	Float resyy;
+////	x1 = Float(s1.psx());
+////	y1 = Float(s1.psy());
+////	x2 = Float(s1.pex());
+////	y2 = Float(s1.pey());
+////	x3 = Float(s2.psx());
+////	y3 = Float(s2.psy());
+////	x4 = Float(s2.pex());
+////	y4 = Float(s2.pey());
+////	Float b1 = (y2 - y1) * x1 + (x1 - x2) * y1;
+////
+////	Float b2 = (y4 - y3) * x3 + (x3 - x4) * y3;
+////	if (s1.is_horizontal() && s2.is_vertical()) {
+////		resxx = x3;
+////		resyy = y1;
+////	} else if (s2.is_horizontal() && s1.is_vertical()) {
+////		resxx = x1;
+////		resyy = y3;
+////	} else if (s1.is_horizontal()) {
+////		resxx = (b2 + (x4 - x3) * y1) / (y4 - y3);
+////		resyy = y1;
+////	} else if (s1.is_vertical()) {
+////		resxx = x1;
+////		resyy = (b2 - (y4 - y3) * x1) / (x3 - x4);
+////	} else if (s2.is_horizontal()) {
+////		resxx = (b1 + (x2 - x1) * y3) / (y2 - y1);
+////		resyy = y3;
+////	} else if (s2.is_vertical()) {
+////		resxx = x3;
+////		resyy = (b1 - (y2 - y1) * x3) / (x1 - x2);
+////	} else {
+////		Float d = (x2 - x1) * (y4 - y3) - (x4 - x3) * (y2 - y1);
+////		Float d1 = b2 * (x2 - x1) - b1 * (x4 - x3);
+////		Float d2 = b2 * (y2 - y1) - b1 * (y4 - y3);
+////		ASSERT(d != 0);
+////		resxx = d1 / d;
+////		resyy = d2 / d;
+////	}
+////	return Point_<TYPE, 2>(resxx, resyy);
+////}
+/////*
+//// * Segment -------- Line
+//// */
+////template<typename TYPE, St DIM>
+////bool IsIntersect(const Segment_<TYPE, DIM> &s1, //
+////		const Point_<TYPE, DIM>& ps, //
+////		const Point_<TYPE, DIM>& pe) {
+////	// ps --> pe are two points on line
+////	Segment_<TYPE, DIM> s(ps, pe);
+////	int s12s = OnWhichSide3(s, s1.ps());
+////	int s12e = OnWhichSide3(s, s1.pe());
+////	int sum = s12s + s12e;
+////	// co-linear is not intersect
+////	if (sum == 0 || sum == -2 || sum == 2) {
+////		return false;
+////	} else {
+////		return true;
+////	}
+////}
+/////*
+//// * Point   -------- Polygon
+//// */
+////template<typename TYPE>
+////double _WindingNumber(const Point_<TYPE, 2>& ref, const Point_<TYPE, 2>& vi,
+////		const Point_<TYPE, 2>& vip) {
+////	Point_<TYPE, 2> refh(ref.x() + 1.0, ref.y());
+////	Float wn = 0;
+////	Float a = Cro(refh, vi, ref);
+////	Float b = Cro(refh, vip, ref);
+////	if (a == 0 && b == 0) {
+////		return wn;
+////	}
+////	if (a * b < 0) {
+////		//vi vi+1 crosses the x
+////		Float c = Cro(vip, ref, vi);
+////		if ((c > 0 && a < 0) || (c < 0 && a > 0)) {
+////			//vi vi+1 crosses the positive x
+////			if (a < 0) {
+////				wn++;
+////			} else {
+////				wn--;
+////			}
+////		}
+////	} else if (a == 0 && (vi.x() > ref.x())) {
+////		if (b > 0) {
+////			wn = wn + 0.5;
+////		} else {
+////			wn = wn - 0.5;
+////		}
+////	} else if (b == 0 && (vip.x() > ref.x())) {
+////		if (a < 0) {
+////			wn = wn + 0.5;
+////		} else {
+////			wn = wn - 0.5;
+////		}
+//	}
+//	return wn;
+//}
 //template<typename TYPE>
 //Float WindingNumber(const Polygon_<TYPE>& poly, const Point_<TYPE, 2>& ref) {
 //	Float wn = 0;    // the  winding number counter

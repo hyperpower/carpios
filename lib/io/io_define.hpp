@@ -14,6 +14,12 @@
 #include <map>
 
 namespace carpio {
+template<class V1>
+std::string ToString(V1 a) {
+	std::ostringstream sst;
+	sst << a;
+	return sst.str();
+}
 /*
  *  out put a and be to string,
  *  class V1 and v2 must overload operator<<

@@ -54,8 +54,8 @@ ENDIF()
 
 
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
+#find_package(VTK REQUIRED)
+#include(${VTK_USE_FILE})
 
 add_executable(main ${SOURCE_FILES})
 
@@ -66,9 +66,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/io ${CMAKE_CURRENT_BINARY
 # link the libraries to the executable
 target_link_libraries (main io)
 target_link_libraries (main utility)
-target_link_libraries (main gtest)
-target_link_libraries (main glog)
-target_link_libraries (main pthread)
+#target_link_libraries (main gtest)
+#target_link_libraries (main glog)
+#target_link_libraries (main pthread)
 
 if(PYTHON_LIBRARIES)
   TARGET_LINK_LIBRARIES(main ${PYTHON_LIBRARIES})
@@ -76,8 +76,8 @@ ELSE()
   MESSAGE(FATAL_ERROR "Unable to link python libraries")
 ENDIF()
 
-if(VTK_LIBRARIES)
-    target_link_libraries(main ${VTK_LIBRARIES})
-else()
-    target_link_libraries(main vtkHybrid vtkWidgets)
-endif()
+#if(VTK_LIBRARIES)
+#    target_link_libraries(main ${VTK_LIBRARIES})
+#else()
+#    target_link_libraries(main vtkHybrid vtkWidgets)
+#endif()

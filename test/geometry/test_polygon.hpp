@@ -68,9 +68,9 @@ TEST(Polygon, sweepevent) {
 	const St Dim = 2;
 	typedef SweepEvent_<Vt, Dim> SweepEvent;
 	typedef SweepEventComp_<Vt, Dim> SweepEventComp;
-	typedef Segment_<Vt, Dim> Segment;
-	typedef Operation_<Vt, Dim> Op;
 	typedef Point_<double, 2> Point;
+	typedef Segment_<Point> Segment;
+	typedef Operation_<Vt, Dim> Op;
 	std::priority_queue<SweepEvent*, std::vector<SweepEvent*>, SweepEventComp> eq;
 
 	Point p1(0.0, 0.0);
@@ -122,10 +122,10 @@ TEST(Polygon, sweepevent) {
 TEST(Polygon, trivial1) {
 	typedef double Vt;
 	const St Dim = 2;
-	typedef Segment_<Vt, Dim> Segment;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Point> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
-	typedef Point_<double, 2> Point;
 	typedef Clip_<Vt> Clip;
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
@@ -180,10 +180,10 @@ TEST(Polygon, read) {
 TEST(Polygon, normal) {
 	typedef double Vt;
 	const St Dim = 2;
-	typedef Segment_<Vt, Dim> Segment;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Point> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
-	typedef Point_<double, 2> Point;
 	typedef Clip_<Vt> Clip;
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
@@ -204,10 +204,10 @@ TEST(Polygon, normal) {
 TEST(Polygon, line_touch) {
 	typedef double Vt;
 	const St Dim = 2;
-	typedef Segment_<Vt, Dim> Segment;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Point> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
-	typedef Point_<double, 2> Point;
 	typedef Clip_<Vt> Clip;
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
@@ -230,10 +230,10 @@ TEST(Polygon, line_touch) {
 TEST(Polygon, point_line_touch) {
 	typedef double Vt;
 	const St Dim = 2;
-	typedef Segment_<Vt, Dim> Segment;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Point> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
-	typedef Point_<double, 2> Point;
 	typedef Clip_<Vt> Clip;
 	Polygon poly;
 	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);

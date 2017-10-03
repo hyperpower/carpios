@@ -8,8 +8,8 @@
 #include "math.h"
 namespace carpio {
 
-template<typename TYPE, St DIM>
-class Triangle_: public std::array<Point_<TYPE, DIM>, 3> {
+template<typename TYPE, St DIM, class POINT = Point_<TYPE, DIM> >
+class Triangle_: public std::array<POINT, 3> {
 public:
 	static const St Dim = DIM;
 	typedef TYPE vt;
@@ -18,10 +18,10 @@ public:
 	typedef Triangle_<TYPE, DIM> Self;
 	typedef Triangle_<TYPE, DIM>& ref_Self;
 	typedef const Triangle_<TYPE, DIM>& const_ref_Self;
-	typedef Point_<TYPE, DIM> Point;
-	typedef Point_<TYPE, DIM>* pPoint;
-	typedef Point_<TYPE, DIM>& ref_Point;
-	typedef const Point_<TYPE, DIM>& const_ref_Point;
+	typedef POINT Point;
+	typedef POINT* pPoint;
+	typedef POINT& ref_Point;
+	typedef const POINT& const_ref_Point;
 
 	typedef Operation_<TYPE, DIM> Op;
 public:
@@ -45,10 +45,12 @@ public:
 	Triangle_(const_ref_Self rhs) {
 		this->pa() = rhs.pa();
 		this->pb() = rhs.pb();
+		this->pc() = rhs.pc();
 	}
 	void reconstruct(const_ref_Self rhs) {
 		this->pa() = rhs.pa();
 		this->pb() = rhs.pb();
+		this->pc() = rhs.pc();
 	}
 	void reconstruct(const Point& s, const Point& e) {
 		ASSERT(s != e);
@@ -206,10 +208,10 @@ public:
 			return false;
 		}
 	}
-	vt slope() const {
-		//ASSERT(Dim == 2);
-		//return (pby() - pay()) / (pbx() - pax() + SMALL);
-	}
+//	vt slope() const {
+//		//ASSERT(Dim == 2);
+//		//return (pby() - pay()) / (pbx() - pax() + SMALL);
+//	}
 
 	void scale(vt xfactor, vt yfactor, vt zfactor = 1) {
 		this->pa().x() = pax() * xfactor;

@@ -29,16 +29,16 @@ set(REQUIRED_PYTHON_VERSION 3)
 message(STATUS "======== LOOKING FOR ${REQUIRED_PYTHON_VERSION} ========================")
 find_package ( PythonInterp ${REQUIRED_PYTHON_VERSION} REQUIRED)
 find_package ( PythonLibs ${REQUIRED_PYTHON_VERSION} REQUIRED)
-#find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
+find_package ( PythonLibs ${PYTHON_VERSION_STRING} EXACT REQUIRED )
 
 
 message(STATUS "PYTHON_EXECUTABLE:FILEPATH=${PYTHON_EXECUTABLE}")
 message(STATUS "PYTHON_LIBRARY:FILEPATH=${PYTHON_LIBRARY}")
 message(STATUS "PYTHON_LIBRARIES:=${PYTHON_LIBRARIES}")
 message(STATUS "PYTHON_INCLUDE_DIR:FILEPATH=${PYTHON_INCLUDE_DIR}")
-#message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
+message(STATUS "PYTHON_FRAMEWORK_INCLUDES=${PYTHON_FRAMEWORK_INCLUDES}")
 message(STATUS "PYTHONLIBS_VERSION_STRING=${PYTHONLIBS_VERSION_STRING}")
-#message(STATUS "PYTHON_FRAMEWORKS=${Python_FRAMEWORKS}")
+message(STATUS "PYTHON_FRAMEWORKS=${Python_FRAMEWORKS}")
 
 IF(PYTHONLIBS_FOUND)
   INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_DIRS}")
@@ -54,8 +54,8 @@ ENDIF()
 
 
 
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
+#find_package(VTK REQUIRED)
+#include(${VTK_USE_FILE})
 
 add_executable(main ${SOURCE_FILES})
 
@@ -66,9 +66,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../lib/io ${CMAKE_CURRENT_BINARY
 # link the libraries to the executable
 target_link_libraries (main io)
 target_link_libraries (main utility)
-target_link_libraries (main gtest)
-target_link_libraries (main glog)
-target_link_libraries (main pthread)
+#target_link_libraries (main gtest)
+#target_link_libraries (main glog)
+#target_link_libraries (main pthread)
 
 if(PYTHON_LIBRARIES)
   TARGET_LINK_LIBRARIES(main ${PYTHON_LIBRARIES})
@@ -76,8 +76,8 @@ ELSE()
   MESSAGE(FATAL_ERROR "Unable to link python libraries")
 ENDIF()
 
-if(VTK_LIBRARIES)
-    target_link_libraries(main ${VTK_LIBRARIES})
-else()
-    target_link_libraries(main vtkHybrid vtkWidgets)
-endif()
+#if(VTK_LIBRARIES)
+#    target_link_libraries(main ${VTK_LIBRARIES})
+#else()
+#    target_link_libraries(main vtkHybrid vtkWidgets)
+#endif()

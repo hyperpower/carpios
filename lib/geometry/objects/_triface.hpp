@@ -53,9 +53,25 @@ public:
 
 	list_pSur surfaces;
 
+	Any _any_data;
+
 public:
 	TriFace_(pEdg a, pEdg b, pEdg c, pSur psur) :
 			e1(a), e2(b), e3(c) {
+		if (!has_parent_surface(psur)) {
+			surfaces.push_back(psur);
+		}
+
+		e1->faces.push_back(this);
+		e2->faces.push_back(this);
+		e3->faces.push_back(this);
+	}
+
+	TriFace_(pVer v1, pVer v2, pVer v3, pSur psur) {
+		e1 = new Edg(v1, v2);
+		e2 = new Edg(v2, v3);
+		e3 = new Edg(v3, v1);
+
 		if (!has_parent_surface(psur)) {
 			surfaces.push_back(psur);
 		}
@@ -82,8 +98,6 @@ public:
 			return true;
 		return false;
 	}
-
-
 
 	/**
 	 * gts_face_has_parent_surface:
@@ -237,6 +251,16 @@ public:
 		return 0;
 	}
 
+	bool has_vertex(pVer pv) const {
+		return pv == e1->v1 || pv == e1->v2
+				|| pv == e2->v1 || pv == e2->v2
+				|| pv == e3->v1 || pv == e3->v2;
+	}
+
+	bool has_edge(pEdg pe) const {
+		return pe == e1 || pe == e2 || pe == e3;
+	}
+
 	Poi centroid() const {
 		return Op::Centroid(
 				*(this->vertex(0)),
@@ -251,11 +275,35 @@ public:
 				*(this->vertex(2)));
 	}
 
+	Vt signed_area() const {
+		ASSERT(Dim == 2);
+		return Op::SignedArea(
+				*(this->vertex(0)),
+				*(this->vertex(1)),
+				*(this->vertex(2)));
+	}
+
+	bool is_inon(const Poi& poi) const {
+		ASSERT(Dim == 2);
+		return Op::IsInOn(
+				*(this->vertex(0)),
+				*(this->vertex(1)),
+				*(this->vertex(2)), poi);
+	}
+
 	typename Op::Box box() const {
 		return Op::BoundingBox(
 				*(this->vertex(0)),
 				*(this->vertex(1)),
 				*(this->vertex(2)));
+	}
+
+	Any& data() {
+		return _any_data;
+	}
+
+	const Any& data() const {
+		return _any_data;
 	}
 
 	/**
@@ -270,6 +318,28 @@ public:
 		e = this->e1;
 		this->e1 = this->e2;
 		this->e2 = e;
+	}
+
+	pVer opposite_vertex(pEdg pe) {
+		ASSERT(has_edge(pe));
+		for (St i = 0; i < 3; ++i) {
+			pVer pv = vertex(i);
+			if (!pe->has_vertex(pv)) {
+				return pv;
+			}
+		}
+		return nullptr;
+	}
+
+	pEdg opposite_edge(pVer pv) {
+		ASSERT(has_vertex(pv));
+		for (St i = 0; i < 3; ++i) {
+			pEdg pe = edge(i);
+			if (!(pe->has_vertex(pv))) {
+				return pe;
+			}
+		}
+		return nullptr;
 	}
 
 	void show() const {

@@ -32,12 +32,13 @@ public:
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
 	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
+	typedef Segment& ref_Segment;
 	typedef PointChain_<TYPE, DIM>& PointChain;
 	typedef TYPE vt;
 	typedef typename std::list<Point>::iterator iterator;
 	typedef typename std::list<Point>::const_iterator const_iterator;
 	typedef Operation_<TYPE, DIM> Op;
+	typedef Point value_type;
 	protected:
 	/** Linked point chain */
 	std::list<Point> _lpoints;
@@ -213,7 +214,7 @@ public:
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
 	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
+	typedef Segment& ref_Segment;
 	typedef TYPE vt;
 	typedef Polygon_<TYPE> Polygon;
 	//typedef ArrayListT<Point> ArrP;

@@ -8,8 +8,6 @@ import operator
 from scipy import ndimage
 import multiprocessing
 
-
-
 def _col(matrix, i):
     return [row[i] for row in matrix]
 
@@ -284,26 +282,28 @@ def plot_errori():
     plt.close()
 
 def plot_all():
-    matfu = file_name(PATH_RESULT, "phi")
+    matfu = file_name(PATH_RESULT, "exact")
+    print len(matfu)
     matfc = []
     for one in matfu:
         matfc.append(one)
 
-    multiprocessing.freeze_support()
+    #multiprocessing.freeze_support()
     pool = multiprocessing.Pool()
     cpus = multiprocessing.cpu_count() / 2
     results = []
     cmatfs = split(matfc, cpus)
+
     print "Thread num : ", len(cmatfs)
     for i in xrange(0, cpus):
         mat = cmatfs[i]
         for one in mat:
-            result = pool.apply_async(plot_one, args=(one[2], one[3],))
+            result = pool.apply_async(plot_one, args=(one[1], one[2],))
             results.append(result)
-
+    
     pool.close()
     pool.join()
-
+    
     os.system("convert -delay 5 -loop 0 ./fig/comp_*.png comp.gif")
 
 
@@ -311,10 +311,11 @@ def main():
     #stri = "480"
     #strt = "48"
     #plot_one(stri, strt) 
+    
+    plot_all()
     plot_error1()
     plot_error2()
     plot_errori()
-    plot_all()
 
 if __name__ == '__main__':
     main()

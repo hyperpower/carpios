@@ -19,8 +19,8 @@ public:
 	typedef Point_<TYPE, DIM>& ref_Point;
 	typedef const Point_<TYPE, DIM>& const_ref_Point;
 	typedef Segment_<TYPE, DIM> Segment;
-	typedef Segment_<TYPE, DIM>& ref_Segment;
-	typedef const Segment_<TYPE, DIM>& const_ref_Segment;
+	typedef Segment& ref_Segment;
+	typedef const Segment& const_ref_Segment;
 	typedef PointChain_<TYPE, DIM> PointChain;
 
 	typedef Polygon_<TYPE> Polygon;

@@ -47,8 +47,10 @@ public:
 
 	typedef typename std::list<pFac>::iterator iterator;
 	typedef typename std::list<pFac>::const_iterator const_iterator;
-public:
+	public:
 	std::set<pFac> faces;
+
+	Any _any_data;
 	//std::set<pEdg> c_edge;
 	//std::set<pVer> c_vertex;
 public:
@@ -79,22 +81,53 @@ public:
 		} else {
 			return;
 		}
-//		for (int i = 0; i < 3; i++) {
-//			pEdg e = (*f)[i];
-//			auto re = std::find(c_edge.begin(), c_edge.end(), e);
-//			if (re == c_edge.end()) { //not found
-//				c_edge.insert(e);
-//				auto rv = std::find(c_vertex.begin(), c_vertex.end(), (*e)[0]);
-//				if (rv == c_vertex.end()) { //not found
-//					c_vertex.insert((*e)[0]);
-//				}
-//				rv = std::find(c_vertex.begin(), c_vertex.end(), (*e)[1]);
-//				if (rv == c_vertex.end()) { //not found
-//					c_vertex.insert((*e)[1]);
-//				}
-//
-//			}
-//		}
+	}
+
+	void erase(pFac f) {
+		_IF_TRUE_RETRUN(f == nullptr);
+		std::list<pFac> ldfac;
+		std::list<pEdg> ldedg;
+		std::list<pVer> ldver;
+		auto iter = std::find(faces.begin(), faces.end(), f);
+		if (iter != faces.end()) { // found
+			pFac pf = (*iter);
+			if (pf->has_one_parent_surface(this)) {
+				ldfac.push_back(pf);
+			}
+			pf->detach(this);
+			this->faces.erase(pf);
+			if (pf->is_unattached()) {
+				for (int i = 0; i < 3; i++) {
+					pEdg e = pf->edge(i);
+					if (e->has_one_face(pf)) {
+						ldedg.push_back(e);
+					}
+					e->detach(pf);
+					///
+					if (e->is_unattached()) {
+						for (int iv = 0; iv < 2; iv++) {
+							pVer v = e->vertex(iv);
+							if (v->has_one_edge(e)) {
+								ldver.push_back(v);
+							}
+							v->detach(e);
+						}
+					}
+				}
+			}
+		} else {
+			return;
+		}
+		for (auto& fac : ldfac) {
+			delete fac;
+		}
+		for (auto& edg : ldedg) {
+			delete edg;
+		}
+		for (auto& ver : ldver) {
+			delete ver;
+		}
+
 	}
 
 	void clear() {
@@ -109,15 +142,15 @@ public:
 			}
 			pf->detach(this);
 			if (pf->is_unattached()) {
-				for (int i = 0; i < 3; i++) {
-					pEdg e = pf->edge(i);
+				for (int ie = 0; ie < 3; ie++) {
+					pEdg e = pf->edge(ie);
 					if (e->has_one_face(pf)) {
 						ldedg.push_back(e);
 					}
 					e->detach(pf);
 					///
-					for (int iv = 0; i < 2; i++) {
-						pVer v = e->vertex(i);
+					for (int iv = 0; iv < 2; iv++) {
+						pVer v = e->vertex(iv);
 						if (v->has_one_edge(e)) {
 							ldver.push_back(v);
 						}
@@ -409,6 +442,52 @@ public:
 	}
 	static void Copy(Sur& src, Sur& dst) {
 		src.copy_to(dst);
+	}
+
+	/// get all the faces to vertex
+	static void FacesConnectTo(pVer v, pSur sur, std::set<pFac>& res) {
+		for (auto iter = v->begin_edge(); iter != v->end_edge(); ++iter) {
+			pEdg pe = *iter;
+			for (auto itface = pe->begin_face(); itface != pe->end_face();
+					++itface) {
+				pFac pf = *itface;
+				if (pf->has_parent_surface(sur)) {
+					res.insert(pf);
+				}
+			}
+		}
+	}
+
+
+	template<class Container>
+	static std::set<pFac> FacesConnectTo(const Container& con, pSur sur) {
+		typename Container::value_type dummy;
+		return _FacesConnectTo(con, sur, dummy);
+	}
+
+	template<class Container>
+	static std::set<pFac> _FacesConnectTo(
+			Container& con,
+			pSur sur,
+			pVer dummy) {
+		std::set<pFac> res;
+		for (auto& pv : con) {
+			FacesConnectTo(pv, sur, res);
+		}
+		return res;
+	}
+
+	static pFac Neighbor(
+			pFac f,
+			pEdg e,
+			Sur& surface) {
+		for (auto itf = e->begin_face(); itf != e->end_face(); ++itf) {
+			pFac pf = *itf;
+			if (pf != f && pf->has_parent_surface(&surface)) {
+				return pf;
+			}
+		}
+		return nullptr;
 	}
 
 }

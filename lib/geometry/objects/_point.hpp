@@ -8,8 +8,9 @@
 
 namespace carpio {
 
-struct TagPoint :public TagGeometry{
-	TagPoint(){}
+struct TagPoint: public TagGeometry {
+	TagPoint() {
+	}
 };
 
 //Point T ====================================
@@ -26,9 +27,12 @@ public:
 	typedef const TYPE* const_pointer;
 	typedef const TYPE& const_reference;
 
+	typedef const Point& const_ref_Self;
+
 	//constructor
 	Point_() :
 			std::array<TYPE, Dim>() {
+		reconstruct(0, 0, 0);
 	}
 
 	Point_(const Vt& a, const Vt& b = 0, const Vt& c = 0) :
@@ -128,17 +132,19 @@ public:
 		return this->at(2);
 	}
 
-	void reconstruct(const Vt& a, const Vt& b, const Vt& c = 0) {
+	void reconstruct(const Vt& a, const Vt& b = 0, const Vt& c = 0) {
 		this->at(0) = a;
-		this->at(1) = b;
-		if (Dim == 3) {
+		if (Dim >= 2) {
+			this->at(1) = b;
+		}
+		if (Dim >= 3) {
 			this->at(2) = c;
 		}
 	}
 
-	bool operator<(const Point_<Vt, Dim>& a) const{
-		for (St i = 0; i < Dim; i++){
-			if(this->at(i) < a[i]){
+	bool operator<(const Point_<Vt, Dim>& a) const {
+		for (St i = 0; i < Dim; i++) {
+			if (this->at(i) < a[i]) {
 				return true;
 			}
 		}
@@ -158,8 +164,8 @@ public:
 			return !((this->at(0) == a[0] && this->at(1) == a[1]) ? true : false);
 		} else {
 			return !(
-					(this->at(0) == a[0] && this->at(1) == a[1]
-							&& this->at(2) == a[2]) ? true : false);
+			(this->at(0) == a[0] && this->at(1) == a[1]
+					&& this->at(2) == a[2]) ? true : false);
 		}
 	}
 	void show() const {

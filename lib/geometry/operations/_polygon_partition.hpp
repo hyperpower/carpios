@@ -44,7 +44,7 @@ public:
 	typedef Contour_<TYPE> Contour;
 	typedef Point_<TYPE, Dim> Point;
 	typedef PointChain_<TYPE, Dim> PointChain;
-	typedef Segment_<TYPE, Dim> Segment;
+	typedef Segment_<TYPE, DIM> Segment;
 	typedef Operation_<TYPE, Dim> Op;
 	typedef Intersection_<TYPE, Dim> Isc;
 	typedef Connector_<TYPE, Dim> Connector;

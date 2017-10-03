@@ -272,7 +272,7 @@ def plot_errori(scheme):
     #plt.text(10, 1.25, "Time = "+ "%.2f" % float(strtime))
     #plt.text(10, 1.00, "Step = "+ "%04d" % float(strstep))
 
-    plt.legend(llg, scheme, loc= 'upper left')
+    plt.legend(llg, scheme, loc= 'lower right')
 
     plt.grid(True)
     #plt.axes().set_aspect('equal')
@@ -281,12 +281,12 @@ def plot_errori(scheme):
     plt.close()
 
 def plot_all():
-    matfu = file_name(PATH_RESULT, "phi")
+    matfu = file_name(PATH_RESULT, "exact")
     matfc = []
     for one in matfu:
         matfc.append(one)
 
-    multiprocessing.freeze_support()
+    #multiprocessing.freeze_support()
     pool = multiprocessing.Pool()
     cpus = multiprocessing.cpu_count() / 2
     results = []
@@ -295,7 +295,7 @@ def plot_all():
     for i in xrange(0, cpus):
         mat = cmatfs[i]
         for one in mat:
-            result = pool.apply_async(plot_one, args=(one[2], one[3],))
+            result = pool.apply_async(plot_one, args=(one[1], one[2],))
             results.append(result)
 
     pool.close()
@@ -309,10 +309,11 @@ def main():
     #strt = "48"
     #plot_one(stri, strt) 
     scheme = ["upwind2", "VanLeer", "superbee", "WAHYD"]
+    
+    plot_all()
     plot_error1(scheme)
     plot_error2(scheme)
     plot_errori(scheme)
-    plot_all()
 
 if __name__ == '__main__':
     main()

@@ -123,7 +123,9 @@ def plot_one(s, strstep, strtime):
     plt.grid(True)
     #plt.axes().set_aspect('equal')
     plt.tight_layout()
-    plt.savefig(PATH_FIG + "/"+ s +"_comp_" + "%06d" % int(strstep) +".png")
+    figfn = PATH_FIG + "/"+ s +"_comp_" + "%06d" % int(strstep) +".png"
+    print figfn
+    plt.savefig(figfn)
     plt.close()
     # plt.show()
 
@@ -144,7 +146,7 @@ def read_error_file(scheme, fne):
     return content
 
 def plot_error1(scheme,fne):
-    plt.figure(figsize=(4, 4))
+    plt.figure(figsize=(5, 5))
 
     """
     Set labels
@@ -191,7 +193,8 @@ def plot_error1(scheme,fne):
     plt.grid(True)
     #plt.axes().set_aspect('equal')
     plt.tight_layout()
-    plt.savefig(fne + "_1.png")
+    fnn = fne + '.png'
+    plt.savefig(fnn)
     plt.close()
     # plt.show()
 
@@ -302,7 +305,7 @@ def plot_all(scheme):
     for one in matfu:
         matfc.append(one)
 
-    multiprocessing.freeze_support()
+    #multiprocessing.freeze_support()
     pool = multiprocessing.Pool()
     cpus = multiprocessing.cpu_count() / 2
     results = []
@@ -490,23 +493,25 @@ def plot_errori_comp(scheme,fnu, fnn):
 def main():
     #stri = "480"
     #strt = "48"
-    #plot_one(stri, strt) 
+
+
     scheme = copy.copy(run.SCHEME)
-    #scheme = ["upwind2", "VanLeer", "superbee", "WAHYD"]
-    fne = "nerror"
-    plot_error1(scheme, fne)
-    plot_error2(scheme, fne)
-    plot_errori(scheme, fne)
-    fne = "error"
-    plot_error1(scheme, fne)
-    plot_error2(scheme, fne)
-    plot_errori(scheme, fne)
-    plot_error1_comp(scheme, "error", "nerror")
-    plot_error2_comp(scheme, "error", "nerror")
-    plot_errori_comp(scheme, "error", "nerror")
     for s in scheme:
         plot_all(s)
+    #plot_one("QUICK", 480, 4.8)
+    #scheme = ["upwind2", "VanLeer", "superbee", "WAHYD"]
+    fne = "nerror"
+    #plot_error1(scheme, fne)
+    #plot_error2(scheme, fne)
+    #plot_errori(scheme, fne)
+    fne = "error"
+    #plot_error1(scheme, fne)
+    #plot_error2(scheme, fne)
+    #plot_errori(scheme, fne)
 
+    #plot_error1_comp(scheme, "error", "nerror")
+    #plot_error2_comp(scheme, "error", "nerror")
+    #plot_errori_comp(scheme, "error", "nerror")
     
 
 if __name__ == '__main__':
