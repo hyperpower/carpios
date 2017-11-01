@@ -544,7 +544,7 @@ public:
 
 	// Improved total variation diminishing schemes for advection
 	// simulation on arbitrary grids
-	// J. Hou * ,† , F. Simons and R. Hinkelmann
+	// J. Hou , F. Simons and R. Hinkelmann
 	// Int. J. Numer. Meth. Fluids 2012; 70:359–382
 	static Vt VdotNabla_TVD(const VecF& vface, const Scalar& cdata, Index idx,
 			Limiter lim) {

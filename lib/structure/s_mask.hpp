@@ -10,6 +10,7 @@
 
 #include "s_define.hpp"
 #include "s_grid.hpp"
+#include "s_data.hpp"
 
 #include <unordered_map>
 

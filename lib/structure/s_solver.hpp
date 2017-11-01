@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "utility/any.hpp"
 #include "s_ghost.hpp"
+#include "s_order.hpp"
 
 namespace structure {
 
@@ -51,7 +52,8 @@ protected:
 	spStencil _stencil;
 
 	spCenterScalar _spcs; // the unknow variable
-	spCenterExp _spc_exp;
+	spCenterExp _spc_exp; //
+
 	std::string _vname;
 	spOrder _order;
 

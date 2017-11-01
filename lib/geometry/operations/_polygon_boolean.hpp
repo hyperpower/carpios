@@ -381,12 +381,14 @@ protected:
 		// (the line segment associated to e)
 		SweepEvent *l = _store(
 				SweepEvent(p, true, e->pl, e->other, e->other->type));
-		if (sec(l, e->other)) { // avoid a rounding error. The left event would be processed after the right event
+		if (sec(l, e->other)) {
+			// avoid a rounding error. The left event would be processed after the right event
 			std::cout << "Oops" << std::endl;
 			e->other->left = true;
 			l->left = false;
 		}
-		if (sec(e, r)) { // avoid a rounding error. The left event would be processed after the right event
+		if (sec(e, r)) {
+			// avoid a rounding error. The left event would be processed after the right event
 			std::cout << "Oops2" << std::endl;
 			//		cout << *e << endl;
 		}
@@ -403,6 +405,8 @@ protected:
 
 }
 ;
+
+
 
 }
 

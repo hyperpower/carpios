@@ -32,7 +32,9 @@ public:
 		}
 		_set_uniform_grid();
 	}
-	Grid_(const Poi& min, const Idx& gl, const Arr& csx, //
+	Grid_(const Poi& min,           // mimun location
+			const Idx& gl,          // ghost layer
+			const Arr& csx,         //
 			const Arr& csy = Arr(), //
 			const Arr& csz = Arr()) {
 		_min = min;
@@ -240,6 +242,9 @@ public:
 		return v(i, VERTEX_IDX[order][0], j, VERTEX_IDX[order][1], k,
 				VERTEX_IDX[order][2]);
 	}
+	Poi v(Idx order, Index index) const{
+		return v(order, index.i(), index.j(), index.k());
+	}
 	Poi v(Idx order, Ijk ijk) const {
 		return v(order, ijk.i(), ijk.j(), ijk.k());
 	}
@@ -294,6 +299,10 @@ public:
 		Index C = IJK.current();
 		Index c(C.value(0) - _gl, C.value(1) - _gl, C.value(2) - _gl);
 		return Ijk(c, this->_n);
+	}
+	Index to_Index(const Index& INDEX) const{
+		Index c(INDEX.value(0) - _gl, INDEX.value(1) - _gl, INDEX.value(2) - _gl);
+		return c;
 	}
 
 	inline St _IDX(Idx i) const {

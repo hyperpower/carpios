@@ -46,6 +46,12 @@ enum Orientation {
 	_C_ = 2, //
 };
 
+enum CellType {
+	_Normal_ = 1 << 0,
+	_Ghost_  = 1 << 1,
+	_Cut_    = 1 << 2,
+};
+
 typedef carpio::MatrixSCR_<Vt> Mat;
 typedef carpio::ArrayListV<Vt> Arr;
 typedef carpio::ArrayListV<St> Arrst;

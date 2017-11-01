@@ -97,12 +97,16 @@ public:
 	typedef std::list<str> lines;
 	typedef std::fstream fst;
 	typedef std::map<std::string, std::string> dict;
-	protected:
+protected:
+	/// a text file is consisted from three parts
+	///  1. filename
+	///  2. a dictionary: illustrate how to read this text file
+	///  3. contents
+
 	str _filename;
 	lines _content;
-
 	dict _config;
-	public:
+public:
 	TextFile() :
 			_filename(""), _content() {
 	}

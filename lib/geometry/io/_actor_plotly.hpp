@@ -457,6 +457,36 @@ public:
 		return res;
 	}
 
+	template<class Container>
+	static spPA_scatter _WireFrame2D(const Container& listcon, Contour) {
+		Listd lx;
+		Listd ly;
+		for (auto& con : listcon) {
+			auto iter_s = con.begin();
+			auto iter_e = std::next(iter_s, 1);
+			for (; iter_e != con.end();) {
+				lx.push_back(iter_s->value(_X_));
+				ly.push_back(iter_s->value(_Y_));
+
+				lx.push_back(iter_e->value(_X_));
+				ly.push_back(iter_e->value(_Y_));
+
+				std::advance(iter_s, 1);
+				std::advance(iter_e, 1);
+			}
+			iter_e = con.begin();
+			lx.push_back(iter_s->value(_X_));
+			ly.push_back(iter_s->value(_Y_));
+
+			lx.push_back(iter_e->value(_X_));
+			ly.push_back(iter_e->value(_Y_));
+		}
+		spPA_scatter res = spPA_scatter(
+				new Plotly_actor_scatter(lx, ly, 2));
+		res->set_mode("lines");
+		return res;
+	}
+
 	static spPA_scatter WireFrame2D(const Point& p1, const Point& p2,
 			const Point& p3) {
 		Listd lx;

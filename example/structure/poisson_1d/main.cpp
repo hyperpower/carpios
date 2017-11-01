@@ -34,5 +34,6 @@ int main() {
 
     //output
     auto spphi = poisson.get_CS("phi");
-    int res = Output("center_phi", *spphi);
+    //int res  = Output("center_phi", *spphi);
+    int res2 = Output_Scalar("center_phi", *spphi);
 }

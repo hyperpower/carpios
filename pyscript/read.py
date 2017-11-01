@@ -1,7 +1,7 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 import os 
 import re
 import sys
@@ -191,6 +191,7 @@ class CenterScalar:
                 first = line.split(" ")
                 assert(len(first) == 6)
                 self._size = int(first[1].split(":")[1])
+
                 self._dim = int(first[2].split(":")[1])
                 self._nx = int(first[3].split(":")[1])
                 self._ny = int(first[4].split(":")[1])
@@ -255,12 +256,12 @@ def read_residual_file(filename):
     return multi
 
 def test():
-    print "====== end test ====="
+    print("====== start test =====")
     pd = PointData("p_0_0") 
     arr = pd.get_coo_y()
     arr = pd.get_coo_x()
-    print arr
-    print "====== end test ====="
+    print(arr)
+    print("====== end test =====")
 
 if __name__ == '__main__':
     test()

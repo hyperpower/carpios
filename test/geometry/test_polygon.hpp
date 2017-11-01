@@ -69,7 +69,7 @@ TEST(Polygon, sweepevent) {
 	typedef SweepEvent_<Vt, Dim> SweepEvent;
 	typedef SweepEventComp_<Vt, Dim> SweepEventComp;
 	typedef Point_<double, 2> Point;
-	typedef Segment_<Point> Segment;
+	typedef Segment_<Vt, Dim> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	std::priority_queue<SweepEvent*, std::vector<SweepEvent*>, SweepEventComp> eq;
 
@@ -123,7 +123,7 @@ TEST(Polygon, trivial1) {
 	typedef double Vt;
 	const St Dim = 2;
 	typedef Point_<double, 2> Point;
-	typedef Segment_<Point> Segment;
+	typedef Segment_<Vt, 2> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
 	typedef Clip_<Vt> Clip;
@@ -181,7 +181,7 @@ TEST(Polygon, normal) {
 	typedef double Vt;
 	const St Dim = 2;
 	typedef Point_<double, 2> Point;
-	typedef Segment_<Point> Segment;
+	typedef Segment_<Vt, Dim> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
 	typedef Clip_<Vt> Clip;
@@ -205,7 +205,7 @@ TEST(Polygon, line_touch) {
 	typedef double Vt;
 	const St Dim = 2;
 	typedef Point_<double, 2> Point;
-	typedef Segment_<Point> Segment;
+	typedef Segment_<Vt, Dim> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
 	typedef Clip_<Vt> Clip;
@@ -231,7 +231,7 @@ TEST(Polygon, point_line_touch) {
 	typedef double Vt;
 	const St Dim = 2;
 	typedef Point_<double, 2> Point;
-	typedef Segment_<Point> Segment;
+	typedef Segment_<Vt, Dim> Segment;
 	typedef Operation_<Vt, Dim> Op;
 	typedef Creation_<Vt, Dim> Cr;
 	typedef Clip_<Vt> Clip;
@@ -251,6 +251,64 @@ TEST(Polygon, point_line_touch) {
 		gp.add(GpActor::Lines(res.contour(0), 0, 2));
 	}
 	//gp.plot();
+}
+
+TEST(Polygon, point_line_touch2) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly,  0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	Cr::Cube(poly2, 0.75, 0.75, 1.1, 1.1);
+
+	Clip clip(poly2, poly);
+	Polygon res;
+	clip.compute(INTERSECTION, res);
+
+
+	Gnuplot gp;
+	gp.add(GpActor::Lines(poly.contour(0), 0, 0));
+	gp.add(GpActor::Lines(poly2.contour(0), 0, 1));
+	std::cout << "n contour = " << res.ncontours() << std::endl;
+	if (res.ncontours() > 0) {
+		gp.add(GpActor::Lines(res.contour(0), 0, 2));
+	}
+	gp.plot();
+}
+
+TEST(Polygon, circle) {
+	typedef double Vt;
+	const St Dim = 2;
+	typedef Point_<double, 2> Point;
+	typedef Segment_<Vt, Dim> Segment;
+	typedef Operation_<Vt, Dim> Op;
+	typedef Creation_<Vt, Dim> Cr;
+	typedef Clip_<Vt> Clip;
+	Polygon poly;
+	Cr::Cube(poly, 0.0, 0.0, 1.0, 1.0);
+	Polygon poly2;
+	Cr::Circle(poly2, 1., 1., 0.3, 356);
+
+	Clip clip(poly, poly2);
+	Polygon res;
+	clip.compute(INTERSECTION, res);
+	std::cout << "volume = " << res.contour(0).volume() << std::endl;
+
+	Gnuplot gp;
+//	gp.add(GpActor::Lines(poly.contour(0), 0, 0));
+//	gp.add(GpActor::Lines(poly2.contour(0), 0, 1));
+	if (res.ncontours() > 0) {
+		gp.add(GpActor::Lines(res.contour(0), 0, 2));
+	}
+	gp.set_xrange(-.2,1.2);
+	gp.set_yrange(-.2,1.2);
+	gp.set_equal_ratio();
+//	gp.plot();
 }
 
 }

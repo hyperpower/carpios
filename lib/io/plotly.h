@@ -21,8 +21,9 @@ public:
 	Map _map;
 	pPO _module;
 	public:
-	Plotly_actor();
-	virtual ~Plotly_actor();
+	Plotly_actor(){
+	}
+	virtual ~Plotly_actor(){};
 
 	pPO get_p_python_object() {
 		pPO dict = PyDict_New();
@@ -302,6 +303,8 @@ public:
 	public:
 	Plotly() {
 		_init();
+		set_auto_open(false);
+		set_filename("./out.html");
 	}
 
 	~Plotly() {
@@ -319,22 +322,15 @@ public:
 		this->_actors.push_back(spa);
 	}
 
-	void plot() const {
-		pPO data = PyList_New(0);
-		//pPO list_actors;
-		for (spPA pa : _actors) {
-			pPO p = pa->get_p_python_object();
-			PyList_Append(data, p);
-		}
-		if (PyList_Size(data) == 0) {
-			return;
-		}
-		//
-		pPO layout = _get_layout();
-		pPO args;
-		args = Py_BuildValue("({s:O, s:O})", "data", data, "layout",
-				layout);
-		pPO pRet = PyObject_CallObject(_funPlot, args);
+	void set_auto_open(bool flag) {
+		/// default is false
+		pPO val = Py_BuildValue("i", flag ? 1 : 0);
+		_map_config["auto_open"] = val;
+	}
+
+	void set_filename(const std::string& fn) {
+		pPO val = Py_BuildValue("s", fn.c_str());
+		_map_config["filename"] = val;
 	}
 
 	void title(const std::string& t) {
@@ -358,9 +354,11 @@ public:
 		this->height(h);
 	}
 
-	//void set_output_file(const std::string& fn) {
-	//	this->_filename = Py_BuildValue("s", fn.c_str());
-	//}
+	void plot() const {
+		pPO args_fig = Py_BuildValue("(O)", _get_fig());
+		pPO args_o = Py_BuildValue("O", _get_config());
+		pPO pRet = PyObject_Call(_funPlot, args_fig, args_o);
+	}
 
 protected:
 // data
@@ -369,6 +367,7 @@ protected:
 	//pPO _filename;
 
 	Map _map_layout;
+	Map _map_config;
 
 	std::list<spPA> _actors;
 
@@ -384,6 +383,34 @@ protected:
 		pPO args = Py_BuildValue("(O)", dict);
 		pPO _module = _get_module("Layout");
 		return PyObject_CallObject(_module, args);
+	}
+
+	pPO _get_fig() const {
+		pPO dict = PyDict_New();
+		/// data
+		pPO data = PyList_New(0);
+		//pPO list_actors;
+		for (spPA pa : _actors) {
+			pPO p = pa->get_p_python_object();
+			PyList_Append(data, p);
+		}
+		if (PyList_Size(data) == 0) {
+			return nullptr;
+		}
+		PyDict_SetItem(dict, Py_BuildValue("s", "data"), data);
+		/// layout
+		pPO val = _get_layout();
+		PyDict_SetItem(dict, Py_BuildValue("s", "layout"), val);
+//		pPO args = Py_BuildValue("(O)", dict);
+		return dict;
+	}
+
+	pPO _get_config() const {
+		pPO dict = PyDict_New();
+		for (auto& pair : _map_config) {
+			PyDict_SetItem(dict, Py_BuildValue("s", pair.first.c_str()), pair.second);
+		}
+		return dict;
 	}
 
 	pPO _get_module(std::string name) const {

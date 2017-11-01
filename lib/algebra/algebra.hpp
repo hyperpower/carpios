@@ -10,6 +10,7 @@
 #include "matrix_SparCompRow.hpp"
 #include "matrix_SparCoord.hpp"
 #include "polynomial.hpp"
+#include "polynomial_one.hpp"
 #include "preconditioner.hpp"
 #include "solver_matrix.hpp"
 #include "sort.hpp"

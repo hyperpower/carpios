@@ -12,7 +12,9 @@
 #include <iterator>
 
 #include "array_list.hpp"
+#ifdef OPENMP
 #include <omp.h>
+#endif
 
 namespace carpio {
 
@@ -662,16 +664,19 @@ MatrixV<T> MatrixV<T>::operator+(const MatrixV<T> &a) {
 	ASSERT(a.size_i() == this->size_i());
 	ASSERT(a.size_j() == this->size_j());
 	MatrixV<T> sum(this->m_iLen, this->m_jLen);
-#pragma omp parallel
+#ifdef OPENMP
+#pragma omp parallel if (a.size_i() > 100)
 	{
-#pragma omp for schedule(dynamic,50)
+#pragma omp for schedule(dynamic)
+#endif
 	for (size_type i = 0; i < this->m_iLen; i++) {
 		for (size_type j = 0; j < this->m_jLen; j++) {
 			sum[i][j] = this->m_mp[i][j] + a[i][j];
 		}
-//		printf("Thread %d\n", omp_get_thread_num());
 	}
+#ifdef OPENMP
 	}
+#endif
 	return sum;
 }
 template<typename T>
@@ -679,11 +684,20 @@ MatrixV<T> MatrixV<T>::operator-(const MatrixV<T> &a) {
 	ASSERT(a.size_i() == this->size_i());
 	ASSERT(a.size_j() == this->size_j());
 	MatrixV<T> sum(this->m_iLen, this->m_jLen);
+#ifdef OPENMP
+#pragma omp parallel if (a.size_i() > 100)
+	{
+#pragma omp for schedule(dynamic)
+#endif
+
 	for (size_type i = 0; i < this->m_iLen; i++) {
 		for (size_type j = 0; j < this->m_jLen; j++) {
 			sum[i][j] = this->m_mp[i][j] - a[i][j];
 		}
 	}
+#ifdef OPENMP
+	}
+#endif
 	return sum;
 }
 template<typename T>

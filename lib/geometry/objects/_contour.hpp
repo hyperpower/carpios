@@ -99,9 +99,12 @@ public:
 		}
 		Vt s = 0.0;
 		for (St i = 1; i < _vertices.size() - 1; i++) {
-			s = s + Op::Cross(_vertices[i + 1], _vertices[i], _vertices[0]); // det to cro
+			s = s + Op::TripleScalar(_vertices[i + 1], _vertices[i], _vertices[0]); // det to cro
 		}
 		return std::abs(s) / 2.0;
+	}
+	Vt volume() const{
+		return area();
 	}
 	bool empty() const {
 		if (_vertices.size() == 0) {

@@ -44,7 +44,9 @@ TEST(sgrid, construct) {
 	Poi pmax(6.0, 10.0, 3.0);
 	Index mn(4, 5, 3);
 	Grid grid(pmin, pmax, mn, 2);
-	std::cout << "Number of Face :" << Grid::NumFace << "\n";
+	std::cout << "Number of Face     :" << Grid::NumFace << "\n";
+	std::cout << "Number of Vertices :" << Grid::NumVertex << "\n";
+
 	for (Grid::Ijk idx = grid.begin_ijk(); !idx.is_end(); ++idx) {
 		//	idx.show();
 		Poi pc = grid.c(idx);
@@ -59,7 +61,7 @@ TEST(sgrid, construct) {
 	plt.add(WireFrame(grid));
 	plt.title("Structure");
 	plt.size(1200, 800);
-	//plt.plot();
+	plt.plot();
 }
 
 Arr random_arr(Vt len, Arr::size_type n) {
@@ -111,7 +113,7 @@ TEST(sgrid, construct_non) {
 	//plt.add(WireFrameGhost(gri));
 	plt.title("Structure");
 	plt.size(1200, 800);
-	plt.plot();
+//	plt.plot();
 }
 
 }

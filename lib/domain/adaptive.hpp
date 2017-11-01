@@ -49,6 +49,10 @@ public:
 	typedef typename SpaceT<pNode, Dim>::const_reference const_reference;
 	typedef typename SpaceT<pNode, Dim>::size_type size_type;
 
+	typedef Creation_<COO_VALUE, Dim> Cr;
+	typedef Polygon_<COO_VALUE> Polygon;
+	typedef Shape_<COO_VALUE, Dim> Shape;
+
 	typedef void (*pfunction)(pNode, utPointer);
 
 	typedef void (*pfunction_conditional)(arrayList &, pNode, utPointer);
@@ -126,7 +130,7 @@ public:
 		std::function<void(pNode&, St)> fun =
 				[this, &shape, &vr](pNode pn, St max_l) {
 					//if(pn->is_leaf()) {
-						Shape2D sn,res;
+						Shape sn,res;
 						CreatCube(sn,
 								pn->p(_M_,_X_), pn->p(_M_,_Y_),
 								pn->p(_P_,_X_), pn->p(_P_,_Y_));
@@ -172,14 +176,13 @@ public:
 		std::function<void(pNode&, St)> fun =
 				[this, &shape, &vr](pNode& pn, St max_l) {
 					ASSERT(pn!=nullptr);
-
-					//if(pn->is_leaf()) {
-					Shape2D sn,res;
-					CreatCube(sn,
+					Polygon pcube, pres;
+					Cr::Cube(pcube,
 							pn->p(_M_,_X_), pn->p(_M_,_Y_),
 							pn->p(_P_,_X_), pn->p(_P_,_Y_));
-					Intersect(sn,shape,res);
-					vt vsn = sn.volume();
+					Shape res(pres), scube(pcube);
+					St nres = Shape::Intersection(shape,scube,res);
+					vt vsn = pcube[0].volume();
 					vt vres = res.volume();
 					if(res.empty() ||//
 							Abs((vsn-vres)/vsn)>=vr) { //node is all out

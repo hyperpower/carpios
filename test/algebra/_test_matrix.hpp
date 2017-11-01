@@ -60,7 +60,7 @@ TEST(Matrix, add) {
 			int n = 10;
 			n *= std::pow(10, i);
 			double t = test_mat_add(n);
-			fmt::print("Threads : {:5d} n : {:5d} time :{:8.5f}ms\n", numt, n, t);
+			fmt::print("Threads : {:5d} n : {:5d} time :{:10.5f}ms\n", numt, n, t);
 		}
 #ifdef OPENMP
 	}

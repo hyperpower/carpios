@@ -177,7 +177,7 @@ spActor Shape(const Shape_2D& g, St base_idx) {
 		return actor;
 	}
 	typedef typename Shape2D::S2D::Point Poi;
-	for (St i = 0; i < g.size_vertexs(); ++i) {
+	for (St i = 0; i < g.size_vertices(); ++i) {
 		const Poi& p = g.v(i);
 		actor->data().push_back(ToString(p.x(), p.y(), i + base_idx, " "));
 	}

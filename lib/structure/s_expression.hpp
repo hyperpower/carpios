@@ -34,11 +34,36 @@ public:
 	typedef typename Base::const_iterator const_iterator;
 
 public:
-	Expression_(){
+	Expression_() {
 
 	}
+};
+template<St DIM>
+class Formula_:
+		public
+		carpio::PolynomialOne_<
+				Vt,                 //
+				Index_<DIM>,        //
+				Index_compare_<DIM> //
+		>//
+{
+public:
+	typedef carpio::PolynomialOne_<Vt, Index_<DIM>,
+			Index_compare_<DIM> > Base;
+	typedef Index_<DIM> Index;
+	typedef Grid_<DIM> Grid;
+	typedef std::shared_ptr<Grid> spGrid;
+	typedef Index_compare_<DIM> Index_compare;
 
+	typedef Formula_<DIM> Formula;
+	typedef std::shared_ptr<Formula_> spFormula;
 
+	typedef typename Base::iterator iterator;
+	typedef typename Base::const_iterator const_iterator;
+	public:
+	Formula_() {
+
+	}
 };
 }
 #endif

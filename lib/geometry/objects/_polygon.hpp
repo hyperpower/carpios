@@ -30,14 +30,16 @@ public:
 	typedef typename std::vector<Contour>::const_iterator const_iterator;
 	typedef Point_<TYPE, 2> Point;
 	typedef Point_<TYPE, 2>& ref_Point;
+	typedef const Point_<TYPE, 2>& const_ref_Point;
 
 	typedef Segment_<TYPE, 2> Segment;
 	typedef Segment& ref_Segment;
 
+	typedef Contour value_type;
 protected:
 	/** Set of contours conforming the polygon */
 	std::vector<Contour> contours;
-public:
+	public:
 	Polygon_() :
 			contours() {
 	}
@@ -75,6 +77,10 @@ public:
 		return contours[p];
 	}
 	Contour& operator[](unsigned int p) {
+		ASSERT(p < contours.size());
+		return contours[p];
+	}
+	const Contour& operator[](unsigned int p) const {
 		ASSERT(p < contours.size());
 		return contours[p];
 	}
@@ -124,6 +130,9 @@ public:
 	}
 	void pop_back() {
 		contours.pop_back();
+	}
+	bool empty() const {
+		return contours.empty();
 	}
 	void erase(iterator i) {
 		contours.erase(i);

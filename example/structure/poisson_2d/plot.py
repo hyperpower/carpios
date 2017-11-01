@@ -6,24 +6,15 @@ import numpy as np
 import string
 import math
 import operator
-from scipy import ndimage
 
-
-
-
-
-matplotlib.rcParams['text.usetex'] = True
-matplotlib.rcParams['text.latex.unicode'] = True
-matplotlib.rcParams['font.family'] = 'serif'
-matplotlib.rcParams['font.size'] = 12
-
-PATH_EXAMPLE = os.path.abspath(os.path.join(__file__, "../"))
-PATH_THIS    = os.path.abspath(__file__)
+PATH_EXAMPLE  = os.path.abspath(os.path.join(__file__, "../../"))
+PATH_THIS     = os.path.abspath(__file__)
+PATH_RESULT   = os.path.abspath("./result")
+PATH_FIG      = os.path.abspath("./fig")
 PATH_PROJECT  = os.path.abspath(os.path.join(PATH_EXAMPLE, "../.."))
 PATH_PYSCRIPT = os.path.abspath(os.path.join(PATH_PROJECT, "pyscript"))
 
 sys.path.append(PATH_PYSCRIPT)
-print PATH_PYSCRIPT
 import read
 
 def draw_contour():
@@ -65,7 +56,9 @@ def draw_contour():
     plt.axes().set_aspect('equal', 'datalim')
     #plt.axes().set_aspect('equal')
     plt.tight_layout()
-    plt.savefig("fig_phi.pdf")
+    fn = "fig_phi.pdf"
+    plt.savefig(fn)
+    print("Output fig : ", fn)
     # plt.show()
 
 def draw_residual():
@@ -102,7 +95,9 @@ def draw_residual():
     plt.axes().set_yscale("log")
     #plt.axes().set_aspect('equal')
     plt.tight_layout()
-    plt.savefig("fig_residual.pdf")
+    fn = "fig_residual.pdf"
+    plt.savefig(fn)
+    print("Output fig : ", fn)
 
 def main():
     draw_contour() 

@@ -34,10 +34,10 @@ public:
 	typedef typename Stencil::spExpression spExpression;
 
 protected:
-	FunGrid _d; // distance to other center
-	FunGrid _a; // face area
-	FunGrid _s; // face area
-	FunGrid _betaf;  //beta on face
+	FunGrid _d;      // distance to other center
+	FunGrid _a;      // face area
+	FunGrid _s;      // face area
+	FunGrid _betaf;  // beta on face
 	FunGrid _source; // source term
 
 	spCenterScalar _cs_beta;   // scalar field of beta
@@ -110,7 +110,7 @@ protected:
 		Vt betaf = _betaf(index, dim, ori);
 		Vt a = _a(index, dim, ori);
 		Vt d = _d(index, dim, ori);
-		return -betaf * a / d;
+		return - betaf * a / d;
 	}
 	void _build_default_d() {
 		FunGrid fun =
@@ -510,9 +510,9 @@ public:
 		this->_values["tau"] = tau;
 	}
 
-	void set_depend( //
-			spCenterScalar spphi, //
-			spCenterScalar spbeta,  //
+	void set_depend(                 //
+			spCenterScalar spphi,    //
+			spCenterScalar spbeta,   //
 			spCenterScalar spsource, //
 			Vt beta = 1, Vt source = 0) {
 		this->_events.erase("stand_alone");
@@ -538,7 +538,7 @@ public:
 			const int& max_iter = 1000,      //
 			const Vt& tol = 1e-3       //
 			) {
-		// name should
+		// name should be
 		ASSERT(name == "Jacobi" //
 		|| name == "IC_CGS" //
 		|| name == "SOR");

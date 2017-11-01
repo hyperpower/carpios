@@ -20,8 +20,8 @@ TEST(CSV, test1) {
 
 	std::cout << file[1]["Model"] << std::endl; // display : Cougar
 
-	std::cout << file.row_count() << std::endl; // display : 2
-	std::cout << file.column_count() << std::endl; // display : 3
+	std::cout << "Row size    : "<< file.size_row() << std::endl; // display    : 4
+	std::cout << "Column size : "<< file.size_column() << std::endl; // display : 5
 
 	std::cout << file.get_header_element(3) << std::endl; // display : Model
 	//} catch (csv::Error &e) {
@@ -38,8 +38,8 @@ TEST(CSV, test2) {
 		std::cout << file[0][0] << std::endl;       // display : 1997
 		std::cout << file[0] << std::endl;          // display : 1997 | Ford | E350
 		std::cout << file[1]["Model"] << std::endl; // display : Cougar
-		std::cout << file.row_count() << std::endl; // display : 2
-		std::cout << file.column_count() << std::endl; // display : 3
+		std::cout << file.size_row() << std::endl; // display : 2
+		std::cout << file.size_column() << std::endl; // display : 3
 
 		std::cout << file.get_header_element(3) << std::endl; // display : Model
 	} catch (csv::Error &e) {

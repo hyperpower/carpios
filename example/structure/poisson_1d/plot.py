@@ -1,29 +1,21 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import os
+import sys
 import numpy as np
 import string
 import math
 import operator
-from scipy import ndimage
 
+PATH_EXAMPLE  = os.path.abspath(os.path.join(__file__, "../../"))
+PATH_THIS     = os.path.abspath(__file__)
+PATH_RESULT   = os.path.abspath("./result")
+PATH_FIG      = os.path.abspath("./fig")
+PATH_PROJECT  = os.path.abspath(os.path.join(PATH_EXAMPLE, "../.."))
+PATH_PYSCRIPT = os.path.abspath(os.path.join(PATH_PROJECT, "pyscript"))
 
-def read_center_scalar(fn):
-    file = open(fn, "r") 
-    content = file.readlines()
-    mat = []
-    for row in content:
-        nr = [x.strip() for x in row.split(',')]
-        mat.append(nr)
-    fl   = mat[0]
-    sfl  = fl[0].split(' ')
-    nr   = (sfl[1].split(':'))[1]
-    dim  = (sfl[2].split(':'))[1]
-    nx   = (sfl[3].split(':'))[1]
-    ny   = (sfl[4].split(':'))[1]
-    nz   = (sfl[5].split(':'))[1]
-    mat  = mat[1:]
-    return mat, nr, dim, nx, ny, nz
+sys.path.append(PATH_PYSCRIPT)
+import read
 
 def _col(matrix, i):
     return [row[i] for row in matrix]
@@ -61,8 +53,11 @@ def draw():
     """
     Data part
     """
-    mat, nr, d ,nx, ny, nz = read_center_scalar("center_phi")
-    assert(int(d) == 1)
+    TF  = read.TextFile("center_phi")
+    mat = TF.get_data()
+    dic = TF.get_config()
+    nx  = dic["NX"]
+    # mat, nr, d ,nx, ny, nz = read_center_scalar("center_phi")
     plt.plot(_col(mat,0), _col(mat, 3), marker=".")
 
     plt.grid(True)

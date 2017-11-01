@@ -7,9 +7,11 @@ using namespace std;
 #include <glog/logging.h>
 
 //#include "../test/utility/_test_any.hpp"
+//#include "../test/utility/_test_multikey_map.hpp"
 //#include "../test/algebra/_test_matrix.hpp"
 //#include "../test/algebra/_test_matrix_small.hpp"
 //#include "../test/algebra/_test_polynomial.hpp"
+//#include "../test/algebra/_test_polynomial_one.hpp"
 //#include "../test/algebra/_test_solver.hpp"
 
 //#include "../test/domain/_test_grid_2D.hpp"
@@ -29,11 +31,11 @@ using namespace std;
 //#include "../test/ts/test_delaunay.h"
 
 //#include "../test/structure/_test_s_poisson.hpp"
+#include "../test/structure/_test_s_order.hpp"
 //#include "../test/structure/_test_s_advection.hpp"
 //#include "../test/structure/_test_s_operation.hpp"
 //#include "../test/structure/_test_s_ns.hpp"
 //#include "../test/structure/_test_s_grid.hpp"
-
 
 //#include "../test/geometry/test_triangle.hpp"
 //#include "../test/geometry/test_polygon.hpp"
@@ -42,7 +44,7 @@ using namespace std;
 //#include "../test/geometry/test_intersection.hpp"
 //#include "../test/geometry/test_trisurface.hpp"
 //#include "../test/geometry/test_trisurface_boolean.hpp"
-#include "../test/geometry/test_delaunay_triangluation.hpp"
+//#include "../test/geometry/test_delaunay_triangluation.hpp"
 //#include "../test/geometry/test_bbtree.hpp"
 //#include "../test/geometry/test_polygon_partition.hpp"
 //#include "../test/io/_test_plotly.hpp"

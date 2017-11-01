@@ -11,7 +11,7 @@
 
 namespace carpio {
 /*
- *  if the shape is 2D, the shape is polygon
+ *  if the shape is 2D, the shape is contour
  *  if the shape is 3D, the shape is surface
  */
 
@@ -20,14 +20,16 @@ class Shape_ {
 public:
 	static const St Dim = DIM;
 
-	typedef VALUE vt;
+	typedef VALUE Vt;
 
 	typedef Shape_<VALUE, DIM> Self;
 
-	typedef Contour_<VALUE> S2D;
-	typedef Contour_<VALUE>* pS2D;
-	typedef Contour_<VALUE>& ref_S2D;
+	typedef Polygon_<VALUE> S2D;
+	typedef Polygon_<VALUE>* pS2D;
+	typedef Polygon_<VALUE>& ref_S2D;
 	typedef const Polygon_<VALUE>& const_ref_S2D;
+	typedef Clip_<Vt> Clip;
+
 	typedef typename S2D::Segment Seg2D;
 	typedef typename S2D::Point Poi2D;
 protected:
@@ -41,6 +43,11 @@ public:
 		if (Dim == 2) {
 			_ps2d = nullptr;
 		}
+		_type = 0;
+	}
+	Shape_(const Polygon_<VALUE>& c) {
+		ASSERT(Dim == 2);
+		_ps2d = new S2D(c);
 		_type = 0;
 	}
 
@@ -80,17 +87,20 @@ public:
 	/*
 	 * vertex
 	 */
-	inline St size_vertexs() const {
+	inline St size_vertices(St idx = 0) const {
 		ASSERT(Dim == 2);
-		return _ps2d->size_vertices();
+		ASSERT(!_ps2d->empty());
+		return _ps2d->operator [](idx).size_vertices();
 	}
-	typename S2D::const_ref_Point v(St i) const {
+	typename S2D::const_ref_Point v(St i, St idx = 0) const {
 		ASSERT(Dim == 2);
-		return _ps2d->vertex(i);
+		ASSERT(!_ps2d->empty());
+		return _ps2d->operator [](idx).vertex(i);
 	}
-	typename S2D::ref_Point v(St i) {
+	typename S2D::ref_Point v(St i, St idx = 0) {
 		ASSERT(Dim == 2);
-		return _ps2d->v(i);
+		ASSERT(!_ps2d->empty());
+		return _ps2d->operator [](idx).v(i);
 	}
 	/*
 	 * set
@@ -132,37 +142,32 @@ public:
 	/*
 	 *  max and min
 	 */
-	vt max_x() const {
+	void boundingbox(typename S2D::Point& min, typename S2D::Point& max) const {
+		_ps2d->boundingbox(min, max);
+	}
+	Vt max(int dim) const {
 		if (Dim == 2) {
-			return _ps2d->max_x();
+			typename S2D::Point max, min;
+			_ps2d->boundingbox(min, max);
+			return max[dim];
 		}
 		return 0;
 	}
-	vt max_y() const {
+	Vt min(int dim) const {
 		if (Dim == 2) {
-			return _ps2d->max_y();
-		}
-		return 0;
-	}
-	vt min_x() const {
-		if (Dim == 2) {
-			return _ps2d->min_x();
-		}
-		return 0;
-	}
-	vt min_y() const {
-		if (Dim == 2) {
-			return _ps2d->min_y();
+			typename S2D::Point max, min;
+			_ps2d->boundingbox(min, max);
+			return min[dim];
 		}
 		return 0;
 	}
 	/*
 	 * volume
 	 */
-	vt volume() const {
+	Vt volume() const {
 		if (Dim == 2) {
 			if (!this->empty()) {
-				return _ps2d->area();
+				return _ps2d->contour(0).volume();
 			}
 		}
 		return 0.0;
@@ -175,7 +180,8 @@ public:
 	 *
 	 * Find all the segments across x=v, y=v or z=v
 	 */
-	void find_seg_across(std::list<St>& l_seg_idx, Axes aix, const vt& v) const {
+	void find_seg_across(std::list<St>& l_seg_idx, Axes aix,
+			const Vt& v) const {
 		if (Dim == 2) {
 			_ps2d->find_seg_across(l_seg_idx, aix, v);
 			return;
@@ -186,7 +192,7 @@ public:
 	/*
 	 * Find closest vertex
 	 */
-	St find_closest_vertex(vt x, vt y, vt z = 0) const {
+	St find_closest_vertex(Vt x, Vt y, Vt z = 0) const {
 		if (Dim == 2) {
 			return _ps2d->find_closest_vertex(x, y);
 		}
@@ -202,24 +208,33 @@ public:
 		}
 	}
 
+	static St Intersection(const Self& obj, const Self& clip, Self& res) {
+		ASSERT(DIM == 2); //temp
+		/*
+		 * 2D clip
+		 */
+		res.clear();
+		Clip c(*(obj._ps2d), *(clip._ps2d));
+		c.compute(INTERSECTION, *(res._ps2d));
+		return res._ps2d->ncontours();
+	}
+
 }
 ;
 
-template<typename VALUE>
-void CreatCircle(Shape_<VALUE, 2>& s, VALUE x0, VALUE y0, VALUE r, int n) {
-	Polygon_<VALUE> ply;
-	CreatCircle(ply, x0, y0, r, n);
-	s.set(ply);
-}
+//template<typename VALUE>
+//void CreatCircle(Shape_<VALUE, 2>& s, VALUE x0, VALUE y0, VALUE r, int n) {
+//	Polygon_<VALUE> ply;
+//	CreatCircle(ply, x0, y0, r, n);
+//	s.set(ply);
+//}
 
-template<typename VALUE>
-void CreatCube(Shape_<VALUE, 2>& s, VALUE x0, VALUE y0, VALUE x1, VALUE y1) {
-	Polygon_<VALUE> ply;
-	CreatCube(ply, x0, y0, x1, y1);
-	s.set(ply);
-}
-
-
+//template<typename VALUE>
+//void CreatCube(Shape_<VALUE, 2>& s, VALUE x0, VALUE y0, VALUE x1, VALUE y1) {
+//	Polygon_<VALUE> ply;
+//	CreatCube(ply, x0, y0, x1, y1);
+//	s.set(ply);
+//}
 
 template<typename TYPE, St DIM>
 bool IsBoxCross(const Shape_<TYPE, DIM> &s1, const Shape_<TYPE, DIM> &s2) {

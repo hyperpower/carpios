@@ -8,12 +8,12 @@
 #ifndef _S_GHOST_HPP_
 #define _S_GHOST_HPP_
 
-
 #include "s_define.hpp"
 #include "s_grid.hpp"
 #include "s_boundary.hpp"
+#include "s_data.hpp"
 
-namespace structure{
+namespace structure {
 
 template<St DIM>
 class Ghost_ {
@@ -33,14 +33,22 @@ public:
 	typedef std::shared_ptr<Stencil> spStencil;
 
 	typedef std::function<void(const Index&)> Fun_index;
-protected:
+	protected:
 	std::string _name;
 	spBI _bi;
 	spGrid _grid;
-public:
+	public:
 	Ghost_(spGrid spg, spBI bi) :
 			_grid(spg), _bi(bi) {
 		_name = "Ghost";
+	}
+
+	Grid& grid() {
+		return *_grid;
+	}
+
+	const Grid& grid() const {
+		return *_grid;
 	}
 
 	const std::string& name() const {
@@ -68,13 +76,13 @@ public:
 		return false;
 	}
 	virtual bool is_normal(const Index& index) const {
-		std::cout << "Boundary : is ghost\n";
+		std::cout << "Boundary : is normal\n";
 		SHOULD_NOT_REACH;
 		return false;
 	}
 
-	virtual bool IS_NORAML(const Index& INDEX) const {
-		std::cout << "Boundary : is ghost\n";
+	virtual bool IS_NORMAL(const Index& INDEX) const {
+		std::cout << "Boundary : is NORMAL\n";
 		SHOULD_NOT_REACH;
 		return false;
 	}
@@ -116,6 +124,12 @@ public:
 	}
 
 	virtual spcBC find(const Index& index, const std::string& vname) const {
+		return nullptr;
+	}
+
+	virtual spcBC find_bc(const std::string& vname,
+			const Index& center_idx, const Index& ghost_idx,
+			const St& d) const {
 		return nullptr;
 	}
 
@@ -183,11 +197,11 @@ public:
 	typedef typename Stencil::spExpression spExpression;
 
 	typedef std::function<void(const Index&)> Fun_index;
-protected:
+	protected:
 	//BI _bi;
 	//spGrid _grid;
 	static const St _ShapeID = 0;
-public:
+	public:
 	GhostRegular_(spGrid g, spBI bi) :
 			Ghost_<DIM>(g, bi) {
 		this->_name = "GhostRegular";
@@ -342,146 +356,230 @@ public:
 		return spc;
 	}
 
-//spcBC find(const Index& index, const std::string& vname) const {
-//	St seg_idx = which_boudary_seg(index);
-//	return this->_bi.find(_ShapeID, seg_idx, vname);
-//}
-
-//void add_bc(St shape_idx, St seg_idx, const std::string&name, spBC spbc) {
-//	this->_bi.insert(shape_idx, seg_idx, name, spbc);
-//}
-
 }
 ;
 
-
 template<St DIM>
-class Order_ {
+class GhostIrregular_: public Ghost_<DIM> {
 public:
 	static const St Dim = DIM;
-
-	typedef Index_<DIM> Index;
-
-	typedef Scalar_<DIM> CenterScalar;
-	typedef std::shared_ptr<CenterScalar> spCenterScalar;
-
 	typedef BoundaryCondition BC;
 	typedef std::shared_ptr<BoundaryCondition> spBC;
 	typedef std::shared_ptr<const BoundaryCondition> spcBC;
+	typedef Data_<int, DIM> ScalarInt;
 
 	typedef BoundaryIndex BI;
 	typedef std::shared_ptr<BI> spBI;
-	typedef std::shared_ptr<const BI> spcBI;
 	typedef Grid_<DIM> Grid;
 	typedef std::shared_ptr<Grid> spGrid;
-	typedef Ghost_<DIM> Ghost;
-	typedef std::shared_ptr<Ghost> spGhost;
-	typedef Stencil_<DIM> Stencil;
-	typedef std::shared_ptr<Stencil> spStencil;
-	typedef typename Stencil::Expression Expression;
-	typedef std::shared_ptr<Expression> spExpression;
-	typedef Data_<spExpression, DIM> CenterExp;
-	typedef std::shared_ptr<CenterExp> spCenterExp;
-protected:
-	spGrid  _grid;
-	spGhost _ghost;
-public:
-	Order_(spGrid grid, spGhost ghost) :
-			_grid(grid), _ghost(ghost) {
-	}
-
-	virtual St get_order(const Index& index) {
-		SHOULD_NOT_REACH;
-		return 0;
-	}
-
-	virtual St size() const {
-		SHOULD_NOT_REACH;
-		return 0;
-	}
-
-	virtual Index begin() const {
-		SHOULD_NOT_REACH;
-		return Index();
-	}
-
-	virtual Index end() const {
-		SHOULD_NOT_REACH;
-		return Index();
-	}
-	virtual Index next(const Index& index) const {
-		SHOULD_NOT_REACH;
-		return Index();
-	}
-	virtual ~Order_() {
-
-	}
-};
-
-template<St DIM>
-class OrderRegular_: public Order_<DIM> {
-public:
-	static const St Dim = DIM;
-
 	typedef Index_<DIM> Index;
-	typedef Scalar_<DIM> CenterScalar;
-	typedef std::shared_ptr<CenterScalar> spCenterScalar;
-
-	typedef BoundaryCondition BC;
-	typedef std::shared_ptr<BoundaryCondition> spBC;
-	typedef std::shared_ptr<const BoundaryCondition> spcBC;
-
-	typedef BoundaryIndex BI;
-	typedef std::shared_ptr<BI> spBI;
-	typedef std::shared_ptr<const BI> spcBI;
-	typedef Grid_<DIM> Grid;
-	typedef std::shared_ptr<Grid> spGrid;
-	typedef Ghost_<DIM> Ghost;
-	typedef std::shared_ptr<Ghost> spGhost;
-	typedef Stencil_<DIM> Stencil;
-	typedef std::shared_ptr<Stencil> spStencil;
+	typedef Stencil_<Dim> Stencil;
 	typedef typename Stencil::Expression Expression;
-	typedef std::shared_ptr<Expression> spExpression;
-	typedef Data_<spExpression, DIM> CenterExp;
-	typedef std::shared_ptr<CenterExp> spCenterExp;
-	typedef Ijk_<DIM> Ijk;
-public:
-	OrderRegular_(spGrid grid, spGhost ghost) :
-			Order_<DIM>(grid, ghost) {
-		ASSERT(ghost->name() == "GhostRegular");
+	typedef typename Stencil::spExpression spExpression;
+
+	typedef std::function<void(const Index&)> Fun_index;
+
+	typedef carpio::Any Any;
+
+	typedef carpio::Polygon_<Vt> Shape2;
+	typedef carpio::Polygon_<Vt>* pShape2;
+	typedef std::shared_ptr<Shape2> spShape2;
+	typedef carpio::Polygon_<Vt>& ref_Shape2;
+	typedef const carpio::Polygon_<Vt>& const_ref_Shape2;
+	typedef carpio::Polygon_<Vt> Polygon;
+	typedef carpio::Clip_<Vt> Clip;
+
+	typedef carpio::Creation_<Vt, Dim> Cr;
+
+	struct GhostCellID {
+		Axes axe;
+		Orientation ori;
+		St step;
+		int idx_shape;
+		int idx_segment;
+	};
+	typedef std::list<GhostCellID> list_GCID;
+	typedef Data_<list_GCID, Dim> ScalarLGCID;
+	protected:
+	//BI _bi;
+	//spGrid _grid;
+	Any _ashape;
+
+	ScalarInt _sflag;    // _Normal_ = 1 << 0,
+						 // _Ghost_  = 1 << 1,
+						 // _Cut_    = 1 << 2,
+	ScalarLGCID _sgc;
+	public:
+	GhostIrregular_(spGrid g, spBI bi, spShape2 shape) :
+			Ghost_<DIM>(g, bi), _sflag(g), _sgc(g) {
+		this->_name = "GhostIRRegular";
+		_ashape = shape;
+		_initial_ghost_scalar_2D();
 	}
 
-	St get_order(const Index& index) {
-		Index n = this->_grid->n();
-		return index.i() + index.j() * n.i() + index.k() * n.i() * n.j();
-	}
-
-	St size() const {
-		St res = 1;
+	St which_boudary_seg(const Index& index) const {
+		// get seg idx in BCID
+		St ABI[3][2] = { { 0, 1 }, { 2, 3 }, { 4, 5 } };
 		Index n = this->_grid->n();
 		for (St d = 0; d < Dim; ++d) {
-			res *= n[d];
+			Idx res = index.value(d);
+			if (res < 0) {
+				return ABI[d][0];
+			} else if (res >= n.value(d)) {
+				return ABI[d][1];
+			}
 		}
-		return res;
+		SHOULD_NOT_REACH;
+		return 0;
 	}
 
-	Index begin() const {
-		return this->_grid->begin_ijk().current();
+	St which_boudary_shape(const Index& index) const {
+		return 0;
 	}
 
-	Index end() const {
-		return this->_grid->end_ijk().current();
+	spcBC find(const Index& index, const std::string& vname) const {
+		St seg_idx = this->which_boudary_seg(index);
+		St shape_idx = this->which_boudary_shape(index);
+		return this->_bi->find(shape_idx, seg_idx, vname);
 	}
-	Index next(const Index& index) const {
-		Ijk ijk(index, this->_grid->n());
-		++ijk;
-		return ijk.current();
-	}
-};
 
+	bool is_ghost(const Index& index) const {
+		if (_sflag(index) == _Ghost_) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	bool IS_GHOST(const Index& INDEX) const {
+		Index index = this->_grid->to_Index(INDEX);
+		return is_ghost(index);
+	}
+
+	bool is_normal(const Index& index) const {
+		return !is_ghost(index);
+	}
+
+	bool IS_NORMAL(const Index& INDEX) const {
+		return !IS_GHOST(INDEX);
+	}
+
+	Index ori_index(const Index& index) const {
+		// index is a ghost index
+		ASSERT(is_ghost(index));
+		for (St d = 0; d < Dim; ++d) {
+			Idx res = index[d];
+			if (res < 0) {
+				Index res(index);
+				res[d] = 0;
+				return res;
+			} else if (res >= this->_grid->n().value(d)) {
+				Index res(index);
+				res[d] = this->_grid->n().value(d) - 1;
+				return res;
+			}
+		}
+		SHOULD_NOT_REACH;
+		return Index();
+	}
+
+	St ori_axes(const Index& index) const {
+		// index is a ghost index
+		ASSERT(is_ghost(index));
+		for (St d = 0; d < Dim; ++d) {
+			Idx res = index.value(d);
+			if (res < 0) {
+				return d;
+			} else if (res >= this->_grid->n().value(d)) {
+				return d;
+			}
+		}
+		SHOULD_NOT_REACH;
+		return 0;
+	}
+
+	Orientation orientation(const Index& index) const {
+		// index is a ghost index
+		ASSERT(is_ghost(index));
+		for (St d = 0; d < Dim; ++d) {
+			Idx res = index.value(d);
+			if (res < 0) {
+				return _M_;
+			} else if (res >= this->_grid->n().value(d)) {
+				return _P_;
+			}
+		}
+		SHOULD_NOT_REACH;
+		return _C_;
+	}
+
+	void for_each_ghost(Fun_index fun) {
+		for (typename Grid::Ijk idx = this->_grid->begin_ijk(); !idx.is_end();
+				++idx) {
+			if (is_ghost(idx.current())) {
+				fun(idx.current());
+			}
+		}
+	}
+
+	spExpression substitute(spExpression spc, const std::string& vname) const {
+		for (auto iter = spc->begin(); iter != spc->end();) {
+			const Vt& coe = iter->second;
+			const std::pair<Index, short>& key = iter->first;
+			if (this->is_ghost(key.first)) {
+				auto itere = iter;
+				++iter;
+				if (coe != 0) {
+					spcBC pbc = this->find(key.first, vname);
+					// spExpression spc,
+					// spcBC pbc,
+					// const Index& index,
+					// const Vt& coe,
+					// const std::string& vname
+					spc = this->_substitute_ghost(spc, pbc, key.first, coe,
+							vname);
+				}
+				spc->erase(itere);
+			} else {
+				++iter;
+			}
+		}
+		return spc;
+	}
+protected:
+	void _initial_ghost_scalar_2D() {
+		ASSERT(Dim == 2);
+		spShape2 spshape = carpio::any_cast<spShape2>(_ashape);
+		for (typename Grid::Ijk IJK = this->_grid->begin_IJK(); !IJK.is_end();
+				++IJK) {
+			typename Grid::Ijk ijk = this->_grid->to_ijk(IJK);
+			Index_<DIM> index = ijk.current();
+			Polygon pc;
+			Cr::Cube(pc, //
+					this->_grid->f_(_X_, _M_, index(_X_)),
+					this->_grid->f_(_Y_, _M_, index(_Y_)),
+					this->_grid->f_(_X_, _P_, index(_X_)),
+					this->_grid->f_(_Y_, _P_, index(_Y_))
+							);
+			Vt vcell = pc[0].volume();
+			Clip clip(pc, *spshape);
+			Polygon res;
+			clip.compute(carpio::INTERSECTION, res);
+			if (res.ncontours() > 0) {
+				//std::cout << "res v = " << index << " "<< res[0].volume() << "\n";
+			}
+			ASSERT(res.ncontours() <= 1);
+			if (res.ncontours() == 0) {
+				_sflag(index) = _Ghost_;
+			} else if (res[0].volume() / vcell < 0.5) {
+				_sflag(index) = _Ghost_;
+			}
+
+		}
+	}
+}
+;
 
 }
-
-
 
 #endif /* LIB_STRUCTURE_S_GHOST_HPP_ */

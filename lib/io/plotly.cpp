@@ -2,12 +2,12 @@
 
 namespace carpio{
 
-Plotly_actor::Plotly_actor(){
-	Py_Initialize();
-}
+//Plotly_actor::Plotly_actor(){
+//	Py_Initialize();
+//}
 
-Plotly_actor::~Plotly_actor(){
-	//Py_Finalize();
-};
+//Plotly_actor::~Plotly_actor(){
+//	//Py_Finalize();
+//};
 
 }

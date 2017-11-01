@@ -105,6 +105,55 @@ spPA_scatter WireFrame2(const Grid_<DIM>& grid, St dim = 2, Idx idx = 0) {
 }
 
 template<St DIM>
+spPA_scatter WireFrame2(const Ghost_<DIM>& ghost, St dim = 2, Idx idx = 0) {
+	typedef Grid_<DIM> Grid;
+	const Grid& grid = ghost.grid();
+	Listd lx;
+	Listd ly;
+	Listd lz;
+	short order[] = { 0, 1, 3, 2, 6, 4, 5, 7 };
+	short order3[] = { 0, 1, 1, 3, 3, 2, 2, 0, 2, 6, 3, 7, 1, 5, 0, 4, 4, 5, 5,
+			7, 7, 6, 6, 4 };
+	for (typename Grid::Ijk IJK = grid.begin_IJK(); !IJK.is_end(); ++IJK) {
+		typename Grid::Ijk ijk = grid.to_ijk(IJK);
+		Index_<DIM> index = ijk.current();
+		if(!ghost.is_ghost(index)){
+			continue;
+		}
+		if (DIM == 3) {
+			if (ijk.current().value(dim) == idx) {
+				for (short i = 0; i < grid.num_vertex(); ++i) {
+					typename Grid::Poi p = grid.v(order[i], ijk);
+					lx.push_back(p.value(0));
+					ly.push_back(p.value(1));
+					lz.push_back(p.value(2));
+				}
+				typename Grid::Poi p = grid.v(0, ijk);
+				lx.push_back(p.value(0));
+				ly.push_back(p.value(1));
+				lz.push_back(p.value(2));
+			}
+		} else {
+			for (short i = 0; i < grid.num_vertex(); ++i) {
+				typename Grid::Poi p = grid.v(order[i], ijk);
+				lx.push_back(p.value(0));
+				ly.push_back(p.value(1));
+				lz.push_back(p.value(2));
+			}
+			typename Grid::Poi p = grid.v(0, ijk);
+			lx.push_back(p.value(0));
+			ly.push_back(p.value(1));
+			lz.push_back(p.value(2));
+		}
+	}
+	spPA_scatter res;
+	res = spPA_scatter(new carpio::Plotly_actor_scatter(lx, ly, 5));
+	res->set_mode("lines");
+	return res;
+}
+
+
+template<St DIM>
 spPA_scatter3d WireFrameGhost(const Grid_<DIM>& grid,
 		const Ghost_<DIM>& ghost) {
 	typedef Grid_<DIM> Grid;
@@ -165,7 +214,6 @@ spPA_scatter3d CenterPoints(const Grid_<DIM>& grid) {
 		lx.push_back(p.value(0));
 		ly.push_back(p.value(1));
 		lz.push_back(p.value(2));
-
 	}
 	spPA_scatter3d res;
 	res = spPA_scatter3d(new carpio::Plotly_actor_scatter3d(lx, ly, lz, 1));

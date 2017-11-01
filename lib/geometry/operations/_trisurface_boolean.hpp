@@ -15,8 +15,8 @@
 #include "_intersection.hpp"
 #include "_sweep.hpp"
 
-#include "io/plotly.h"
-#include "geometry/io/_actor_plotly.hpp"
+//#include "io/plotly.h"
+//#include "geometry/io/_actor_plotly.hpp"
 
 #include <array>
 #include <vector>
@@ -126,26 +126,26 @@ public:
 
 			break;
 		}
-		typedef PlotlyActor_Geometry_<TYPE, 3> PAG;
-		Plotly p;
-		auto actor = PAG::Surface(*_subject);
-		p.add(actor);
-		actor->set_opacity(0.6);
-		auto actor2 = PAG::SurfaceWireFrame(*_clipping);
-		p.add(actor2);
-		actor2->set_opacity(0.8);
-
-		for (auto& ap : lsegres) {
-			auto actorap = PAG::AsSegment(ap[0], ap[1]);
-			p.add(actorap);
-		}
-
-		auto actorpoints = PAG::ScalarPoints(lvend);
-		p.add(actorpoints);
-		auto actor3 = PAG::Surface(result);
-		//p.add(actor3);
-		//actor3->set_opacity(0.5);
-		p.plot();
+//		typedef PlotlyActor_Geometry_<TYPE, 3> PAG;
+//		Plotly p;
+//		auto actor = PAG::Surface(*_subject);
+//		p.add(actor);
+//		actor->set_opacity(0.6);
+//		auto actor2 = PAG::SurfaceWireFrame(*_clipping);
+//		p.add(actor2);
+//		actor2->set_opacity(0.8);
+//
+//		for (auto& ap : lsegres) {
+//			auto actorap = PAG::AsSegment(ap[0], ap[1]);
+//			p.add(actorap);
+//		}
+//
+//		auto actorpoints = PAG::ScalarPoints(lvend);
+//		p.add(actorpoints);
+//		auto actor3 = PAG::Surface(result);
+//		//p.add(actor3);
+//		//actor3->set_opacity(0.5);
+//		p.plot();
 
 	}
 protected:

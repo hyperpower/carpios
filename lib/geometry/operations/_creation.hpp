@@ -97,6 +97,23 @@ public:
 		}
 	}
 
+	static void Circle(Contour& res, Vt x0, Vt y0, Vt r, int n) {
+		ASSERT(Dim == 2);
+		ASSERT(n >= 3);
+		Float pi = 3.141592653589793238;
+		res.clear();
+		for (int i = 0; i < n; i++) {
+			Vt x = x0 + r * cos(2. * pi / float(n) * i);
+			Vt y = y0 + r * sin(2. * pi / float(n) * i);
+			res.add(Point(x, y));
+		}
+	}
+	static void Circle(Polygon& res, Vt x0, Vt y0, Vt r, int n) {
+		res.clear();
+		Contour con;
+		Circle(con, x0, y0, r, n);
+		res.push_back(con);
+	}
 	static void Circle(TriSurface& sur, uInt n, Vt r) {
 		std::vector<pVertex> v_vertex;
 		std::vector<pEdge> v_edge;

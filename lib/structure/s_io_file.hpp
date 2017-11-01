@@ -11,7 +11,7 @@
 #include "io/io_define.hpp"
 
 namespace structure {
-
+// delete function --------------------
 template<St DIM>
 int Output(const std::string& filename, const Scalar_<DIM>& data) {
 	// Open a file
@@ -47,7 +47,7 @@ int Output_Scalar(const std::string& filename, const Scalar_<DIM>& data) {
 	// format first line
 	typename Grid::Index n = grid.n();
 	carpio::TextFile txtf(filename);
-	txtf.add_line(fmt::format("## Size: {0:d}", data.num_cells()));
+	txtf.add_line(fmt::format("## Size : {0:d}", data.num_cells()));
 	txtf.add_line(fmt::format("## Dim : {0:d}", DIM));
 	txtf.add_line(fmt::format("## NX :  {0:d}", n(_X_)));
 	if (DIM >= 2) {

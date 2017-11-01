@@ -182,7 +182,7 @@ TEST(sgrid, t) {
 	poisson.run();
 
 	auto spphi = poisson.get_CS("phi");
-	int res = Output("center_phi", *spphi);
+	int res = Output_Scalar("center_phi", *spphi);
 
 	//auto spexa = poisson.get_CS("exact");
 
@@ -210,7 +210,7 @@ TEST(sgrid, t) {
 	//plt.add(WireFrame(grid));
 	//plt.add(WireFrameGhost(grid, *(poisson.get_ghost())));
 	//plt.title("Structure");
-	plt.size(800, 800);
+	plt.size(600, 600);
 	//plt.set_output_file("fig_phi");
 	plt.plot();
 }
